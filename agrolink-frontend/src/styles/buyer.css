@@ -1,0 +1,7 @@
+.theme-buyer {
+    --color-primary: #0284C7;
+    /* Azul comercial (da confianza para pagar) */
+    --color-primary-hover: #0369A1;
+    --color-secondary: #FF9800;
+    /* Tu Naranja para el botón de "Comprar ahora" */
+}

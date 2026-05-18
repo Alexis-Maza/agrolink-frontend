@@ -1,0 +1,45 @@
+:root {
+    /* Fondo general */
+    --color-bg: #F4F7F5;
+    /* Gris Claro Huerta */
+
+    /* Colores principales */
+    --color-primary: #2E7D32;
+    /* Verde Vivo (Títulos y Marca) */
+    --color-primary-hover: #1b5e20;
+
+    --color-secondary: #FF9800;
+    /* Naranja (Botones de Acción) */
+    --color-secondary-hover: #e65100;
+
+    /* Textos y Contenedores */
+    --color-text: #2C3E2F;
+    /* Verde Oscuro Grisáceo */
+    --color-surface: #FFFFFF;
+    /* Blanco Puro (Tarjetas y contenedores) */
+
+    /* Tipografías aprobadas */
+    --font-titles: 'Merriweather', Georgia, serif;
+    --font-body: 'Plus Jakarta Sans', Arial, sans-serif;
+
+    /* Estructura base (opcional para mantener consistencia) */
+    --radius-md: 8px;
+    --space-md: 16px;
+}
+
+/* Aplicación inicial de fuentes al proyecto */
+body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-titles);
+}

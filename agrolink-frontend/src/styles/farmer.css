@@ -1,0 +1,7 @@
+.theme-farmer {
+    --color-primary: #2E7D32;
+    /* Tu Verde Vivo como centro */
+    --color-secondary: #8D6E63;
+    /* Cambiamos el naranja por un tono tierra para sus herramientas/acciones */
+    --color-secondary-hover: #5d4037;
+}

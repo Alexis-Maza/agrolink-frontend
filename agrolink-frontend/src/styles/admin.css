@@ -1,0 +1,7 @@
+.theme-admin {
+    --color-primary: #455A64;
+    /* Gris Azulado institucional */
+    --color-primary-hover: #263238;
+    --color-bg: #ECEFF1;
+    /* Fondo un poco más frío tipo oficina */
+}
