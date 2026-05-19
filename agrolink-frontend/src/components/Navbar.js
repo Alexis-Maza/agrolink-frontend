@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Importación vital para la navegación interna
 
 function Navbar() {
     return (
@@ -32,7 +33,7 @@ function Navbar() {
                 </span>
             </div>
 
-            {/* ENLACES CENTRALES */}
+            {/* ENLACES CENTRALES (Anclas para desplazamiento suave) */}
             <div style={{ display: 'flex', gap: '30px' }}>
                 <a href="#about" style={{ textDecoration: 'none', color: 'var(--color-text)', fontWeight: '500', fontSize: '1rem' }}>Nosotros</a>
                 <a href="#mission" style={{ textDecoration: 'none', color: 'var(--color-text)', fontWeight: '500', fontSize: '1rem' }}>Misión</a>
@@ -41,29 +42,37 @@ function Navbar() {
 
             {/* BOTONES DE ACCIÓN (A la derecha) */}
             <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                <button style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'var(--color-text)',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '1rem'
-                }}>
-                    Iniciar Sesión
-                </button>
-                <button style={{
-                    backgroundColor: 'var(--color-secondary)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '10px 22px',
-                    borderRadius: 'var(--radius-md)',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    boxShadow: '0 2px 4px rgba(255, 152, 0, 0.3)'
-                }}>
-                    Registrarse
-                </button>
+
+                {/* Enlace temporal al inicio público o login futuro */}
+                <Link to="/" style={{ textDecoration: 'none' }}>
+                    <button style={{
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'var(--color-text)',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '1rem'
+                    }}>
+                        Iniciar Sesión
+                    </button>
+                </Link>
+
+                {/* ENLACE ACTIVO: Te redirige al formulario de registro */}
+                <Link to="/register" style={{ textDecoration: 'none' }}>
+                    <button style={{
+                        backgroundColor: 'var(--color-secondary)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 22px',
+                        borderRadius: 'var(--radius-md)',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '1rem',
+                        boxShadow: '0 2px 4px rgba(255, 152, 0, 0.3)'
+                    }}>
+                        Registrarse
+                    </button>
+                </Link>
             </div>
 
         </nav>
