@@ -14,8 +14,6 @@ import Login from './views/Auth/Login';
 function App() {
   return (
     <Router>
-
-
       {/* Definición de las rutas del proyecto */}
       <Routes>
         {/* Ruta de la Landing Page Pública */}
@@ -28,7 +26,9 @@ function App() {
         {/* Rutas de los paneles privados */}
         <Route path="/admin" element={<AdminHome />} />
         <Route path="/farmer/*" element={<FarmerHome />} />
-        <Route path="/buyer" element={<BuyerHome />} />
+        
+        {/* AQUÍ ESTÁ EL CAMBIO: Se agregó el /* al final de /buyer */}
+        <Route path="/buyer/*" element={<BuyerHome />} />
       </Routes>
     </Router>
   );
