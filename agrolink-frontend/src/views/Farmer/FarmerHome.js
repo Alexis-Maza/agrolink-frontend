@@ -36,7 +36,10 @@ function FarmerHome() {
                 backgroundColor: 'white',
                 boxShadow: '2px 0 5px rgba(0,0,0,0.05)',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                position: 'sticky',
+                top: 0,
+                height: '100vh'
             }}>
                 <div style={{ padding: '30px 20px', textAlign: 'center', borderBottom: '1px solid #eee' }}>
                     <h2 style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-titles)', margin: 0, fontSize: '1.5rem' }}>
