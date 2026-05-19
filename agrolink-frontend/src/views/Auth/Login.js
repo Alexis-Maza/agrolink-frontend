@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Login() {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         email: '',
-        password: ''
+        password: '',
+        rol: '' // Añadido para simular hacia donde ir en este prototipo
     });
+
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     const handleChange = (e) => {
         setFormData({
@@ -14,10 +19,34 @@ function Login() {
         });
     };
 
+    const handleRoleSelect = (selectedRole) => {
+        setFormData({
+            ...formData,
+            rol: selectedRole
+        });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Datos de inicio de sesión:", formData);
-        alert("¡Inicio de sesión exitoso!");
+
+        if (!formData.rol) {
+            alert("Para esta demo, por favor selecciona con qué rol deseas iniciar sesión.");
+            return;
+        }
+
+        setIsLoggingIn(true);
+
+        // Simulamos el tiempo de validación con el backend
+        setTimeout(() => {
+            setIsLoggingIn(false);
+            
+            // Lógica de redirección basada en el rol
+            if (formData.rol === 'FARMER') {
+                navigate('/farmer');
+            } else if (formData.rol === 'BUYER') {
+                navigate('/buyer');
+            }
+        }, 1200);
     };
 
     return (
@@ -32,7 +61,7 @@ function Login() {
             <div style={{
                 backgroundColor: 'white',
                 padding: '45px',
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 'var(--radius-lg)', // Coincide con Register
                 boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
                 width: '100%',
                 maxWidth: '480px'
@@ -55,30 +84,47 @@ function Login() {
                     </div>
 
                     {/* Fila: Contraseña */}
-                    <div style={{ marginBottom: '35px' }}>
+                    <div style={{ marginBottom: '25px' }}>
                         <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Contraseña</label>
                         <input type="password" name="password" required value={formData.password} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
                         <div style={{ textAlign: 'right', marginTop: '10px' }}>
-                            <a href="#" style={{ color: 'var(--color-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>¿Olvidaste tu contraseña?</a>
+                            <Link to="/forgot-password" style={{ color: 'var(--color-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>¿Olvidaste tu contraseña?</Link>
+                        </div>
+                    </div>
+
+                    {/* SECTOR TEMPORAL: SELECCIÓN DE ROL PARA DEMO */}
+                    <div style={{ marginBottom: '35px' }}>
+                        <label style={{ display: 'block', marginBottom: '15px', fontWeight: 'bold', textAlign: 'center', color: '#333', fontSize: '0.95rem' }}>Simular ingreso como:</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                            <button type="button" onClick={() => handleRoleSelect('FARMER')} style={{
+                                padding: '12px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
+                                border: formData.rol === 'FARMER' ? '2px solid var(--color-primary)' : '1px solid #ccc',
+                                backgroundColor: formData.rol === 'FARMER' ? '#E8F5E9' : 'white',
+                                color: formData.rol === 'FARMER' ? 'var(--color-primary)' : '#555',
+                                transition: 'all 0.2s ease'
+                            }}>
+                                🌾 Agricultor
+                            </button>
+                            <button type="button" onClick={() => handleRoleSelect('BUYER')} style={{
+                                padding: '12px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
+                                border: formData.rol === 'BUYER' ? '2px solid var(--color-secondary)' : '1px solid #ccc',
+                                backgroundColor: formData.rol === 'BUYER' ? '#FFF3E0' : 'white',
+                                color: formData.rol === 'BUYER' ? 'var(--color-secondary)' : '#555',
+                                transition: 'all 0.2s ease'
+                            }}>
+                                🛒 Comprador
+                            </button>
                         </div>
                     </div>
 
                     {/* Botón de envío */}
-                    <button type="submit" style={{
-                        width: '100%',
-                        padding: '15px',
-                        backgroundColor: 'var(--color-primary)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 'var(--radius-md)',
-                        fontSize: '1.1rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 10px rgba(46, 125, 50, 0.2)',
-                        marginBottom: '25px',
-                        transition: 'background-color 0.2s'
+                    <button type="submit" disabled={isLoggingIn} style={{
+                        width: '100%', padding: '15px', backgroundColor: isLoggingIn ? '#ccc' : 'var(--color-primary)', 
+                        color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '1.1rem', fontWeight: 'bold', 
+                        cursor: isLoggingIn ? 'default' : 'pointer', boxShadow: isLoggingIn ? 'none' : '0 4px 10px rgba(46, 125, 50, 0.2)', 
+                        marginBottom: '25px', transition: '0.2s'
                     }}>
-                        Iniciar Sesión
+                        {isLoggingIn ? '⏳ Verificando credenciales...' : 'Iniciar Sesión'}
                     </button>
 
                     {/* Enlace para ir a registro */}
