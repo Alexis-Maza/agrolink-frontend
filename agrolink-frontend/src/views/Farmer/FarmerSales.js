@@ -1,34 +1,9 @@
 import React, { useState } from 'react';
+import { initialSales } from '../../data/mockFarmerData';
 
 function FarmerSales() {
-    // 1. Datos simulados (Mock Data) de ventas ampliados con los nuevos campos
-    const [salesData] = useState([
-        { 
-            id: 'V-1001', producto: 'Café Arábica - Grano Verde', comprador: 'Carlos Gómez', empresa: 'BioCafé SAC',
-            cantidad: '500', unidad: 'Kg', costo: 'S/ 2,500.00', fechaCompra: '12/10/2025', fechaEntrega: '15/01/2026',
-            lote: 'L-2025-A', loteParcial: 'LP-01', estado: 'Pendiente de Cosecha', metodoPago: 'Transferencia (50% Adelanto)', direccionEntrega: 'Almacén Principal BioCafé, Lima'
-        },
-        { 
-            id: 'V-1002', producto: 'Cacao Fino de Aroma', comprador: 'Laura Pérez', empresa: 'Chocolates Andinos',
-            cantidad: '2', unidad: 'Toneladas', costo: 'S/ 5,800.00', fechaCompra: '05/11/2025', fechaEntrega: '20/02/2026',
-            lote: 'L-2025-C', loteParcial: 'LP-03', estado: 'En Tránsito', metodoPago: 'Carta de Crédito', direccionEntrega: 'Puerto del Callao, Zona 4'
-        },
-        { 
-            id: 'V-1003', producto: 'Maíz Morado Orgánico', comprador: 'Jorge Ramírez', empresa: 'IncaFoods EIRL',
-            cantidad: '800', unidad: 'Kg', costo: 'S/ 1,200.00', fechaCompra: '20/09/2025', fechaEntrega: '10/12/2025',
-            lote: 'L-2025-M', loteParcial: 'LP-01', estado: 'Entregado', metodoPago: 'Transferencia 100%', direccionEntrega: 'Planta Procesadora IncaFoods, Arequipa'
-        },
-        { 
-            id: 'V-1004', producto: 'Café Robusta', comprador: 'Ana Torres', empresa: 'Cafetalera Sur',
-            cantidad: '1.5', unidad: 'Toneladas', costo: 'S/ 6,000.00', fechaCompra: '02/10/2025', fechaEntrega: '05/03/2026',
-            lote: 'L-2025-R', loteParcial: 'LP-02', estado: 'Pendiente de Cosecha', metodoPago: 'Transferencia (30% Adelanto)', direccionEntrega: 'Almacén Cafetalera Sur, Cusco'
-        },
-        { 
-            id: 'V-1005', producto: 'Mango Kent (Exportación)', comprador: 'Luis Silva', empresa: 'Frutas Globales',
-            cantidad: '5', unidad: 'Toneladas', costo: 'S/ 15,000.00', fechaCompra: '15/08/2025', fechaEntrega: '30/11/2025',
-            lote: 'L-2025-MK', loteParcial: 'LP-05', estado: 'Entregado', metodoPago: 'Pago a 30 días', direccionEntrega: 'Planta de Empaque Piura'
-        }
-    ]);
+    // 1. Datos simulados (Mock Data) de ventas importados
+    const [salesData] = useState(initialSales);
 
     // 2. Estados para el buscador y el modal
     const [searchTerm, setSearchTerm] = useState('');

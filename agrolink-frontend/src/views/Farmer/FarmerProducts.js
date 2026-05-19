@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { initialCrops } from '../../data/mockFarmerData';
 
 // --- Funciones Auxiliares ---
 const addDaysToDate = (dateStr, days) => {
@@ -54,61 +55,9 @@ function FarmerProducts() {
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [formMode, setFormMode] = useState('create'); // 'create' | 'edit'
     const [editCropId, setEditCropId] = useState(null);
-    
-    // Fechas dinámicas
-    const today = new Date();
-    const dateGerminacion = new Date(today); dateGerminacion.setDate(today.getDate() - 10);
-    const dateCrecimiento = new Date(today); dateCrecimiento.setDate(today.getDate() - 40);
-    const dateCosechado = new Date(today); dateCosechado.setDate(today.getDate() - 150);
 
-    // Mock Data
-    const [crops, setCrops] = useState([
-        {
-            id: 'C-001',
-            nombre: 'Maíz Amarillo Duro',
-            variedad: 'INIA 619',
-            lote: 'LOTE-MZD-2025',
-            hectareas: '5',
-            fechaSiembra: dateGerminacion.toISOString().split('T')[0],
-            etapas: { germinacion: 15, crecimiento: 40, floracion: 20, maduracion: 25 },
-            cantidadTotal: '15 Toneladas',
-            cantidadDisponible: '15 Toneladas', // 0 ventas
-            precio: '1200',
-            minimoVenta: '1 Tonelada',
-            imagen: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-            incidencia: false
-        },
-        {
-            id: 'C-002',
-            nombre: 'Café Arábica Caturra',
-            variedad: 'Caturra',
-            lote: 'LOTE-CAF-2025',
-            hectareas: '2.5',
-            fechaSiembra: dateCrecimiento.toISOString().split('T')[0],
-            etapas: { germinacion: 20, crecimiento: 60, floracion: 30, maduracion: 30 },
-            cantidadTotal: '800 Kg',
-            cantidadDisponible: '800 Kg', // 0 ventas
-            precio: '15.00',
-            minimoVenta: '50 Kg',
-            imagen: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-            incidencia: false
-        },
-        {
-            id: 'C-003',
-            nombre: 'Cacao Fino de Aroma',
-            variedad: 'CCN-51',
-            lote: 'LOTE-CAC-2025',
-            hectareas: '4',
-            fechaSiembra: dateCosechado.toISOString().split('T')[0],
-            etapas: { germinacion: 10, crecimiento: 30, floracion: 20, maduracion: 20 },
-            cantidadTotal: '3 Toneladas',
-            cantidadDisponible: '1.5 Toneladas', // YA TIENE VENTAS (3 vs 1.5)
-            precio: '12500',
-            minimoVenta: '500 Kg',
-            imagen: 'https://images.unsplash.com/photo-1623517112001-f25ec1d318e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-            incidencia: false
-        }
-    ]);
+    // Mock Data importada
+    const [crops, setCrops] = useState(initialCrops);
 
     const defaultFormData = {
         nombre: '', variedad: '', lote: '', hectareas: '', cantidadEstimada: '', unidad: 'Kg',
