@@ -80,3 +80,17 @@ export const initialSales = [
         lote: 'L-2025-MK', loteParcial: 'LP-05', estado: 'Entregado', metodoPago: 'Pago a 30 días', direccionEntrega: 'Planta de Empaque Piura'
     }
 ];
+
+export const initialProfile = {
+    nombre: 'Juan',
+    apellidoPaterno: 'Pérez',
+    apellidoMaterno: 'Gómez',
+    email: 'juan.perez@example.com',
+    fechaNacimiento: '1985-05-15',
+    descripcion: '',
+    ubicacion: '',
+    documentoIdentidad: '',
+    hectareas: '',
+    experiencia: '',
+    certificaciones: [] // Array para guardar las certificaciones
+};

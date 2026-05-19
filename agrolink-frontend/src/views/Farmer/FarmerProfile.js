@@ -1,22 +1,11 @@
 import React, { useState, useRef } from 'react';
+import { initialProfile } from '../../data/mockFarmerData';
 
 function FarmerProfile() {
     const fileInputRef = useRef(null);
 
-    // Simulamos datos pre-cargados del usuario
-    const [profileData, setProfileData] = useState({
-        nombre: 'Juan',
-        apellidoPaterno: 'Pérez',
-        apellidoMaterno: 'Gómez',
-        email: 'juan.perez@example.com',
-        fechaNacimiento: '1985-05-15',
-        descripcion: '',
-        ubicacion: '',
-        documentoIdentidad: '',
-        hectareas: '',
-        experiencia: '',
-        certificaciones: [] // Array para guardar las certificaciones
-    });
+    // Importamos los datos pre-cargados del usuario
+    const [profileData, setProfileData] = useState(initialProfile);
 
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
