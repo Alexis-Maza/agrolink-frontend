@@ -9,6 +9,7 @@ import BuyerHome from './views/Buyer/BuyerHome';
 
 /* Vista de Autenticación */
 import Register from './views/Auth/Register';
+import Login from './views/Auth/Login';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
 
           {/* NUEVA RUTA ACTIVA: Formulario de registro multi-rol */}
           <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
 
           {/* Rutas de los paneles privados */}
           <Route path="/admin" element={<AdminHome />} />

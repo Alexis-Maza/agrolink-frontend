@@ -43,8 +43,8 @@ function Navbar() {
             {/* BOTONES DE ACCIÓN (A la derecha) */}
             <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
 
-                {/* Enlace temporal al inicio público o login futuro */}
-                <Link to="/" style={{ textDecoration: 'none' }}>
+                {/* Enlace al login */}
+                <Link to="/login" style={{ textDecoration: 'none' }}>
                     <button style={{
                         backgroundColor: 'transparent',
                         border: 'none',
