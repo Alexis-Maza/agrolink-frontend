@@ -6,6 +6,7 @@ import FarmerDashboard from './FarmerDashboard';
 import FarmerProducts from './FarmerProducts';
 import FarmerSales from './FarmerSales';
 import FarmerProfile from './FarmerProfile';
+import FarmerCatalog from './FarmerCatalog';
 
 function FarmerHome() {
     const location = useLocation();
@@ -51,6 +52,7 @@ function FarmerHome() {
                 <div style={{ flex: 1, padding: '20px 0' }}>
                     <Link to="/farmer" style={linkStyle('/farmer')}>🏠 Inicio</Link>
                     <Link to="/farmer/products" style={linkStyle('/farmer/products')}>🌾 Mis Cultivos</Link>
+                    <Link to="/farmer/catalog" style={linkStyle('/farmer/catalog')}>📦 Historial Productos</Link>
                     <Link to="/farmer/sales" style={linkStyle('/farmer/sales')}>💰 Mis Ventas</Link>
                     <Link to="/farmer/profile" style={linkStyle('/farmer/profile')}>👤 Mi Perfil</Link>
                 </div>
@@ -65,6 +67,7 @@ function FarmerHome() {
                 <Routes>
                     <Route path="/" element={<FarmerDashboard />} />
                     <Route path="products" element={<FarmerProducts />} />
+                    <Route path="catalog" element={<FarmerCatalog />} />
                     <Route path="sales" element={<FarmerSales />} />
                     <Route path="profile" element={<FarmerProfile />} />
                 </Routes>
