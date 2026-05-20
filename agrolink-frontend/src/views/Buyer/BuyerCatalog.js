@@ -68,11 +68,11 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         return "Almacén Av. Industrial 1250, Callao";
     };
 
-    const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: '', direccionEntrega: '' });
+    const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: '', direccionEntrega: '', fechaEntregaEstimada: '' });
 
     const handleCloseModal = () => {
         setSelectedCrop(null);
-        setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: '', direccionEntrega: '' });
+        setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: '', direccionEntrega: '', fechaEntregaEstimada: '' });
     };
 
     const normalizeText = (str) => {
@@ -164,6 +164,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             porcentajeAdelanto: parseInt(purchaseData.porcentajeAdelanto),
             montoTotal: total,
             direccionEntrega: purchaseData.direccionEntrega,
+            fechaEntregaEstimada: purchaseData.fechaEntregaEstimada,
             seleccionado: true,
             imagen: selectedCrop.imagen,
             agricultor: selectedCrop.agricultor,
@@ -685,6 +686,19 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                                 onChange={(e) => setPurchaseData({ ...purchaseData, direccionEntrega: e.target.value })} 
                                 style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
                             />
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Fecha de Entrega Estimada</label>
+                            <input 
+                                type="date"
+                                name="fechaEntregaEstimada"
+                                value={purchaseData.fechaEntregaEstimada}
+                                min={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                                onChange={(e) => setPurchaseData({ ...purchaseData, fechaEntregaEstimada: e.target.value })} 
+                                style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
+                            />
+                            <span style={{ fontSize: '0.78rem', color: '#888', marginTop: '4px', display: 'block' }}>Opcional. Si se deja vacío se calculará automáticamente (90 días).</span>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>

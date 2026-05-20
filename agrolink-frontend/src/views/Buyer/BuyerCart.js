@@ -47,10 +47,22 @@ function BuyerCart() {
         const uniqueAddresses = [...new Set(itemsSeleccionados.map(i => i.direccionEntrega || 'Sin especificar'))];
         const headerAddress = uniqueAddresses.length === 1 ? uniqueAddresses[0] : 'Múltiples destinos (ver en lista de productos)';
 
+        // Determinar fecha de entrega de la cabecera: una si coinciden, "Múltiples fechas" si varían
+        const defaultDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString('es-PE');
+        const getItemDate = (item) => {
+            if (item.fechaEntregaEstimada) {
+                const d = new Date(item.fechaEntregaEstimada);
+                return isNaN(d) ? defaultDate : d.toLocaleDateString('es-PE');
+            }
+            return defaultDate;
+        };
+        const uniqueDates = [...new Set(itemsSeleccionados.map(i => getItemDate(i)))];
+        const headerDate = uniqueDates.length === 1 ? uniqueDates[0] : 'Múltiples fechas de entrega (ver en lista de productos)';
+
         const newOrder = {
             id: summary.id,
             fecha: summary.fecha,
-            fechaEntregaEstimada: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString('es-PE'),
+            fechaEntregaEstimada: headerDate,
             estado: 'Pendiente',
             metodoPago: itemsSeleccionados[0].metodoPago,
             direccionEntrega: headerAddress,
@@ -67,6 +79,7 @@ function BuyerCart() {
                 montoAdelanto: `S/ ${(item.montoTotal * (item.porcentajeAdelanto / 100)).toFixed(2)}`,
                 montoPendiente: `S/ ${(item.montoTotal * ((100 - item.porcentajeAdelanto) / 100)).toFixed(2)}`,
                 direccionEntrega: item.direccionEntrega || 'Almacén Av. Industrial 1250, Callao',
+                fechaEntregaEstimada: getItemDate(item),
                 metodoPago: item.metodoPago,
                 detallesProducto: item.detallesProducto || null
             })),
