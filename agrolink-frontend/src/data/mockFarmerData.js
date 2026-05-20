@@ -92,5 +92,6 @@ export const initialProfile = {
     documentoIdentidad: '',
     hectareas: '',
     experiencia: '',
-    certificaciones: [] // Array para guardar las certificaciones
+    certificaciones: [], // Array para guardar las certificaciones habilitadas
+    certificacionesFotos: {} // Objeto para guardar fotos de certificados
 };
