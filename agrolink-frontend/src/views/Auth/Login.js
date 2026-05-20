@@ -6,8 +6,7 @@ function Login() {
 
     const [formData, setFormData] = useState({
         email: '',
-        password: '',
-        rol: '' // Añadido para simular hacia donde ir en este prototipo
+        password: ''
     });
 
     const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -19,20 +18,8 @@ function Login() {
         });
     };
 
-    const handleRoleSelect = (selectedRole) => {
-        setFormData({
-            ...formData,
-            rol: selectedRole
-        });
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        if (!formData.rol) {
-            alert("Para esta demo, por favor selecciona con qué rol deseas iniciar sesión.");
-            return;
-        }
 
         setIsLoggingIn(true);
 
@@ -40,14 +27,34 @@ function Login() {
         setTimeout(() => {
             setIsLoggingIn(false);
             
+            // Buscar usuario registrado en localStorage
+            const registeredUsers = JSON.parse(localStorage.getItem('agrolink_users') || '[]');
+            const foundUser = registeredUsers.find(u => u.email.toLowerCase() === formData.email.toLowerCase());
+            
+            let role = 'BUYER'; // Rol por defecto
+
+            if (foundUser) {
+                role = foundUser.rol;
+            } else {
+                // Fallback inteligente para demo sin selector
+                const emailLower = formData.email.toLowerCase();
+                if (emailLower.includes('farmer') || emailLower.includes('agricultor') || emailLower.includes('pedro') || emailLower.includes('maria') || emailLower.includes('juan')) {
+                    role = 'FARMER';
+                } else if (emailLower.includes('admin')) {
+                    role = 'ADMIN';
+                }
+            }
+
             // Guardar autenticación ficticia en localStorage
             localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userRole', formData.rol);
+            localStorage.setItem('userRole', role);
             
             // Lógica de redirección basada en el rol
-            if (formData.rol === 'FARMER') {
+            if (role === 'ADMIN') {
+                navigate('/admin');
+            } else if (role === 'FARMER') {
                 navigate('/farmer');
-            } else if (formData.rol === 'BUYER') {
+            } else {
                 const savedCart = JSON.parse(localStorage.getItem('agrolink_cart') || '[]');
                 if (savedCart.length > 0) {
                     navigate('/buyer/cart');
@@ -70,7 +77,7 @@ function Login() {
             <div style={{
                 backgroundColor: 'white',
                 padding: '45px',
-                borderRadius: 'var(--radius-lg)', // Coincide con Register
+                borderRadius: 'var(--radius-lg)',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
                 width: '100%',
                 maxWidth: '480px'
@@ -98,31 +105,6 @@ function Login() {
                         <input type="password" name="password" required value={formData.password} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
                         <div style={{ textAlign: 'right', marginTop: '10px' }}>
                             <Link to="/forgot-password" style={{ color: 'var(--color-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>¿Olvidaste tu contraseña?</Link>
-                        </div>
-                    </div>
-
-                    {/* SECTOR TEMPORAL: SELECCIÓN DE ROL PARA DEMO */}
-                    <div style={{ marginBottom: '35px' }}>
-                        <label style={{ display: 'block', marginBottom: '15px', fontWeight: 'bold', textAlign: 'center', color: '#333', fontSize: '0.95rem' }}>Simular ingreso como:</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                            <button type="button" onClick={() => handleRoleSelect('FARMER')} style={{
-                                padding: '12px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
-                                border: formData.rol === 'FARMER' ? '2px solid var(--color-primary)' : '1px solid #ccc',
-                                backgroundColor: formData.rol === 'FARMER' ? '#E8F5E9' : 'white',
-                                color: formData.rol === 'FARMER' ? 'var(--color-primary)' : '#555',
-                                transition: 'all 0.2s ease'
-                            }}>
-                                🌾 Agricultor
-                            </button>
-                            <button type="button" onClick={() => handleRoleSelect('BUYER')} style={{
-                                padding: '12px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
-                                border: formData.rol === 'BUYER' ? '2px solid var(--color-secondary)' : '1px solid #ccc',
-                                backgroundColor: formData.rol === 'BUYER' ? '#FFF3E0' : 'white',
-                                color: formData.rol === 'BUYER' ? 'var(--color-secondary)' : '#555',
-                                transition: 'all 0.2s ease'
-                            }}>
-                                🛒 Comprador
-                            </button>
                         </div>
                     </div>
 

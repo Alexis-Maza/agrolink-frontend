@@ -10,6 +10,10 @@ import BuyerHome from './views/Buyer/BuyerHome';
 /* Vista de Autenticación */
 import Register from './views/Auth/Register';
 import Login from './views/Auth/Login';
+import EmailVerification from './views/Auth/EmailVerification';
+import ForgotPassword from './views/Auth/ForgotPassword';
+import VerifyResetToken from './views/Auth/VerifyResetToken';
+import ResetPassword from './views/Auth/ResetPassword';
 
 function App() {
   return (
@@ -22,6 +26,10 @@ function App() {
         {/* Rutas de Autenticación */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/verify-email" element={<EmailVerification />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-reset-token" element={<VerifyResetToken />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Rutas de los paneles privados */}
         <Route path="/admin" element={<AdminHome />} />
