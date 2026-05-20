@@ -1,13 +1,27 @@
 import React, { useState } from 'react';
 
 function BuyerCart() {
-    const [cartItems, setCartItems] = useState([
-        { id: 1, cultivoId: 'CULT-001', nombre: 'Palta Hass', lote: 'L-001', cantidad: '500', precio: 8.50, loteParcial: 'LP-001A', metodoPago: 'Transferencia', porcentajeAdelanto: 30, montoTotal: 4250.00, seleccionado: true, imagen: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80', agricultor: 'Juan Pérez' },
-        { id: 2, cultivoId: 'CULT-002', nombre: 'Mandarina', lote: 'L-002', cantidad: '1000', precio: 3.20, loteParcial: 'LP-002A', metodoPago: 'Crédito', porcentajeAdelanto: 50, montoTotal: 3200.00, seleccionado: false, imagen: 'https://images.unsplash.com/photo-1582281298055-e25b84a1e0e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80', agricultor: 'María Gómez' }
-    ]);
+    const [cartItems, setCartItems] = useState(() => {
+        const saved = localStorage.getItem('agrolink_cart');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("Error reading cart from localStorage", e);
+            }
+        }
+        return [
+            { id: 1, cultivoId: 'CULT-001', nombre: 'Palta Hass', lote: 'L-001', cantidad: '500', precio: 8.50, loteParcial: 'LP-001A', metodoPago: 'Transferencia', porcentajeAdelanto: 30, montoTotal: 4250.00, seleccionado: true, imagen: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80', agricultor: 'Juan Pérez' },
+            { id: 2, cultivoId: 'CULT-002', nombre: 'Mandarina', lote: 'L-002', cantidad: '1000', precio: 3.20, loteParcial: 'LP-002A', metodoPago: 'Crédito', porcentajeAdelanto: 50, montoTotal: 3200.00, seleccionado: false, imagen: 'https://images.unsplash.com/photo-1582281298055-e25b84a1e0e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80', agricultor: 'María Gómez' }
+        ];
+    });
 
     const [paymentModal, setPaymentModal] = useState(false);
     const [paymentSummary, setPaymentSummary] = useState(null);
+
+    React.useEffect(() => {
+        localStorage.setItem('agrolink_cart', JSON.stringify(cartItems));
+    }, [cartItems]);
 
     const toggleSelection = (id) => setCartItems(cartItems.map(item => item.id === id ? { ...item, seleccionado: !item.seleccionado } : item));
 
@@ -25,9 +39,37 @@ function BuyerCart() {
             adelanto: totalAdelanto, 
             contraEntrega: totalPagar - totalAdelanto 
         };
+
+        // Guardar pedido en localStorage para 'BuyerPurchases.js'
+        const savedOrders = JSON.parse(localStorage.getItem('agrolink_orders') || '[]');
+        const newOrder = {
+            id: summary.id,
+            fecha: summary.fecha,
+            fechaEntregaEstimada: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString('es-PE'),
+            estado: 'Pendiente',
+            metodoPago: itemsSeleccionados[0].metodoPago,
+            direccionEntrega: 'Almacén Principal (Ubicación en Perfil)',
+            productos: itemsSeleccionados.map(item => ({
+                cultivoId: item.cultivoId,
+                nombre: item.nombre,
+                imagen: item.imagen,
+                cantidad: `${item.cantidad} Kg`,
+                loteParcial: item.loteParcial || `LP-${Math.floor(Math.random() * 1000)}`,
+                agricultor: item.agricultor,
+                adelanto: item.porcentajeAdelanto,
+                montoAdelanto: `S/ ${(item.montoTotal * (item.porcentajeAdelanto / 100)).toFixed(2)}`,
+                montoPendiente: `S/ ${(item.montoTotal * ((100 - item.porcentajeAdelanto) / 100)).toFixed(2)}`
+            })),
+            total: `S/ ${summary.total.toFixed(2)}`
+        };
+        localStorage.setItem('agrolink_orders', JSON.stringify([newOrder, ...savedOrders]));
+
         setPaymentSummary(summary);
         setPaymentModal(true);
-        setCartItems(cartItems.filter(item => !item.seleccionado));
+        
+        // Filtrar y eliminar del carrito los ítems seleccionados
+        const remainingItems = cartItems.filter(item => !item.seleccionado);
+        setCartItems(remainingItems);
     };
 
     return (

@@ -7,8 +7,25 @@ function BuyerCatalog() {
     const [selectedCrop, setSelectedCrop] = useState(null);
     
     // Estado simulado del carrito
-    const [cartItems, setCartItems] = useState([]);
-    const [purchaseData, setPurchaseData] = useState({ cantidad: '', loteParcial: '', metodoPago: 'Transferencia', porcentajeAdelanto: 30 });
+    const [cartItems, setCartItems] = useState(() => {
+        const saved = localStorage.getItem('agrolink_cart');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("Error reading cart from localStorage", e);
+            }
+        }
+        return [];
+    });
+    
+    React.useEffect(() => {
+        localStorage.setItem('agrolink_cart', JSON.stringify(cartItems));
+        // Disparar evento para que otros componentes (como el Navbar) actualicen el conteo
+        window.dispatchEvent(new Event('cartUpdated'));
+    }, [cartItems]);
+
+    const [purchaseData, setPurchaseData] = useState({ cantidad: '', loteParcial: '', metodoPago: 'Transferencia Bancaria', porcentajeAdelanto: 30 });
 
     const filteredCrops = catalog.filter(c => c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || c.lote.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -17,19 +34,31 @@ function BuyerCatalog() {
             alert('Por favor ingresa una cantidad válida.');
             return;
         }
+        
+        const priceNum = parseFloat(selectedCrop.precio);
+        const qtyNum = parseFloat(purchaseData.cantidad);
+        const total = priceNum * qtyNum;
+        
         const newItem = {
-            ...selectedCrop,
-            cantidadComprada: purchaseData.cantidad,
-            loteParcial: purchaseData.loteParcial || `LP-${Math.floor(Math.random() * 1000)}`,
+            id: `CART-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            cultivoId: selectedCrop.id,
+            nombre: selectedCrop.nombre,
+            lote: selectedCrop.lote,
+            cantidad: purchaseData.cantidad,
+            precio: priceNum,
+            loteParcial: purchaseData.loteParcial || `LP-${Math.floor(Math.random() * 100)}`,
             metodoPago: purchaseData.metodoPago,
-            adelanto: purchaseData.porcentajeAdelanto,
-            montoTotal: (parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)).toFixed(2),
-            montoAdelanto: ((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * (purchaseData.porcentajeAdelanto / 100)).toFixed(2)
+            porcentajeAdelanto: purchaseData.porcentajeAdelanto,
+            montoTotal: total,
+            seleccionado: true,
+            imagen: selectedCrop.imagen,
+            agricultor: selectedCrop.agricultor
         };
+        
         setCartItems([...cartItems, newItem]);
-        alert(`${selectedCrop.nombre} añadido al carrito con ${purchaseData.porcentajeAdelanto}% de adelanto.`);
+        alert(`¡${selectedCrop.nombre} añadido al carrito con éxito!`);
         setSelectedCrop(null);
-        setPurchaseData({ cantidad: '', loteParcial: '', metodoPago: 'Transferencia', porcentajeAdelanto: 30 });
+        setPurchaseData({ cantidad: '', loteParcial: '', metodoPago: 'Transferencia Bancaria', porcentajeAdelanto: 30 });
     };
 
     return (

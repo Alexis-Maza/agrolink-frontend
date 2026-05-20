@@ -58,7 +58,7 @@ function FarmerHome() {
                 </div>
 
                 <div style={{ padding: '20px', borderTop: '1px solid #eee' }}>
-                    <Link to="/" style={{ color: '#dc3545', textDecoration: 'none', fontWeight: 'bold' }}>🚪 Cerrar Sesión</Link>
+                    <Link to="/" onClick={() => { localStorage.removeItem('isAuthenticated'); localStorage.removeItem('userRole'); }} style={{ color: '#dc3545', textDecoration: 'none', fontWeight: 'bold' }}>🚪 Cerrar Sesión</Link>
                 </div>
             </nav>
 

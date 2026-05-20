@@ -2,12 +2,23 @@ import React, { useState } from 'react';
 import { initialOrders } from '../../data/mockBuyerData';
 
 function BuyerPurchases() {
-    const [orders, setOrders] = useState(initialOrders);
+    const [orders, setOrders] = useState(() => {
+        const saved = localStorage.getItem('agrolink_orders');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("Error reading orders from localStorage", e);
+            }
+        }
+        localStorage.setItem('agrolink_orders', JSON.stringify(initialOrders));
+        return initialOrders;
+    });
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [exportStatus, setExportStatus] = useState('idle');
 
-    const filteredOrders = orders.filter(o => o.id.toLowerCase().includes(searchTerm.toLowerCase()) || o.productos[0].nombre.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredOrders = orders.filter(o => o.id.toLowerCase().includes(searchTerm.toLowerCase()) || (o.productos && o.productos.length > 0 && o.productos[0].nombre.toLowerCase().includes(searchTerm.toLowerCase())));
 
     const handleExport = () => {
         if (exportStatus !== 'idle') return;
@@ -26,6 +37,7 @@ function BuyerPurchases() {
                 return o;
             });
             setOrders(updated);
+            localStorage.setItem('agrolink_orders', JSON.stringify(updated));
             if(selectedOrder && selectedOrder.id === orderId) {
                 const updOrder = updated.find(o => o.id === orderId);
                 setSelectedOrder(updOrder);

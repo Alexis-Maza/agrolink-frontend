@@ -70,11 +70,20 @@ function Register() {
         setTimeout(() => {
             setIsValidating(false);
             
+            // Guardar autenticación ficticia en localStorage
+            localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('userRole', formData.rol);
+            
             // Lógica de redirección basada en el rol
             if (formData.rol === 'FARMER') {
                 navigate('/farmer');
             } else if (formData.rol === 'BUYER') {
-                navigate('/buyer');
+                const savedCart = JSON.parse(localStorage.getItem('agrolink_cart') || '[]');
+                if (savedCart.length > 0) {
+                    navigate('/buyer/cart');
+                } else {
+                    navigate('/buyer');
+                }
             }
         }, 1500);
     };
