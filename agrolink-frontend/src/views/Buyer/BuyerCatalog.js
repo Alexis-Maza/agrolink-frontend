@@ -57,7 +57,12 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         setCurrentPage(1);
     }, [searchTerm, selectedCertifications]);
 
-    const [purchaseData, setPurchaseData] = useState({ cantidad: '', loteParcial: '', metodoPago: 'Transferencia Bancaria', porcentajeAdelanto: 30 });
+    const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: '' });
+
+    const handleCloseModal = () => {
+        setSelectedCrop(null);
+        setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: '' });
+    };
 
     const normalizeText = (str) => {
         if (!str) return '';
@@ -88,6 +93,14 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             alert('Por favor ingresa una cantidad válida.');
             return;
         }
+        if (!purchaseData.metodoPago) {
+            alert('Por favor selecciona un método de pago preferido.');
+            return;
+        }
+        if (purchaseData.porcentajeAdelanto === '') {
+            alert('Por favor selecciona un porcentaje de adelanto.');
+            return;
+        }
 
         const priceNum = parseFloat(selectedCrop.precio);
         const qtyNum = parseFloat(purchaseData.cantidad);
@@ -106,6 +119,14 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                     });
                 }
             });
+            // Contar también los elementos en el carrito actual
+            const savedCart = JSON.parse(localStorage.getItem('agrolink_cart') || '[]');
+            savedCart.forEach(item => {
+                if (item.loteParcial && item.loteParcial.startsWith(loteCentral)) {
+                    count++;
+                }
+            });
+
             // Contar con base simulada
             if (loteCentral === 'LOTE-CAF-2025') count += 2;
             else if (loteCentral === 'LOTE-MZD-2025') count += 2;
@@ -114,6 +135,8 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             return `${loteCentral}-P${count + 1}`;
         };
 
+        const generatedLoteParcial = getNextPartialSuffix(selectedCrop.lote);
+
         const newItem = {
             id: `CART-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             cultivoId: selectedCrop.id,
@@ -121,9 +144,9 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             lote: selectedCrop.lote,
             cantidad: purchaseData.cantidad,
             precio: priceNum,
-            loteParcial: purchaseData.loteParcial || getNextPartialSuffix(selectedCrop.lote),
+            loteParcial: generatedLoteParcial,
             metodoPago: purchaseData.metodoPago,
-            porcentajeAdelanto: purchaseData.porcentajeAdelanto,
+            porcentajeAdelanto: parseInt(purchaseData.porcentajeAdelanto),
             montoTotal: total,
             seleccionado: true,
             imagen: selectedCrop.imagen,
@@ -134,9 +157,8 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         if (onAddToCart) {
             onAddToCart(selectedCrop.id);
         }
-        alert(`¡${selectedCrop.nombre} añadido al carrito con éxito!`);
-        setSelectedCrop(null);
-        setPurchaseData({ cantidad: '', loteParcial: '', metodoPago: 'Transferencia Bancaria', porcentajeAdelanto: 30 });
+        alert(`¡${selectedCrop.nombre} añadido al carrito con éxito!\n\nLote Parcial Generado: ${generatedLoteParcial}`);
+        handleCloseModal();
     };
 
     const handleCertToggle = (cert) => {
@@ -518,7 +540,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             {selectedCrop && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
                     <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-                        <button onClick={() => setSelectedCrop(null)} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
+                        <button onClick={handleCloseModal} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
 
                         <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
                             <img src={selectedCrop.imagen} alt={selectedCrop.nombre} style={{ width: '120px', height: '120px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }} />
@@ -575,31 +597,54 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             </div>
                         </div>
 
+                        {/* Detalles de Producción y Cultivo */}
+                        <div style={{ marginBottom: '25px', border: '1px solid #eee', borderRadius: 'var(--radius-md)', padding: '20px', backgroundColor: '#FAFAFA' }}>
+                            <h4 style={{ margin: '0 0 15px 0', color: 'var(--color-text)', fontSize: '1.05rem', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>🌱 Detalles de Producción y Cultivo</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Hectáreas Sembradas</span>
+                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.hectareas} Ha</span>
+                                </div>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Fecha de Siembra</span>
+                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.fechaSiembra ? new Date(selectedCrop.fechaSiembra).toLocaleDateString('es-PE') : 'No especificada'}</span>
+                                </div>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Variedad de Cultivo</span>
+                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.variedad || 'Estándar'}</span>
+                                </div>
+                            </div>
+                            
+                            {selectedCrop.etapas && (
+                                <div style={{ marginTop: '15px' }}>
+                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '10px' }}>Progreso de Etapas del Cultivo</span>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        {Object.entries(selectedCrop.etapas).map(([etapa, pct]) => (
+                                            <div key={etapa} style={{ flex: '1 1 100px', backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '5px', padding: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                                <span style={{ textTransform: 'capitalize', fontSize: '0.75rem', color: '#777', display: 'block' }}>{etapa}</span>
+                                                <strong style={{ color: 'var(--color-primary)', fontSize: '1rem' }}>{pct}%</strong>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <h4 style={{ color: 'var(--color-text)', marginBottom: '15px', fontSize: '1.1rem' }}>Configurar Compra de la Preventa</h4>
                         
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Cantidad a Comprar (Kg)</label>
+                            <input 
+                                type="number" 
+                                name="cantidad" 
+                                placeholder={`Mínimo: ${selectedCrop.minimoVenta}`}
+                                value={purchaseData.cantidad} 
+                                onChange={(e) => setPurchaseData({ ...purchaseData, cantidad: e.target.value })} 
+                                style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
+                            />
+                        </div>
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Cantidad a Comprar (Kg)</label>
-                                <input 
-                                    type="number" 
-                                    name="cantidad" 
-                                    placeholder={`Mínimo: ${selectedCrop.minimoVenta}`}
-                                    value={purchaseData.cantidad} 
-                                    onChange={(e) => setPurchaseData({ ...purchaseData, cantidad: e.target.value })} 
-                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Lote Parcial (Opcional)</label>
-                                <input 
-                                    type="text" 
-                                    name="loteParcial" 
-                                    placeholder={`Ej: ${selectedCrop.lote}-P3`} 
-                                    value={purchaseData.loteParcial} 
-                                    onChange={(e) => setPurchaseData({ ...purchaseData, loteParcial: e.target.value })} 
-                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
-                                />
-                            </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Método de Pago Preferido</label>
                                 <select 
@@ -607,6 +652,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                                     onChange={(e) => setPurchaseData({ ...purchaseData, metodoPago: e.target.value })} 
                                     style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: 'white', boxSizing: 'border-box' }}
                                 >
+                                    <option value="">-- Seleccionar Método de Pago --</option>
                                     <option value="Transferencia Bancaria">Transferencia Bancaria</option>
                                     <option value="Depósito en Efectivo">Depósito en Efectivo</option>
                                     <option value="Crédito Comercial 30 días">Crédito Comercial (30 días)</option>
@@ -616,27 +662,28 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Porcentaje de Adelanto (%)</label>
                                 <select 
                                     value={purchaseData.porcentajeAdelanto} 
-                                    onChange={(e) => setPurchaseData({ ...purchaseData, porcentajeAdelanto: parseInt(e.target.value) })} 
+                                    onChange={(e) => setPurchaseData({ ...purchaseData, porcentajeAdelanto: e.target.value })} 
                                     style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: 'white', boxSizing: 'border-box' }}
                                 >
-                                    <option value={0}>Sin Adelanto (Pago 100% al entregar)</option>
-                                    <option value={30}>30% Adelanto (Garantía estándar)</option>
-                                    <option value={50}>50% Adelanto (Garantía prioritaria)</option>
+                                    <option value="">-- Seleccionar Adelanto --</option>
+                                    <option value="0">Sin Adelanto (Pago 100% al entregar)</option>
+                                    <option value="30">30% Adelanto (Garantía estándar)</option>
+                                    <option value="50">50% Adelanto (Garantía prioritaria)</option>
                                 </select>
                             </div>
                         </div>
 
-                        {purchaseData.cantidad > 0 && (
+                        {purchaseData.cantidad > 0 && purchaseData.porcentajeAdelanto !== '' && (
                             <div style={{ backgroundColor: '#F4F7F5', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid #e0e0e0', marginBottom: '25px' }}>
                                 <h4 style={{ margin: '0 0 15px 0', color: 'var(--color-primary)' }}>Resumen Estimado de la Preventa</h4>
                                 <p style={{ margin: '0 0 8px 0' }}>Monto Total: <strong style={{ fontSize: '1.1rem' }}>S/ {(parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)).toFixed(2)}</strong></p>
-                                <p style={{ margin: '0 0 8px 0', color: '#2E7D32' }}>Adelanto a pagar ahora ({purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * (purchaseData.porcentajeAdelanto / 100)).toFixed(2)}</strong></p>
-                                <p style={{ margin: 0, color: '#d32f2f' }}>Contraentrega ({100 - purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * ((100 - purchaseData.porcentajeAdelanto) / 100)).toFixed(2)}</strong></p>
+                                <p style={{ margin: '0 0 8px 0', color: '#2E7D32' }}>Adelanto a pagar ahora ({purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * (parseInt(purchaseData.porcentajeAdelanto) / 100)).toFixed(2)}</strong></p>
+                                <p style={{ margin: 0, color: '#d32f2f' }}>Contraentrega ({100 - parseInt(purchaseData.porcentajeAdelanto)}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * ((100 - parseInt(purchaseData.porcentajeAdelanto)) / 100)).toFixed(2)}</strong></p>
                             </div>
                         )}
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
-                            <button onClick={() => setSelectedCrop(null)} style={{ background: 'transparent', border: '1px solid #ccc', padding: '10px 20px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold' }}>Cancelar</button>
+                            <button onClick={handleCloseModal} style={{ background: 'transparent', border: '1px solid #ccc', padding: '10px 20px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold' }}>Cancelar</button>
                             <button 
                                 onClick={handleAddToCart} 
                                 style={{ 

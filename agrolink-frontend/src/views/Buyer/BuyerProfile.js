@@ -75,7 +75,16 @@ function BuyerProfile() {
                             <div><label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Nombre</label><input type="text" name="nombre" required value={profileData.nombre} onChange={handleProfileChange} style={inputStyle} /></div>
                             <div><label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Apellido Paterno</label><input type="text" name="apellidoPaterno" required value={profileData.apellidoPaterno} onChange={handleProfileChange} style={inputStyle} /></div>
                         </div>
-                        <div style={{ marginBottom: '20px' }}><label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Correo Electrónico</label><input type="email" disabled value={profileData.email} style={{ ...inputStyle, backgroundColor: '#f9f9f9', color: '#888', cursor: 'not-allowed' }} /></div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Correo Electrónico</label>
+                                <input type="email" disabled value={profileData.email} style={{ ...inputStyle, backgroundColor: '#f5f5f5', color: '#777', cursor: 'not-allowed', border: '1px solid #ddd' }} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Fecha de Nacimiento</label>
+                                <input type="date" disabled value={profileData.fechaNacimiento} style={{ ...inputStyle, backgroundColor: '#f5f5f5', color: '#777', cursor: 'not-allowed', border: '1px solid #ddd' }} />
+                            </div>
+                        </div>
                         
                         <button type="submit" style={{ backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', padding: '14px', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.05rem', width: '100%', boxShadow: '0 4px 6px rgba(46, 125, 50, 0.2)', marginBottom: '40px' }}>Guardar Datos Personales</button>
                     </form>
