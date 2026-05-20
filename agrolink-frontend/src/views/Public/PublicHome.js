@@ -36,9 +36,21 @@ function PublicHome() {
         return [];
     });
     const [selectedCrop, setSelectedCrop] = useState(null);
-    const [purchaseData, setPurchaseData] = useState({ cantidad: '', loteParcial: '', metodoPago: 'Transferencia Bancaria', porcentajeAdelanto: 30 });
+    const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: 0, direccionEntrega: '', fechaEntregaEstimada: '' });
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [companyModal, setCompanyModal] = useState(null); // 'about' | 'mission' | 'vision' | null
+
+    const getProfileAddress = () => {
+        const saved = localStorage.getItem('agrolink_buyer_profile');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.direccionEntrega) return data.direccionEntrega;
+            } catch (e) {}
+        }
+        return "Almacén Av. Industrial 1250, Callao";
+    };
+
 
     // Sincronizar carrito con localStorage
     useEffect(() => {
@@ -74,6 +86,18 @@ function PublicHome() {
             alert('Por favor ingresa una cantidad válida.');
             return;
         }
+        if (!purchaseData.metodoPago) {
+            alert('Por favor selecciona un método de pago preferido.');
+            return;
+        }
+        if (purchaseData.porcentajeAdelanto === '') {
+            alert('Por favor selecciona un porcentaje de adelanto.');
+            return;
+        }
+        if (!purchaseData.direccionEntrega || !purchaseData.direccionEntrega.trim()) {
+            alert('Por favor ingresa una dirección de entrega válida.');
+            return;
+        }
 
         const priceNum = parseFloat(selectedCrop.precio);
         const qtyNum = parseFloat(purchaseData.cantidad);
@@ -92,6 +116,14 @@ function PublicHome() {
                     });
                 }
             });
+            // Contar también los elementos en el carrito actual
+            const savedCart = JSON.parse(localStorage.getItem('agrolink_cart') || '[]');
+            savedCart.forEach(item => {
+                if (item.loteParcial && item.loteParcial.startsWith(loteCentral)) {
+                    count++;
+                }
+            });
+
             // Contar con base simulada
             if (loteCentral === 'LOTE-CAF-2025') count += 2;
             else if (loteCentral === 'LOTE-MZD-2025') count += 2;
@@ -100,6 +132,8 @@ function PublicHome() {
             return `${loteCentral}-P${count + 1}`;
         };
 
+        const generatedLoteParcial = getNextPartialSuffix(selectedCrop.lote);
+
         const newItem = {
             id: `CART-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             cultivoId: selectedCrop.id,
@@ -107,19 +141,33 @@ function PublicHome() {
             lote: selectedCrop.lote,
             cantidad: purchaseData.cantidad,
             precio: priceNum,
-            loteParcial: purchaseData.loteParcial || getNextPartialSuffix(selectedCrop.lote),
+            loteParcial: generatedLoteParcial,
             metodoPago: purchaseData.metodoPago,
-            porcentajeAdelanto: purchaseData.porcentajeAdelanto,
+            porcentajeAdelanto: parseInt(purchaseData.porcentajeAdelanto),
             montoTotal: total,
+            direccionEntrega: purchaseData.direccionEntrega,
+            fechaEntregaEstimada: purchaseData.fechaEntregaEstimada,
             seleccionado: true,
             imagen: selectedCrop.imagen,
-            agricultor: selectedCrop.agricultor
+            agricultor: selectedCrop.agricultor,
+            // Snapshot del cultivo en el momento de la compra
+            detallesProducto: {
+                variedad: selectedCrop.variedad || 'Estándar',
+                hectareas: selectedCrop.hectareas,
+                fechaSiembra: selectedCrop.fechaSiembra,
+                cantidadTotal: selectedCrop.cantidadTotal,
+                cantidadDisponible: selectedCrop.cantidadDisponible,
+                minimoVenta: selectedCrop.minimoVenta,
+                certificaciones: selectedCrop.certificaciones || [],
+                incidencia: selectedCrop.incidencia || null,
+                etapas: selectedCrop.etapas || {}
+            }
         };
 
         setCartItems([...cartItems, newItem]);
-        alert(`¡${selectedCrop.nombre} añadido al carrito con éxito!`);
+        alert(`¡${selectedCrop.nombre} añadido al carrito con éxito!\n\nLote Parcial Generado: ${generatedLoteParcial}`);
         setSelectedCrop(null);
-        setPurchaseData({ cantidad: '', loteParcial: '', metodoPago: 'Transferencia Bancaria', porcentajeAdelanto: 30 });
+        setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: 0, direccionEntrega: '', fechaEntregaEstimada: '' });
     };
 
     const handleRemoveFromCart = (id) => {
@@ -363,7 +411,10 @@ function PublicHome() {
                                                 </div>
 
                                                 <button
-                                                    onClick={() => setSelectedCrop(crop)}
+                                                    onClick={() => {
+                                                        setSelectedCrop(crop);
+                                                        setPurchaseData(prev => ({ ...prev, direccionEntrega: getProfileAddress() }));
+                                                    }}
                                                     style={{
                                                         width: '100%',
                                                         backgroundColor: 'var(--color-primary)',
@@ -540,38 +591,87 @@ function PublicHome() {
                             </div>
                         </div>
 
+                        {/* Detalles de Producción y Cultivo */}
+                        <div style={{ marginBottom: '25px', border: '1px solid #eee', borderRadius: 'var(--radius-md)', padding: '20px', backgroundColor: '#FAFAFA' }}>
+                            <h4 style={{ margin: '0 0 15px 0', color: 'var(--color-text)', fontSize: '1.05rem', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>🌱 Detalles de Producción y Cultivo</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Hectáreas Sembradas</span>
+                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.hectareas} Ha</span>
+                                </div>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Fecha de Siembra</span>
+                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.fechaSiembra ? new Date(selectedCrop.fechaSiembra).toLocaleDateString('es-PE') : 'No especificada'}</span>
+                                </div>
+                                <div>
+                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Variedad de Cultivo</span>
+                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.variedad || 'Estándar'}</span>
+                                </div>
+                            </div>
+                            
+                            {selectedCrop.etapas && (
+                                <div style={{ marginTop: '15px' }}>
+                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '10px' }}>Progreso de Etapas del Cultivo</span>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        {Object.entries(selectedCrop.etapas).map(([etapa, pct]) => (
+                                            <div key={etapa} style={{ flex: '1 1 100px', backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '5px', padding: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                                <span style={{ textTransform: 'capitalize', fontSize: '0.75rem', color: '#777', display: 'block' }}>{etapa}</span>
+                                                <strong style={{ color: 'var(--color-primary)', fontSize: '1rem' }}>{pct}%</strong>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <h4 style={{ color: 'var(--color-text)', marginBottom: '15px', fontSize: '1.1rem' }}>Configurar Compra de la Preventa</h4>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Cantidad a Comprar (Kg)</label>
+                            <input 
+                                type="number" 
+                                name="cantidad" 
+                                placeholder={`Mínimo: ${selectedCrop.minimoVenta}`}
+                                value={purchaseData.cantidad} 
+                                onChange={(e) => setPurchaseData({ ...purchaseData, cantidad: e.target.value })} 
+                                style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Dirección de Entrega para este Producto</label>
+                            <input 
+                                type="text" 
+                                name="direccionEntrega" 
+                                placeholder="Ej: Almacén Principal, Av. Industrial 1250, Callao"
+                                value={purchaseData.direccionEntrega} 
+                                onChange={(e) => setPurchaseData({ ...purchaseData, direccionEntrega: e.target.value })} 
+                                style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Fecha de Entrega Estimada</label>
+                            <input 
+                                type="date"
+                                name="fechaEntregaEstimada"
+                                value={purchaseData.fechaEntregaEstimada}
+                                min={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                                onChange={(e) => setPurchaseData({ ...purchaseData, fechaEntregaEstimada: e.target.value })} 
+                                style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
+                            />
+                            <span style={{ fontSize: '0.78rem', color: '#888', marginTop: '4px', display: 'block' }}>Opcional. Si se deja vacío se calculará automáticamente (90 días).</span>
+                        </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Cantidad a Comprar (Kg)</label>
-                                <input
-                                    type="number"
-                                    name="cantidad"
-                                    placeholder={`Mínimo: ${selectedCrop.minimoVenta}`}
-                                    value={purchaseData.cantidad}
-                                    onChange={(e) => setPurchaseData({ ...purchaseData, cantidad: e.target.value })}
-                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Lote Parcial (Opcional)</label>
-                                <input
-                                    type="text"
-                                    name="loteParcial"
-                                    placeholder={`Ej: ${selectedCrop.lote}-P3`}
-                                    value={purchaseData.loteParcial}
-                                    onChange={(e) => setPurchaseData({ ...purchaseData, loteParcial: e.target.value })}
-                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }}
-                                />
-                            </div>
-                            <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Método de Pago Preferido</label>
-                                <select
-                                    value={purchaseData.metodoPago}
-                                    onChange={(e) => setPurchaseData({ ...purchaseData, metodoPago: e.target.value })}
+                                <select 
+                                    value={purchaseData.metodoPago} 
+                                    onChange={(e) => setPurchaseData({ ...purchaseData, metodoPago: e.target.value })} 
                                     style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: 'white', boxSizing: 'border-box' }}
                                 >
+                                    <option value="">-- Seleccionar Método de Pago --</option>
                                     <option value="Transferencia Bancaria">Transferencia Bancaria</option>
                                     <option value="Depósito en Efectivo">Depósito en Efectivo</option>
                                     <option value="Crédito Comercial 30 días">Crédito Comercial (30 días)</option>
@@ -579,9 +679,9 @@ function PublicHome() {
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Porcentaje de Adelanto (%)</label>
-                                <select
-                                    value={purchaseData.porcentajeAdelanto}
-                                    onChange={(e) => setPurchaseData({ ...purchaseData, porcentajeAdelanto: parseInt(e.target.value) })}
+                                <select 
+                                    value={purchaseData.porcentajeAdelanto} 
+                                    onChange={(e) => setPurchaseData({ ...purchaseData, porcentajeAdelanto: parseInt(e.target.value) || 0 })} 
                                     style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: 'white', boxSizing: 'border-box' }}
                                 >
                                     <option value={0}>Sin Adelanto (Pago 100% al entregar)</option>
@@ -595,13 +695,16 @@ function PublicHome() {
                             <div style={{ backgroundColor: '#F4F7F5', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid #e0e0e0', marginBottom: '25px' }}>
                                 <h4 style={{ margin: '0 0 15px 0', color: 'var(--color-primary)' }}>Resumen Estimado de la Preventa</h4>
                                 <p style={{ margin: '0 0 8px 0' }}>Monto Total: <strong style={{ fontSize: '1.1rem' }}>S/ {(parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)).toFixed(2)}</strong></p>
-                                <p style={{ margin: '0 0 8px 0', color: '#2E7D32' }}>Monto Adelanto a Pagar ({purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * (purchaseData.porcentajeAdelanto / 100)).toFixed(2)}</strong></p>
-                                <p style={{ margin: 0, color: '#d32f2f' }}>Monto Contraentrega ({100 - purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * ((100 - purchaseData.porcentajeAdelanto) / 100)).toFixed(2)}</strong></p>
+                                <p style={{ margin: '0 0 8px 0', color: '#2E7D32' }}>Adelanto a pagar ahora ({purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * (purchaseData.porcentajeAdelanto / 100)).toFixed(2)}</strong></p>
+                                <p style={{ margin: 0, color: '#d32f2f' }}>Contraentrega ({100 - purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * ((100 - purchaseData.porcentajeAdelanto) / 100)).toFixed(2)}</strong></p>
                             </div>
                         )}
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
-                            <button onClick={() => setSelectedCrop(null)} style={{ background: 'transparent', border: '1px solid #ccc', padding: '10px 20px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold' }}>Cancelar</button>
+                            <button onClick={() => {
+                                setSelectedCrop(null);
+                                setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: 0, direccionEntrega: '', fechaEntregaEstimada: '' });
+                            }} style={{ background: 'transparent', border: '1px solid #ccc', padding: '10px 20px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold' }}>Cancelar</button>
                             <button onClick={handleAddToCart} style={{ backgroundColor: 'var(--color-secondary)', color: 'white', border: 'none', padding: '10px 25px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(255,152,0,0.2)' }}>
                                 🛒 Añadir al Carrito
                             </button>
