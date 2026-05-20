@@ -242,11 +242,8 @@ function BuyerPurchases() {
                     <div style={{ backgroundColor: 'white', padding: '35px', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                         <button onClick={() => setSelectedOrder(null)} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', cursor: 'pointer' }}>&times;</button>
                         
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '15px' }}>
+                        <div style={{ marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '15px' }}>
                             <h3 style={{ color: 'var(--color-primary)' }}>Detalle Pedido: {selectedOrder.id}</h3>
-                            <button onClick={() => handleDownloadBoleta(selectedOrder)} style={{ backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                📄 Descargar Boleta de Venta
-                            </button>
                         </div>
                         
                         {/* INFORMACIÓN DE LA ORDEN */}
@@ -329,19 +326,33 @@ function BuyerPurchases() {
                                         </div>
 
                                         {/* Etapas */}
-                                        {prod.detallesProducto.etapas && Object.keys(prod.detallesProducto.etapas).length > 0 && (
-                                            <div style={{ marginBottom: '12px' }}>
-                                                <span style={{ fontSize: '0.78rem', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Etapas del Cultivo</span>
-                                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                                    {Object.entries(prod.detallesProducto.etapas).map(([etapa, pct]) => (
-                                                        <div key={etapa} style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '5px', padding: '6px 10px', textAlign: 'center', minWidth: '80px' }}>
-                                                            <span style={{ textTransform: 'capitalize', fontSize: '0.72rem', color: '#777', display: 'block' }}>{etapa}</span>
-                                                            <strong style={{ color: 'var(--color-primary)', fontSize: '0.95rem' }}>{pct}%</strong>
+                                        {prod.detallesProducto.etapas && Object.keys(prod.detallesProducto.etapas).length > 0 && (() => {
+                                            const etapas = prod.detallesProducto.etapas;
+                                            const etapaActualKey = Object.entries(etapas).reduce((a, b) => b[1] > a[1] ? b : a)[0];
+                                            const etapaLabels = { germinacion: 'Germinación', crecimiento: 'Crecimiento', floracion: 'Floración', maduracion: 'Maduración' };
+                                            const etapaColors = { germinacion: '#81C784', crecimiento: '#2E7D32', floracion: '#F9A825', maduracion: '#E65100' };
+                                            return (
+                                                <div style={{ marginBottom: '12px' }}>
+                                                    <span style={{ fontSize: '0.78rem', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Etapas del Cultivo</span>
+                                                    <div style={{ backgroundColor: '#F1F8F5', border: `2px solid ${etapaColors[etapaActualKey] || 'var(--color-primary)'}`, borderRadius: '8px', padding: '10px 14px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        <span style={{ fontSize: '1.3rem' }}>{etapaActualKey === 'germinacion' ? '🌱' : etapaActualKey === 'crecimiento' ? '🌿' : etapaActualKey === 'floracion' ? '🌸' : '🍏'}</span>
+                                                        <div>
+                                                            <span style={{ fontSize: '0.75rem', color: '#666', display: 'block', fontWeight: 'bold', textTransform: 'uppercase' }}>Etapa Actual</span>
+                                                            <strong style={{ color: etapaColors[etapaActualKey] || 'var(--color-primary)', fontSize: '1rem', textTransform: 'capitalize' }}>{etapaLabels[etapaActualKey] || etapaActualKey}</strong>
+                                                            <span style={{ fontSize: '0.82rem', color: '#555', marginLeft: '8px' }}>({etapas[etapaActualKey]}% de progreso)</span>
                                                         </div>
-                                                    ))}
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                        {Object.entries(etapas).map(([etapa, pct]) => (
+                                                            <div key={etapa} style={{ backgroundColor: etapa === etapaActualKey ? (etapaColors[etapa] || 'var(--color-primary)') : 'white', border: `1px solid ${etapa === etapaActualKey ? (etapaColors[etapa] || 'var(--color-primary)') : '#e0e0e0'}`, borderRadius: '5px', padding: '6px 10px', textAlign: 'center', minWidth: '80px' }}>
+                                                                <span style={{ textTransform: 'capitalize', fontSize: '0.72rem', color: etapa === etapaActualKey ? 'rgba(255,255,255,0.85)' : '#777', display: 'block' }}>{etapaLabels[etapa] || etapa}</span>
+                                                                <strong style={{ color: etapa === etapaActualKey ? 'white' : 'var(--color-primary)', fontSize: '0.95rem' }}>{pct}%</strong>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            );
+                                        })()}
 
                                         {/* Certificaciones */}
                                         {prod.detallesProducto.certificaciones && prod.detallesProducto.certificaciones.length > 0 && (
