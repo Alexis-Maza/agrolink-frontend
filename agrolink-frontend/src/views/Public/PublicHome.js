@@ -18,7 +18,7 @@ function PublicHome() {
     const [catalog] = useState(initialCatalog);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCertifications, setSelectedCertifications] = useState([]);
-    
+
     // Paginación
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 9;
@@ -53,10 +53,10 @@ function PublicHome() {
 
     // 3. Lógica de Filtrado
     const filteredCrops = catalog.filter(crop => {
-        const matchesSearch = 
+        const matchesSearch =
             crop.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
             crop.agricultor.toLowerCase().includes(searchTerm.toLowerCase());
-        
+
         const matchesCertifications = selectedCertifications.length === 0 ||
             selectedCertifications.every(cert => crop.certificaciones && crop.certificaciones.includes(cert));
 
@@ -96,7 +96,7 @@ function PublicHome() {
             if (loteCentral === 'LOTE-CAF-2025') count += 2;
             else if (loteCentral === 'LOTE-MZD-2025') count += 2;
             else if (loteCentral === 'LOTE-CAC-2025') count += 1;
-            
+
             return `${loteCentral}-P${count + 1}`;
         };
 
@@ -159,7 +159,7 @@ function PublicHome() {
 
     return (
         <div style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh', scrollBehavior: 'smooth' }}>
-            
+
             {/* Inyección de estilos CSS responsivos */}
             <style>{`
                 @media (max-width: 992px) {
@@ -203,7 +203,7 @@ function PublicHome() {
                 minHeight: '100vh',
                 backgroundColor: 'var(--color-bg)'
             }}>
-                
+
                 {/* COLUMNA IZQUIERDA: SIDEBAR SÓLIDO */}
                 <aside className="sidebar-panel" style={{
                     width: '320px',
@@ -217,11 +217,11 @@ function PublicHome() {
                     height: 'calc(100vh - 76px)',
                     overflowY: 'auto'
                 }}>
-                    <h3 style={{ 
-                        margin: '0 0 25px 0', 
-                        fontSize: '1.3rem', 
-                        color: 'var(--color-text)', 
-                        borderBottom: '2px solid #F4F7F5', 
+                    <h3 style={{
+                        margin: '0 0 25px 0',
+                        fontSize: '1.3rem',
+                        color: 'var(--color-text)',
+                        borderBottom: '2px solid #F4F7F5',
                         paddingBottom: '12px',
                         fontFamily: 'var(--font-titles)',
                         fontWeight: 'bold'
@@ -232,18 +232,18 @@ function PublicHome() {
                     {/* Barra de búsqueda */}
                     <div style={{ marginBottom: '30px' }}>
                         <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#555', fontSize: '0.9rem' }}>🔍 Buscar Cultivo</label>
-                        <input 
-                            type="text" 
-                            placeholder="Cultivo o Agricultor..." 
-                            value={searchTerm} 
-                            onChange={(e) => setSearchTerm(e.target.value)} 
-                            style={{ 
-                                width: '100%', 
-                                padding: '12px', 
-                                borderRadius: 'var(--radius-md)', 
-                                border: '1px solid #ddd', 
-                                fontSize: '0.95rem', 
-                                outline: 'none', 
+                        <input
+                            type="text"
+                            placeholder="Cultivo o Agricultor..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid #ddd',
+                                fontSize: '0.95rem',
+                                outline: 'none',
                                 transition: 'border-color 0.2s',
                                 boxSizing: 'border-box'
                             }}
@@ -259,20 +259,20 @@ function PublicHome() {
                             {AVAILABLE_CERTIFICATIONS.map((cert, idx) => {
                                 const isChecked = selectedCertifications.includes(cert);
                                 return (
-                                    <label key={idx} style={{ 
-                                        display: 'flex', 
-                                        alignItems: 'flex-start', 
-                                        gap: '10px', 
-                                        fontSize: '0.9rem', 
-                                        color: '#444', 
+                                    <label key={idx} style={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                        fontSize: '0.9rem',
+                                        color: '#444',
                                         cursor: 'pointer',
                                         lineHeight: '1.3',
                                         transition: 'color 0.2s'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-primary)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.color = '#444'}>
-                                        <input 
-                                            type="checkbox" 
+                                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-primary)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.color = '#444'}>
+                                        <input
+                                            type="checkbox"
                                             checked={isChecked}
                                             onChange={() => handleCertToggle(cert)}
                                             style={{ marginTop: '2px', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
@@ -286,10 +286,10 @@ function PublicHome() {
                 </aside>
 
                 {/* COLUMNA DERECHA: CONTENIDO PRINCIPAL */}
-                <main className="main-content" style={{ 
-                    flex: 1, 
-                    padding: '40px', 
-                    boxSizing: 'border-box' 
+                <main className="main-content" style={{
+                    flex: 1,
+                    padding: '40px',
+                    boxSizing: 'border-box'
                 }}>
                     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
@@ -300,13 +300,13 @@ function PublicHome() {
                                 </div>
                             ) : (
                                 visibleCrops.map(crop => (
-                                    <div 
-                                        key={crop.id} 
-                                        style={{ 
-                                            backgroundColor: 'white', 
-                                            borderRadius: 'var(--radius-lg)', 
-                                            overflow: 'hidden', 
-                                            boxShadow: '0 4px 15px rgba(0,0,0,0.05)', 
+                                    <div
+                                        key={crop.id}
+                                        style={{
+                                            backgroundColor: 'white',
+                                            borderRadius: 'var(--radius-lg)',
+                                            overflow: 'hidden',
+                                            boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
                                             border: crop.incidencia ? '1px solid #ffcdd2' : '1px solid #eee',
                                             transition: 'transform 0.3s, box-shadow 0.3s',
                                             display: 'flex',
@@ -335,7 +335,7 @@ function PublicHome() {
                                                     <span style={{ fontSize: '0.8rem', color: '#666' }}>Var: <strong>{crop.variedad}</strong></span>
                                                 </div>
                                                 <h3 style={{ margin: '0 0 12px 0', color: 'var(--color-text)', fontSize: '1.25rem', fontFamily: 'var(--font-titles)', fontWeight: 'bold' }}>{crop.nombre}</h3>
-                                                
+
                                                 <p style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#555' }}>
                                                     👤 Agricultor: <strong style={{ color: 'var(--color-text)' }}>{crop.agricultor}</strong>
                                                 </p>
@@ -361,17 +361,17 @@ function PublicHome() {
                                                     <span style={{ color: '#666', fontSize: '0.9rem' }}>Precio:</span>
                                                     <strong style={{ color: 'var(--color-secondary)', fontSize: '1.15rem' }}>S/ {crop.precio.toFixed(2)} / Kg</strong>
                                                 </div>
-                                                
-                                                <button 
-                                                    onClick={() => setSelectedCrop(crop)} 
-                                                    style={{ 
-                                                        width: '100%', 
-                                                        backgroundColor: 'var(--color-primary)', 
-                                                        color: 'white', 
-                                                        border: 'none', 
-                                                        padding: '10px', 
-                                                        borderRadius: 'var(--radius-md)', 
-                                                        fontWeight: 'bold', 
+
+                                                <button
+                                                    onClick={() => setSelectedCrop(crop)}
+                                                    style={{
+                                                        width: '100%',
+                                                        backgroundColor: 'var(--color-primary)',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        padding: '10px',
+                                                        borderRadius: 'var(--radius-md)',
+                                                        fontWeight: 'bold',
                                                         cursor: 'pointer',
                                                         fontSize: '0.95rem',
                                                         transition: 'background-color 0.2s'
@@ -390,11 +390,11 @@ function PublicHome() {
 
                         {/* PAGINACIÓN ELEGANTE */}
                         {totalPages > 1 && (
-                            <div style={{ 
-                                display: 'flex', 
-                                justifyContent: 'center', 
-                                alignItems: 'center', 
-                                gap: '10px', 
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                gap: '10px',
                                 marginTop: '45px',
                                 flexWrap: 'wrap'
                             }}>
@@ -487,7 +487,7 @@ function PublicHome() {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1100 }}>
                     <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
                         <button onClick={() => setSelectedCrop(null)} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
-                        
+
                         <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
                             <img src={selectedCrop.imagen} alt={selectedCrop.nombre} style={{ width: '120px', height: '120px', borderRadius: 'var(--radius-md)', objectFit: 'cover', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
                             <div>
@@ -510,11 +510,11 @@ function PublicHome() {
                         )}
 
                         {/* Ficha técnica comercial del Lote */}
-                        <div style={{ 
-                            backgroundColor: '#F1F8F5', 
-                            border: '1px solid #C8E6C9', 
-                            borderRadius: 'var(--radius-md)', 
-                            padding: '18px', 
+                        <div style={{
+                            backgroundColor: '#F1F8F5',
+                            border: '1px solid #C8E6C9',
+                            borderRadius: 'var(--radius-md)',
+                            padding: '18px',
                             marginBottom: '25px',
                             display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
@@ -541,35 +541,35 @@ function PublicHome() {
                         </div>
 
                         <h4 style={{ color: 'var(--color-text)', marginBottom: '15px', fontSize: '1.1rem' }}>Configurar Compra de la Preventa</h4>
-                        
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Cantidad a Comprar (Kg)</label>
-                                <input 
-                                    type="number" 
-                                    name="cantidad" 
+                                <input
+                                    type="number"
+                                    name="cantidad"
                                     placeholder={`Mínimo: ${selectedCrop.minimoVenta}`}
-                                    value={purchaseData.cantidad} 
-                                    onChange={(e) => setPurchaseData({...purchaseData, cantidad: e.target.value})} 
-                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
+                                    value={purchaseData.cantidad}
+                                    onChange={(e) => setPurchaseData({ ...purchaseData, cantidad: e.target.value })}
+                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }}
                                 />
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Lote Parcial (Opcional)</label>
-                                <input 
-                                    type="text" 
-                                    name="loteParcial" 
+                                <input
+                                    type="text"
+                                    name="loteParcial"
                                     placeholder={`Ej: ${selectedCrop.lote}-P3`}
-                                    value={purchaseData.loteParcial} 
-                                    onChange={(e) => setPurchaseData({...purchaseData, loteParcial: e.target.value})} 
-                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
+                                    value={purchaseData.loteParcial}
+                                    onChange={(e) => setPurchaseData({ ...purchaseData, loteParcial: e.target.value })}
+                                    style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }}
                                 />
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Método de Pago Preferido</label>
-                                <select 
-                                    value={purchaseData.metodoPago} 
-                                    onChange={(e) => setPurchaseData({...purchaseData, metodoPago: e.target.value})} 
+                                <select
+                                    value={purchaseData.metodoPago}
+                                    onChange={(e) => setPurchaseData({ ...purchaseData, metodoPago: e.target.value })}
                                     style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: 'white', boxSizing: 'border-box' }}
                                 >
                                     <option value="Transferencia Bancaria">Transferencia Bancaria</option>
@@ -579,9 +579,9 @@ function PublicHome() {
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Porcentaje de Adelanto (%)</label>
-                                <select 
-                                    value={purchaseData.porcentajeAdelanto} 
-                                    onChange={(e) => setPurchaseData({...purchaseData, porcentajeAdelanto: parseInt(e.target.value) })} 
+                                <select
+                                    value={purchaseData.porcentajeAdelanto}
+                                    onChange={(e) => setPurchaseData({ ...purchaseData, porcentajeAdelanto: parseInt(e.target.value) })}
                                     style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: 'white', boxSizing: 'border-box' }}
                                 >
                                     <option value={0}>Sin Adelanto (Pago 100% al entregar)</option>
@@ -594,7 +594,7 @@ function PublicHome() {
                         {purchaseData.cantidad > 0 && (
                             <div style={{ backgroundColor: '#F4F7F5', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid #e0e0e0', marginBottom: '25px' }}>
                                 <h4 style={{ margin: '0 0 15px 0', color: 'var(--color-primary)' }}>Resumen Estimado de la Preventa</h4>
-                                <p style={{ margin: '0 0 8px 0' }}>Monto Total: <strong style={{fontSize: '1.1rem'}}>S/ {(parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)).toFixed(2)}</strong></p>
+                                <p style={{ margin: '0 0 8px 0' }}>Monto Total: <strong style={{ fontSize: '1.1rem' }}>S/ {(parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)).toFixed(2)}</strong></p>
                                 <p style={{ margin: '0 0 8px 0', color: '#2E7D32' }}>Monto Adelanto a Pagar ({purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * (purchaseData.porcentajeAdelanto / 100)).toFixed(2)}</strong></p>
                                 <p style={{ margin: 0, color: '#d32f2f' }}>Monto Contraentrega ({100 - purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * ((100 - purchaseData.porcentajeAdelanto) / 100)).toFixed(2)}</strong></p>
                             </div>
@@ -613,18 +613,18 @@ function PublicHome() {
             {/* 4. SLIDING DRAWER: CARRITO PÚBLICO */}
             {isCartOpen && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1200, display: 'flex', justifyContent: 'flex-end' }} onClick={() => setIsCartOpen(false)}>
-                    <div style={{ 
-                        backgroundColor: 'white', 
-                        width: '100%', 
-                        maxWidth: '450px', 
-                        height: '100vh', 
-                        padding: '30px', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
+                    <div style={{
+                        backgroundColor: 'white',
+                        width: '100%',
+                        maxWidth: '450px',
+                        height: '100vh',
+                        padding: '30px',
+                        display: 'flex',
+                        flexDirection: 'column',
                         boxShadow: '-5px 0 25px rgba(0,0,0,0.15)',
                         position: 'relative'
                     }} onClick={(e) => e.stopPropagation()}>
-                        
+
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '2px solid #eee', paddingBottom: '15px' }}>
                             <h3 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.5rem', fontFamily: 'var(--font-titles)' }}>🛒 Tu Carrito</h3>
                             <button onClick={() => setIsCartOpen(false)} style={{ background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
@@ -649,7 +649,7 @@ function PublicHome() {
                                         </div>
                                         <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                                             <strong style={{ color: 'var(--color-secondary)' }}>S/ {item.montoTotal.toFixed(2)}</strong>
-                                            <button 
+                                            <button
                                                 onClick={() => handleRemoveFromCart(item.id)}
                                                 style={{ background: 'transparent', border: 'none', color: '#d32f2f', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold', padding: 0 }}
                                             >
@@ -673,7 +673,7 @@ function PublicHome() {
                                     <strong style={{ fontSize: '1.15rem' }}>S/ {cartAdelanto.toFixed(2)}</strong>
                                 </div>
 
-                                <button 
+                                <button
                                     onClick={handleCheckout}
                                     style={{
                                         width: '100%',
@@ -702,7 +702,7 @@ function PublicHome() {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1300 }} onClick={() => setCompanyModal(null)}>
                     <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '550px', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => setCompanyModal(null)} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
-                        
+
                         {companyModal === 'about' && (
                             <>
                                 <h3 style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-titles)', fontSize: '2rem', marginBottom: '15px' }}>Sobre AgroLink</h3>
@@ -733,18 +733,18 @@ function PublicHome() {
                             </>
                         )}
 
-                        <button 
-                            onClick={() => setCompanyModal(null)} 
-                            style={{ 
-                                marginTop: '25px', 
-                                width: '100%', 
-                                padding: '12px', 
-                                backgroundColor: 'var(--color-primary)', 
-                                color: 'white', 
-                                border: 'none', 
-                                borderRadius: 'var(--radius-md)', 
-                                fontWeight: 'bold', 
-                                cursor: 'pointer' 
+                        <button
+                            onClick={() => setCompanyModal(null)}
+                            style={{
+                                marginTop: '25px',
+                                width: '100%',
+                                padding: '12px',
+                                backgroundColor: 'var(--color-primary)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: 'var(--radius-md)',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
                             }}
                         >
                             Cerrar
@@ -762,7 +762,7 @@ function PublicHome() {
                 borderTop: '5px solid var(--color-secondary)'
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px', marginBottom: '40px' }}>
-                    
+
                     {/* Columna Logo/Descripción */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -781,7 +781,7 @@ function PublicHome() {
                         <h4 style={{ color: 'white', fontSize: '1.1rem', margin: '0 0 15px 0', borderBottom: '1px solid #4a5568', paddingBottom: '8px' }}>Aspectos de la Empresa</h4>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <li>
-                                <button 
+                                <button
                                     onClick={() => setCompanyModal('about')}
                                     style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.95rem', padding: 0, textDecoration: 'underline', transition: 'color 0.2s' }}
                                     onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
@@ -791,7 +791,7 @@ function PublicHome() {
                                 </button>
                             </li>
                             <li>
-                                <button 
+                                <button
                                     onClick={() => setCompanyModal('mission')}
                                     style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.95rem', padding: 0, textDecoration: 'underline', transition: 'color 0.2s' }}
                                     onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
@@ -801,7 +801,7 @@ function PublicHome() {
                                 </button>
                             </li>
                             <li>
-                                <button 
+                                <button
                                     onClick={() => setCompanyModal('vision')}
                                     style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.95rem', padding: 0, textDecoration: 'underline', transition: 'color 0.2s' }}
                                     onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
@@ -819,15 +819,15 @@ function PublicHome() {
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <li>
                                 <Link to="/login" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '0.95rem' }}
-                                      onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
-                                      onMouseLeave={(e) => e.target.style.color = '#cbd5e1'}>
+                                    onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
+                                    onMouseLeave={(e) => e.target.style.color = '#cbd5e1'}>
                                     Iniciar Sesión
                                 </Link>
                             </li>
                             <li>
                                 <Link to="/register" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '0.95rem' }}
-                                      onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
-                                      onMouseLeave={(e) => e.target.style.color = '#cbd5e1'}>
+                                    onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
+                                    onMouseLeave={(e) => e.target.style.color = '#cbd5e1'}>
                                     Crear Cuenta
                                 </Link>
                             </li>

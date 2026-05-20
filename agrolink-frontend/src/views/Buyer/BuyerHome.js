@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 
-import BuyerDashboard from './BuyerDashboard';
 import BuyerCatalog from './BuyerCatalog';
 import BuyerCart from './BuyerCart';
 import BuyerPurchases from './BuyerPurchases';
@@ -38,8 +37,7 @@ function BuyerHome() {
                     <p style={{ color: '#888', fontSize: '0.9rem', margin: '5px 0 0 0' }}>Panel Comprador</p>
                 </div>
                 <div style={{ flex: 1, padding: '20px 0' }}>
-                    <Link to="/buyer" style={linkStyle('/buyer')}>🏠 Inicio</Link>
-                    <Link to="/buyer/catalog" style={linkStyle('/buyer/catalog')}>🌿 Catálogo</Link>
+                    <Link to="/buyer" style={linkStyle('/buyer')}>🌿 Catálogo</Link>
                     <Link to="/buyer/cart" style={linkStyle('/buyer/cart')}>🛒 Mi Carrito</Link>
                     <Link to="/buyer/purchases" style={linkStyle('/buyer/purchases')}>📦 Mis Compras</Link>
                     <Link to="/buyer/notifications" style={linkStyle('/buyer/notifications')}>🔔 Notificaciones</Link>
@@ -52,7 +50,7 @@ function BuyerHome() {
 
             <main style={{ flex: 1, padding: '40px' }}>
                 <Routes>
-                    <Route path="/" element={<BuyerDashboard acquiredIds={acquiredIds} onAddToCart={addAcquiredId} />} />
+                    <Route path="/" element={<BuyerCatalog acquiredIds={acquiredIds} onAddToCart={addAcquiredId} />} />
                     <Route path="catalog" element={<BuyerCatalog acquiredIds={acquiredIds} onAddToCart={addAcquiredId} />} />
                     <Route path="cart" element={<BuyerCart />} />
                     <Route path="purchases" element={<BuyerPurchases />} />
