@@ -39,6 +39,27 @@ function BuyerCatalog() {
         const qtyNum = parseFloat(purchaseData.cantidad);
         const total = priceNum * qtyNum;
         
+        // Autogenerar lote parcial secuencial de acuerdo al lote central del producto
+        const getNextPartialSuffix = (loteCentral) => {
+            const savedOrders = JSON.parse(localStorage.getItem('agrolink_orders') || '[]');
+            let count = 0;
+            savedOrders.forEach(o => {
+                if (o.productos) {
+                    o.productos.forEach(p => {
+                        if (p.loteParcial && p.loteParcial.startsWith(loteCentral)) {
+                            count++;
+                        }
+                    });
+                }
+            });
+            // Contar con base simulada
+            if (loteCentral === 'LOTE-CAF-2025') count += 2;
+            else if (loteCentral === 'LOTE-MZD-2025') count += 2;
+            else if (loteCentral === 'LOTE-CAC-2025') count += 1;
+            
+            return `${loteCentral}-P${count + 1}`;
+        };
+
         const newItem = {
             id: `CART-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             cultivoId: selectedCrop.id,
@@ -46,7 +67,7 @@ function BuyerCatalog() {
             lote: selectedCrop.lote,
             cantidad: purchaseData.cantidad,
             precio: priceNum,
-            loteParcial: purchaseData.loteParcial || `LP-${Math.floor(Math.random() * 100)}`,
+            loteParcial: purchaseData.loteParcial || getNextPartialSuffix(selectedCrop.lote),
             metodoPago: purchaseData.metodoPago,
             porcentajeAdelanto: purchaseData.porcentajeAdelanto,
             montoTotal: total,
@@ -124,7 +145,7 @@ function BuyerCatalog() {
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Lote Parcial (Opcional)</label>
-                                <input type="text" name="loteParcial" value={purchaseData.loteParcial} onChange={(e) => setPurchaseData({...purchaseData, loteParcial: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc' }} />
+                                <input type="text" name="loteParcial" placeholder={`Ej: ${selectedCrop.lote}-P3`} value={purchaseData.loteParcial} onChange={(e) => setPurchaseData({...purchaseData, loteParcial: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc' }} />
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Método de Pago</label>

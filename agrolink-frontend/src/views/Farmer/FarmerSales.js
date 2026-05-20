@@ -203,8 +203,34 @@ function FarmerSales() {
                             <div>
                                 <p style={{ margin: '0 0 15px 0' }}><strong style={{ color: '#555' }}>Fecha de Compra:</strong> <br/><span style={{ fontSize: '1.1rem', color: '#333' }}>{selectedSale.fechaCompra}</span></p>
                                 <p style={{ margin: '0 0 15px 0' }}><strong style={{ color: '#555' }}>Fecha de Entrega:</strong> <br/><span style={{ fontSize: '1.1rem', color: '#333' }}>{selectedSale.fechaEntrega}</span></p>
-                                <p style={{ margin: '0 0 15px 0' }}><strong style={{ color: '#555' }}>Número de Lote Central:</strong> <br/><span style={{ fontSize: '1.1rem', color: '#333' }}>{selectedSale.lote}</span></p>
-                                <p style={{ margin: '0 0 15px 0' }}><strong style={{ color: '#555' }}>Número de Lote Parcial:</strong> <br/><span style={{ fontSize: '1.1rem', color: '#333' }}>{selectedSale.loteParcial}</span></p>
+                                <p style={{ margin: '0 0 15px 0' }}><strong style={{ color: '#555' }}>Número de Lote Central:</strong> <br/><span style={{ fontSize: '1.1rem', color: '#333', fontWeight: 'bold' }}>{selectedSale.lote}</span></p>
+                                <p style={{ margin: '0 0 15px 0' }}>
+                                    <strong style={{ color: '#555' }}>Número de Lote Parcial:</strong> <br/>
+                                    <span style={{ fontSize: '1.1rem', color: 'var(--color-primary)', fontWeight: 'bold' }}>{selectedSale.loteParcial}</span>
+                                    {(() => {
+                                        const match = selectedSale.loteParcial?.match(/-P(\d+)$/);
+                                        if (match) {
+                                            const buyerNum = match[1];
+                                            return (
+                                                <span style={{ 
+                                                    display: 'inline-block', 
+                                                    marginLeft: '10px', 
+                                                    padding: '3px 8px', 
+                                                    backgroundColor: '#E8F5E9', 
+                                                    color: 'var(--color-primary)', 
+                                                    borderRadius: 'var(--radius-sm)', 
+                                                    fontSize: '0.8rem', 
+                                                    fontWeight: 'bold',
+                                                    border: '1px solid var(--color-primary)',
+                                                    verticalAlign: 'middle'
+                                                }}>
+                                                    Parcial N° {buyerNum} (Comprador N° {buyerNum})
+                                                </span>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
+                                </p>
                                 
                                 {/* ATRIBUTOS ADICIONALES RECOMENDADOS */}
                                 <div style={{ backgroundColor: '#F4F7F5', padding: '15px', borderRadius: 'var(--radius-md)', marginTop: '10px' }}>
