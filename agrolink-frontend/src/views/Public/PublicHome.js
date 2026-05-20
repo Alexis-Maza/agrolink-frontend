@@ -712,11 +712,14 @@ function PublicHome() {
                 <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px', marginBottom: '40px' }}>
                     
                     {/* Columna Logo/Descripción */}
-                    <div>
-                        <h3 style={{ color: 'white', fontFamily: 'var(--font-titles)', fontSize: '1.6rem', margin: '0 0 15px 0' }}>
-                            Agro<span style={{ color: 'var(--color-secondary)' }}>Link</span>
-                        </h3>
-                        <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#cbd5e1' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <img src="/logo.png" alt="AgroLink Logo" style={{ width: '45px', height: '45px', objectFit: 'contain', backgroundColor: 'white', borderRadius: '50%', padding: '3px' }} />
+                            <h3 style={{ color: 'white', fontFamily: 'var(--font-titles)', fontSize: '1.6rem', margin: 0 }}>
+                                Agro<span style={{ color: 'var(--color-secondary)' }}>Link</span>
+                            </h3>
+                        </div>
+                        <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#cbd5e1', margin: 0 }}>
                             Digitalizando el agro comercio en Latinoamérica mediante preventas y trazabilidad de cultivos en tiempo real.
                         </p>
                     </div>
@@ -732,7 +735,7 @@ function PublicHome() {
                                     onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
                                     onMouseLeave={(e) => e.target.style.color = '#cbd5e1'}
                                 >
-                                    Quiénes Somos / Nosotros
+                                    Quiénes Somos
                                 </button>
                             </li>
                             <li>
@@ -773,7 +776,7 @@ function PublicHome() {
                                 <Link to="/register" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '0.95rem' }}
                                       onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
                                       onMouseLeave={(e) => e.target.style.color = '#cbd5e1'}>
-                                    Crear Cuenta Comprador / Agricultor
+                                    Crear Cuenta
                                 </Link>
                             </li>
                         </ul>

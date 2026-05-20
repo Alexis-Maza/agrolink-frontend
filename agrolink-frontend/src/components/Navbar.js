@@ -31,11 +31,8 @@ function Navbar({ onCartClick }) {
         }}>
 
             {/* LOGO */}
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="var(--color-primary)" />
-                    <path d="M12 4C7.58 4 4 7.58 4 12C4 14.11 4.81 16.03 6.13 17.47L17.47 6.13C16.03 4.81 14.11 4 12 4Z" fill="#81C784" />
-                </svg>
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+                <img src="/logo.png" alt="AgroLink Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
                 <span style={{
                     fontFamily: 'var(--font-titles)',
                     fontSize: '1.5rem',
