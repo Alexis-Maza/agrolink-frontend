@@ -224,8 +224,9 @@ function FarmerCatalog() {
                             {/* Columna Derecha: Comercialización y Etapas */}
                             <div>
                                 <h4 style={{ color: 'var(--color-secondary)', borderBottom: '1px dashed #ccc', paddingBottom: '5px', marginBottom: '15px' }}>Comercialización</h4>
-                                <p style={{ margin: '0 0 10px 0' }}><strong style={{ color: '#555' }}>Precio Base Unitario:</strong> <span style={{ color: 'var(--color-secondary)', fontWeight: 'bold', fontSize: '1.2rem' }}>S/ {selectedCrop.precio}</span></p>
-                                <p style={{ margin: '0 0 10px 0' }}><strong style={{ color: '#555' }}>Venta Mínima Permitida:</strong> <span style={{ color: '#333' }}>{selectedCrop.minimoVenta}</span></p>
+                                <p style={{ margin: '0 0 10px 0' }}><strong style={{ color: '#555' }}>Precio Unitario por Kg:</strong> <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>S/ {parseFloat(selectedCrop.precio).toFixed(2)}</span></p>
+                                <p style={{ margin: '0 0 10px 0' }}><strong style={{ color: '#555' }}>Valor Total del Lote:</strong> <span style={{ color: '#2E7D32', fontWeight: 'bold' }}>S/ {((parseFloat(selectedCrop.precio) || 0) * (selectedCrop.cantidadTotal.toLowerCase().includes('ton') ? (parseFloat(selectedCrop.cantidadTotal) * 1000) : (parseFloat(selectedCrop.cantidadTotal) || 0))).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></p>
+                                <p style={{ margin: '0 0 10px 0' }}><strong style={{ color: '#555' }}>Venta Mínima Permitida:</strong> <span style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>{selectedCrop.minimoVenta}</span></p>
 
                                 <h4 style={{ color: 'var(--color-secondary)', borderBottom: '1px dashed #ccc', paddingBottom: '5px', marginBottom: '15px', marginTop: '25px' }}>Ciclo de Vida (Días)</h4>
                                 <div style={{ backgroundColor: '#F8F9FA', padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid #eee' }}>

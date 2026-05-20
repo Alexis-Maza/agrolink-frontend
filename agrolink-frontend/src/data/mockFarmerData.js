@@ -16,8 +16,8 @@ export const initialCrops = [
         etapas: { germinacion: 15, crecimiento: 40, floracion: 20, maduracion: 25 },
         cantidadTotal: '15 Toneladas',
         cantidadDisponible: '15 Toneladas',
-        precio: '1200',
-        minimoVenta: '1 Tonelada',
+        precio: '1.80',
+        minimoVenta: '1000 Kg',
         imagen: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
         incidencia: false
     },
@@ -46,7 +46,7 @@ export const initialCrops = [
         etapas: { germinacion: 10, crecimiento: 30, floracion: 20, maduracion: 20 },
         cantidadTotal: '3 Toneladas',
         cantidadDisponible: '1.5 Toneladas',
-        precio: '12500',
+        precio: '18.50',
         minimoVenta: '500 Kg',
         imagen: 'https://images.unsplash.com/photo-1623517112001-f25ec1d318e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
         incidencia: false

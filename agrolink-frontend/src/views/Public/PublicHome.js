@@ -488,6 +488,37 @@ function PublicHome() {
                             </div>
                         )}
 
+                        {/* Ficha técnica comercial del Lote */}
+                        <div style={{ 
+                            backgroundColor: '#F1F8F5', 
+                            border: '1px solid #C8E6C9', 
+                            borderRadius: 'var(--radius-md)', 
+                            padding: '18px', 
+                            marginBottom: '25px',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                            gap: '15px'
+                        }}>
+                            <div>
+                                <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '5px' }}>Precio x Kg</span>
+                                <strong style={{ fontSize: '1.2rem', color: 'var(--color-primary)' }}>S/ {parseFloat(selectedCrop.precio).toFixed(2)}</strong>
+                            </div>
+                            <div>
+                                <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '5px' }}>Valor Total Lote</span>
+                                <strong style={{ fontSize: '1.15rem', color: '#2E7D32' }}>
+                                    S/ {((parseFloat(selectedCrop.precio) || 0) * (selectedCrop.cantidadTotal.toLowerCase().includes('ton') ? (parseFloat(selectedCrop.cantidadTotal) * 1000) : (parseFloat(selectedCrop.cantidadTotal) || 0))).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </strong>
+                            </div>
+                            <div>
+                                <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '5px' }}>Total Lote Declarado</span>
+                                <strong style={{ fontSize: '1.1rem', color: 'var(--color-text)' }}>{selectedCrop.cantidadTotal}</strong>
+                            </div>
+                            <div>
+                                <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '5px' }}>Compra Mínima</span>
+                                <strong style={{ fontSize: '1.1rem', color: 'var(--color-secondary)' }}>{selectedCrop.minimoVenta}</strong>
+                            </div>
+                        </div>
+
                         <h4 style={{ color: 'var(--color-text)', marginBottom: '15px', fontSize: '1.1rem' }}>Configurar Compra de la Preventa</h4>
                         
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
