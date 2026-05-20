@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 
 import BuyerCatalog from './BuyerCatalog';
@@ -6,6 +6,7 @@ import BuyerCart from './BuyerCart';
 import BuyerPurchases from './BuyerPurchases';
 import BuyerNotifications from './BuyerNotifications';
 import BuyerProfile from './BuyerProfile';
+import { initialNotifications } from '../../data/mockBuyerData';
 
 function BuyerHome() {
     const location = useLocation();
@@ -13,6 +14,31 @@ function BuyerHome() {
 
     // Estado global para ocultar productos ya añadidos al carrito
     const [acquiredIds, setAcquiredIds] = useState([]);
+    const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+    useEffect(() => {
+        const checkNotifications = () => {
+            const saved = localStorage.getItem('agrolink_notifications');
+            let notifs = [];
+            if (saved) {
+                try {
+                    notifs = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Error reading notifications", e);
+                }
+            } else {
+                notifs = initialNotifications;
+            }
+            const count = notifs.filter(n => !n.leida).length;
+            setUnreadNotificationsCount(count);
+        };
+
+        checkNotifications();
+        window.addEventListener('notificationsUpdated', checkNotifications);
+        return () => {
+            window.removeEventListener('notificationsUpdated', checkNotifications);
+        };
+    }, []);
 
     const addAcquiredId = (id) => {
         if (!acquiredIds.includes(id)) {
@@ -40,7 +66,22 @@ function BuyerHome() {
                     <Link to="/buyer" style={linkStyle('/buyer')}>🌿 Catálogo</Link>
                     <Link to="/buyer/cart" style={linkStyle('/buyer/cart')}>🛒 Mi Carrito</Link>
                     <Link to="/buyer/purchases" style={linkStyle('/buyer/purchases')}>📦 Mis Compras</Link>
-                    <Link to="/buyer/notifications" style={linkStyle('/buyer/notifications')}>🔔 Notificaciones</Link>
+                    <Link to="/buyer/notifications" style={{ ...linkStyle('/buyer/notifications'), display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span>🔔 Notificaciones</span>
+                        {unreadNotificationsCount > 0 && (
+                            <span style={{ 
+                                backgroundColor: '#d32f2f', 
+                                color: 'white', 
+                                fontSize: '0.75rem', 
+                                padding: '2px 8px', 
+                                borderRadius: '10px', 
+                                fontWeight: 'bold',
+                                marginRight: '15px'
+                            }}>
+                                {unreadNotificationsCount}
+                            </span>
+                        )}
+                    </Link>
                     <Link to="/buyer/profile" style={linkStyle('/buyer/profile')}>👤 Mi Perfil</Link>
                 </div>
                 <div style={{ padding: '20px', borderTop: '1px solid #eee' }}>
