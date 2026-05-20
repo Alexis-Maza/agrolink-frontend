@@ -2,6 +2,11 @@ import React, { useState, useRef } from 'react';
 import { initialCrops } from '../../data/mockFarmerData';
 
 // --- Funciones Auxiliares ---
+const parseKgValue = (valStr) => {
+    if (!valStr) return '';
+    return valStr.replace(/[^0-9]/g, '');
+};
+
 const addDaysToDate = (dateStr, days) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -98,7 +103,7 @@ function FarmerProducts() {
             unidad: uni,
             fechaSiembra: crop.fechaSiembra,
             precio: crop.precio,
-            minimoVenta: crop.minimoVenta || '',
+            minimoVenta: parseKgValue(crop.minimoVenta),
             etapas: { ...crop.etapas }
         });
         setImagePreview(crop.imagen);
@@ -122,12 +127,29 @@ function FarmerProducts() {
     const handleSubmitForm = (e) => {
         e.preventDefault();
         
+        // Formatear la cantidad mínima con "Kg"
+        const formattedMinimoVenta = formData.minimoVenta ? `${formData.minimoVenta} Kg` : '0 Kg';
+
         if (formMode === 'create') {
+            const newCrop = {
+                id: crops.length + 1,
+                nombre: formData.nombre,
+                variedad: formData.variedad,
+                lote: formData.lote,
+                hectareas: formData.hectareas,
+                cantidadTotal: `${formData.cantidadEstimada} ${formData.unidad}`,
+                cantidadDisponible: `${formData.cantidadEstimada} ${formData.unidad}`,
+                fechaSiembra: formData.fechaSiembra,
+                precio: formData.precio,
+                minimoVenta: formattedMinimoVenta,
+                etapas: { ...formData.etapas },
+                imagen: imagePreview || 'https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&q=80&w=600',
+                incidencia: false
+            };
+            setCrops([newCrop, ...crops]);
             alert('¡Cultivo registrado exitosamente!');
-            // Aquí agregarías el nuevo cultivo al array `crops` en una app real
         } else {
             alert('¡Datos estructurales del cultivo actualizados!');
-            // Lógica de update en el array
             const updated = crops.map(c => {
                 if (c.id === editCropId) {
                     return {
@@ -136,8 +158,8 @@ function FarmerProducts() {
                         variedad: formData.variedad,
                         lote: formData.lote,
                         precio: formData.precio,
+                        minimoVenta: formattedMinimoVenta,
                         cantidadTotal: `${formData.cantidadEstimada} ${formData.unidad}`,
-                        // No actualizamos 'cantidadDisponible' directamente sin lógica de ventas
                     };
                 }
                 return c;
@@ -322,28 +344,31 @@ function FarmerProducts() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Nombre del Cultivo</label>
-                                    <input type="text" name="nombre" required disabled={hasSales} value={formData.nombre} onChange={handleInputChange} style={inputStyle} />
+                                    <input type="text" name="nombre" required disabled={hasSales} value={formData.nombre} onChange={handleInputChange} style={inputStyle} placeholder="Ej. Maíz Amarillo Duro, Café, Mango Kent" />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Variedad</label>
-                                    <input type="text" name="variedad" disabled={hasSales} value={formData.variedad} onChange={handleInputChange} style={inputStyle} />
+                                    <input type="text" name="variedad" disabled={hasSales} value={formData.variedad} onChange={handleInputChange} style={inputStyle} placeholder="Ej. INIA 619, Caturra, CCN-51" />
                                 </div>
                             </div>
 
                             <h4 style={{ color: 'var(--color-secondary)', borderBottom: '1px dashed #ccc', paddingBottom: '8px', marginBottom: '20px' }}>2. Producción</h4>
-                            <div style={{ marginBottom: '15px' }}>
+                            <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Código de Lote Principal</label>
-                                <input type="text" name="lote" required disabled={hasSales} value={formData.lote} onChange={handleInputChange} style={inputStyle} />
+                                <input type="text" name="lote" required disabled={hasSales} value={formData.lote} onChange={handleInputChange} style={inputStyle} placeholder="Ej. LOTE-MZD-2025" />
+                                <span style={{ display: 'block', fontSize: '0.82rem', color: '#666', marginTop: '6px', lineHeight: '1.4' }}>
+                                    💡 <strong>Sugerencia de formato:</strong> LOTE-[ABREVIATURA]-[AÑO] para organizar tu catálogo de forma profesional (ej: <code>LOTE-MZD-2025</code> o <code>LOTE-CAF-2026</code>).
+                                </span>
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '30px' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Hectáreas Sembradas</label>
-                                    <input type="number" name="hectareas" min="0" step="0.1" required disabled={hasSales} value={formData.hectareas} onChange={handleInputChange} style={inputStyle} />
+                                    <input type="number" name="hectareas" min="0" step="0.1" required disabled={hasSales} value={formData.hectareas} onChange={handleInputChange} style={inputStyle} placeholder="Ej. 5" />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Cantidad Estimada</label>
                                     <div style={{ display: 'flex' }}>
-                                        <input type="number" name="cantidadEstimada" min="0" required disabled={hasSales} value={formData.cantidadEstimada} onChange={handleInputChange} style={{ ...inputStyle, width: '60%', borderRadius: 'var(--radius-md) 0 0 var(--radius-md)', borderRight: 'none' }} />
+                                        <input type="number" name="cantidadEstimada" min="0" required disabled={hasSales} value={formData.cantidadEstimada} onChange={handleInputChange} style={{ ...inputStyle, width: '60%', borderRadius: 'var(--radius-md) 0 0 var(--radius-md)', borderRight: 'none' }} placeholder="Ej. 15" />
                                         <select name="unidad" disabled={hasSales} value={formData.unidad} onChange={handleInputChange} style={{ ...inputStyle, width: '40%', borderRadius: '0 var(--radius-md) var(--radius-md) 0' }}>
                                             <option value="Kg">Kg</option>
                                             <option value="Toneladas">Ton</option>
@@ -382,12 +407,18 @@ function FarmerProducts() {
                             <h4 style={{ color: 'var(--color-secondary)', borderBottom: '1px dashed #ccc', paddingBottom: '8px', marginBottom: '20px' }}>5. Comercialización</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px' }}>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Precio Unitario (S/)</label>
-                                    <input type="number" name="precio" min="0" step="0.01" required value={formData.precio} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc' }} />
+                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Precio Unitario x 1 Kg (S/)</label>
+                                    <input type="number" name="precio" min="0.01" step="0.01" required value={formData.precio} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc' }} placeholder="Ej. 4.50" />
+                                    <span style={{ display: 'block', fontSize: '0.82rem', color: '#666', marginTop: '6px' }}>
+                                        Precio de venta por cada kilogramo.
+                                    </span>
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Venta Mínima</label>
-                                    <input type="text" name="minimoVenta" required value={formData.minimoVenta} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc' }} />
+                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Venta Mínima (Kg)</label>
+                                    <input type="number" name="minimoVenta" min="1" step="1" required value={formData.minimoVenta} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc' }} placeholder="Ej. 50" />
+                                    <span style={{ display: 'block', fontSize: '0.82rem', color: '#666', marginTop: '6px' }}>
+                                        Cantidad mínima a comprar (en Kilos).
+                                    </span>
                                 </div>
                             </div>
 
