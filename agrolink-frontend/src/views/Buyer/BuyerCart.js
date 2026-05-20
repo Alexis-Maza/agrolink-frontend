@@ -62,9 +62,13 @@ function BuyerCart() {
                 loteParcial: item.loteParcial || `LP-${Math.floor(Math.random() * 1000)}`,
                 agricultor: item.agricultor,
                 adelanto: item.porcentajeAdelanto,
+                precio: item.precio,
+                montoTotal: item.montoTotal,
                 montoAdelanto: `S/ ${(item.montoTotal * (item.porcentajeAdelanto / 100)).toFixed(2)}`,
                 montoPendiente: `S/ ${(item.montoTotal * ((100 - item.porcentajeAdelanto) / 100)).toFixed(2)}`,
-                direccionEntrega: item.direccionEntrega || 'Almacén Av. Industrial 1250, Callao'
+                direccionEntrega: item.direccionEntrega || 'Almacén Av. Industrial 1250, Callao',
+                metodoPago: item.metodoPago,
+                detallesProducto: item.detallesProducto || null
             })),
             total: `S/ ${summary.total.toFixed(2)}`
         };

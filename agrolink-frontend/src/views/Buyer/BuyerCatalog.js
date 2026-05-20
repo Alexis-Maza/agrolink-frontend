@@ -166,7 +166,19 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             direccionEntrega: purchaseData.direccionEntrega,
             seleccionado: true,
             imagen: selectedCrop.imagen,
-            agricultor: selectedCrop.agricultor
+            agricultor: selectedCrop.agricultor,
+            // Snapshot del cultivo en el momento de la compra
+            detallesProducto: {
+                variedad: selectedCrop.variedad || 'Estándar',
+                hectareas: selectedCrop.hectareas,
+                fechaSiembra: selectedCrop.fechaSiembra,
+                cantidadTotal: selectedCrop.cantidadTotal,
+                cantidadDisponible: selectedCrop.cantidadDisponible,
+                minimoVenta: selectedCrop.minimoVenta,
+                certificaciones: selectedCrop.certificaciones || [],
+                incidencia: selectedCrop.incidencia || null,
+                etapas: selectedCrop.etapas || {}
+            }
         };
 
         setCartItems([...cartItems, newItem]);
