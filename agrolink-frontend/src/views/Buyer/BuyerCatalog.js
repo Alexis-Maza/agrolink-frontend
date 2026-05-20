@@ -68,11 +68,11 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         return "Almacén Av. Industrial 1250, Callao";
     };
 
-    const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: '', direccionEntrega: '', fechaEntregaEstimada: '' });
+    const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: 0, direccionEntrega: '', fechaEntregaEstimada: '' });
 
     const handleCloseModal = () => {
         setSelectedCrop(null);
-        setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: '', direccionEntrega: '', fechaEntregaEstimada: '' });
+        setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: 0, direccionEntrega: '', fechaEntregaEstimada: '' });
     };
 
     const normalizeText = (str) => {
@@ -719,23 +719,22 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Porcentaje de Adelanto (%)</label>
                                 <select 
                                     value={purchaseData.porcentajeAdelanto} 
-                                    onChange={(e) => setPurchaseData({ ...purchaseData, porcentajeAdelanto: e.target.value })} 
+                                    onChange={(e) => setPurchaseData({ ...purchaseData, porcentajeAdelanto: parseInt(e.target.value) || 0 })} 
                                     style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: 'white', boxSizing: 'border-box' }}
                                 >
-                                    <option value="">-- Seleccionar Adelanto --</option>
-                                    <option value="0">Sin Adelanto (Pago 100% al entregar)</option>
-                                    <option value="30">30% Adelanto (Garantía estándar)</option>
-                                    <option value="50">50% Adelanto (Garantía prioritaria)</option>
+                                    <option value={0}>Sin Adelanto (Pago 100% al entregar)</option>
+                                    <option value={30}>30% Adelanto (Garantía estándar)</option>
+                                    <option value={50}>50% Adelanto (Garantía prioritaria)</option>
                                 </select>
                             </div>
                         </div>
 
-                        {purchaseData.cantidad > 0 && purchaseData.porcentajeAdelanto !== '' && (
+                        {purchaseData.cantidad > 0 && (
                             <div style={{ backgroundColor: '#F4F7F5', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid #e0e0e0', marginBottom: '25px' }}>
                                 <h4 style={{ margin: '0 0 15px 0', color: 'var(--color-primary)' }}>Resumen Estimado de la Preventa</h4>
                                 <p style={{ margin: '0 0 8px 0' }}>Monto Total: <strong style={{ fontSize: '1.1rem' }}>S/ {(parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)).toFixed(2)}</strong></p>
-                                <p style={{ margin: '0 0 8px 0', color: '#2E7D32' }}>Adelanto a pagar ahora ({purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * (parseInt(purchaseData.porcentajeAdelanto) / 100)).toFixed(2)}</strong></p>
-                                <p style={{ margin: 0, color: '#d32f2f' }}>Contraentrega ({100 - parseInt(purchaseData.porcentajeAdelanto)}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * ((100 - parseInt(purchaseData.porcentajeAdelanto)) / 100)).toFixed(2)}</strong></p>
+                                <p style={{ margin: '0 0 8px 0', color: '#2E7D32' }}>Adelanto a pagar ahora ({purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * (purchaseData.porcentajeAdelanto / 100)).toFixed(2)}</strong></p>
+                                <p style={{ margin: 0, color: '#d32f2f' }}>Contraentrega ({100 - purchaseData.porcentajeAdelanto}%): <strong>S/ {((parseFloat(purchaseData.cantidad) * parseFloat(selectedCrop.precio)) * ((100 - purchaseData.porcentajeAdelanto) / 100)).toFixed(2)}</strong></p>
                             </div>
                         )}
 
