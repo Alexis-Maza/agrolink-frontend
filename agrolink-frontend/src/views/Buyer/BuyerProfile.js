@@ -3,7 +3,17 @@ import { initialBuyerProfile } from '../../data/mockBuyerData';
 
 function BuyerProfile() {
     const fileInputRef = useRef(null);
-    const [profileData, setProfileData] = useState(initialBuyerProfile);
+    const [profileData, setProfileData] = useState(() => {
+        const saved = localStorage.getItem('agrolink_buyer_profile');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("Error reading profile from localStorage", e);
+            }
+        }
+        return initialBuyerProfile;
+    });
     const [avatarPreview, setAvatarPreview] = useState(null);
     
     // Estados para contraseña
@@ -27,6 +37,7 @@ function BuyerProfile() {
     
     const handleProfileSubmit = (e) => { 
         e.preventDefault(); 
+        localStorage.setItem('agrolink_buyer_profile', JSON.stringify(profileData));
         alert("Perfil actualizado correctamente"); 
     };
 

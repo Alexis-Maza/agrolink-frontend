@@ -11,8 +11,8 @@ function BuyerCart() {
             }
         }
         return [
-            { id: 1, cultivoId: 'CULT-001', nombre: 'Palta Hass', lote: 'L-001', cantidad: '500', precio: 8.50, loteParcial: 'LP-001A', metodoPago: 'Transferencia', porcentajeAdelanto: 30, montoTotal: 4250.00, seleccionado: true, imagen: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80', agricultor: 'Juan Pérez' },
-            { id: 2, cultivoId: 'CULT-002', nombre: 'Mandarina', lote: 'L-002', cantidad: '1000', precio: 3.20, loteParcial: 'LP-002A', metodoPago: 'Crédito', porcentajeAdelanto: 50, montoTotal: 3200.00, seleccionado: false, imagen: 'https://images.unsplash.com/photo-1582281298055-e25b84a1e0e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80', agricultor: 'María Gómez' }
+            { id: 1, cultivoId: 'CULT-001', nombre: 'Palta Hass', lote: 'L-001', cantidad: '500', precio: 8.50, loteParcial: 'LP-001A', metodoPago: 'Transferencia', porcentajeAdelanto: 30, montoTotal: 4250.00, seleccionado: true, imagen: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80', agricultor: 'Juan Pérez', direccionEntrega: 'Almacén Av. Industrial 1250, Callao' },
+            { id: 2, cultivoId: 'CULT-002', nombre: 'Mandarina', lote: 'L-002', cantidad: '1000', precio: 3.20, loteParcial: 'LP-002A', metodoPago: 'Crédito', porcentajeAdelanto: 50, montoTotal: 3200.00, seleccionado: false, imagen: 'https://images.unsplash.com/photo-1582281298055-e25b84a1e0e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80', agricultor: 'María Gómez', direccionEntrega: 'Almacén Av. Industrial 1250, Callao' }
         ];
     });
 
@@ -42,13 +42,18 @@ function BuyerCart() {
 
         // Guardar pedido en localStorage para 'BuyerPurchases.js'
         const savedOrders = JSON.parse(localStorage.getItem('agrolink_orders') || '[]');
+
+        // Determinar dirección de la cabecera: una sola si todos coinciden, "Múltiples destinos" si varían
+        const uniqueAddresses = [...new Set(itemsSeleccionados.map(i => i.direccionEntrega || 'Sin especificar'))];
+        const headerAddress = uniqueAddresses.length === 1 ? uniqueAddresses[0] : 'Múltiples destinos (ver en lista de productos)';
+
         const newOrder = {
             id: summary.id,
             fecha: summary.fecha,
             fechaEntregaEstimada: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString('es-PE'),
             estado: 'Pendiente',
             metodoPago: itemsSeleccionados[0].metodoPago,
-            direccionEntrega: 'Almacén Principal (Ubicación en Perfil)',
+            direccionEntrega: headerAddress,
             productos: itemsSeleccionados.map(item => ({
                 cultivoId: item.cultivoId,
                 nombre: item.nombre,
@@ -58,7 +63,8 @@ function BuyerCart() {
                 agricultor: item.agricultor,
                 adelanto: item.porcentajeAdelanto,
                 montoAdelanto: `S/ ${(item.montoTotal * (item.porcentajeAdelanto / 100)).toFixed(2)}`,
-                montoPendiente: `S/ ${(item.montoTotal * ((100 - item.porcentajeAdelanto) / 100)).toFixed(2)}`
+                montoPendiente: `S/ ${(item.montoTotal * ((100 - item.porcentajeAdelanto) / 100)).toFixed(2)}`,
+                direccionEntrega: item.direccionEntrega || 'Almacén Av. Industrial 1250, Callao'
             })),
             total: `S/ ${summary.total.toFixed(2)}`
         };
@@ -92,6 +98,7 @@ function BuyerCart() {
                                         <span style={{ fontSize: '0.85rem', color: '#666', display: 'block', marginBottom: '2px' }}>🌱 Agricultor: <strong>{item.agricultor}</strong></span>
                                         <span style={{ fontSize: '0.85rem', color: '#666', display: 'block', marginBottom: '2px' }}>📦 Lote Origen: {item.lote} | Mi Lote: {item.loteParcial}</span>
                                         <span style={{ fontSize: '0.85rem', color: 'var(--color-secondary)', display: 'block', fontWeight: 'bold' }}>💳 Pago: {item.metodoPago} | Adelanto: {item.porcentajeAdelanto}%</span>
+                                        <span style={{ fontSize: '0.85rem', color: '#555', display: 'block', marginTop: '4px' }}>📍 Entrega: <strong>{item.direccionEntrega || 'Almacén Av. Industrial 1250, Callao'}</strong></span>
                                     </div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>

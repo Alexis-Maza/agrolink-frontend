@@ -108,7 +108,8 @@ function BuyerPurchases() {
                                         <div>
                                             <h4 style={{ margin: '0 0 5px 0', color: 'var(--color-text)', fontSize: '1.1rem' }}>{prod.nombre}</h4>
                                             <span style={{ fontSize: '0.85rem', color: '#666' }}>🌱 Agricultor: <strong>{prod.agricultor}</strong></span><br/>
-                                            <span style={{ fontSize: '0.85rem', color: '#888' }}>Código Lote: {prod.loteParcial}</span>
+                                            <span style={{ fontSize: '0.85rem', color: '#888' }}>Código Lote: {prod.loteParcial}</span><br/>
+                                            <span style={{ fontSize: '0.85rem', color: '#555', marginTop: '3px', display: 'inline-block' }}>📍 Destino: <strong style={{ color: 'var(--color-text)' }}>{prod.direccionEntrega || 'Almacén Av. Industrial 1250, Callao'}</strong></span>
                                         </div>
                                     </div>
                                     {prod.adelanto > 0 && selectedOrder.estado !== 'Cancelado' && (

@@ -57,11 +57,22 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         setCurrentPage(1);
     }, [searchTerm, selectedCertifications]);
 
-    const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: '' });
+    const getProfileAddress = () => {
+        const saved = localStorage.getItem('agrolink_buyer_profile');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.direccionEntrega) return data.direccionEntrega;
+            } catch (e) {}
+        }
+        return "Almacén Av. Industrial 1250, Callao";
+    };
+
+    const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: '', direccionEntrega: '' });
 
     const handleCloseModal = () => {
         setSelectedCrop(null);
-        setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: '' });
+        setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: '', direccionEntrega: '' });
     };
 
     const normalizeText = (str) => {
@@ -99,6 +110,10 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         }
         if (purchaseData.porcentajeAdelanto === '') {
             alert('Por favor selecciona un porcentaje de adelanto.');
+            return;
+        }
+        if (!purchaseData.direccionEntrega || !purchaseData.direccionEntrega.trim()) {
+            alert('Por favor ingresa una dirección de entrega válida.');
             return;
         }
 
@@ -148,6 +163,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             metodoPago: purchaseData.metodoPago,
             porcentajeAdelanto: parseInt(purchaseData.porcentajeAdelanto),
             montoTotal: total,
+            direccionEntrega: purchaseData.direccionEntrega,
             seleccionado: true,
             imagen: selectedCrop.imagen,
             agricultor: selectedCrop.agricultor
@@ -421,7 +437,10 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                                         <strong style={{ color: 'var(--color-secondary)', fontSize: '1.15rem' }}>S/ {crop.precio.toFixed(2)} / Kg</strong>
                                     </div>
                                     <button 
-                                        onClick={() => setSelectedCrop(crop)} 
+                                        onClick={() => {
+                                            setSelectedCrop(crop);
+                                            setPurchaseData(prev => ({ ...prev, direccionEntrega: getProfileAddress() }));
+                                        }} 
                                         style={{ 
                                             width: '100%', 
                                             backgroundColor: 'var(--color-primary)', 
@@ -640,6 +659,18 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                                 placeholder={`Mínimo: ${selectedCrop.minimoVenta}`}
                                 value={purchaseData.cantidad} 
                                 onChange={(e) => setPurchaseData({ ...purchaseData, cantidad: e.target.value })} 
+                                style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Dirección de Entrega para este Producto</label>
+                            <input 
+                                type="text" 
+                                name="direccionEntrega" 
+                                placeholder="Ej: Almacén Principal, Av. Industrial 1250, Callao"
+                                value={purchaseData.direccionEntrega} 
+                                onChange={(e) => setPurchaseData({ ...purchaseData, direccionEntrega: e.target.value })} 
                                 style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
                             />
                         </div>
