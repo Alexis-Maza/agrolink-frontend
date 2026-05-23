@@ -1,85 +1,76 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { register } from '../../api/authService';
 
 function Register() {
     const navigate = useNavigate();
-    
     const [formData, setFormData] = useState({
-        nombre: '',
+        nombres: '',
         apellidoPaterno: '',
         apellidoMaterno: '',
         email: '',
-        fechaNacimiento: '',
         password: '',
         confirmPassword: '',
         rol: ''
     });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
+    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const handleRoleSelect = (selectedRole) => {
-        setFormData({
-            ...formData,
-            rol: selectedRole
-        });
-    };
+    const handleRoleSelect = (selectedRole) => setFormData({ ...formData, rol: selectedRole });
 
-    // Al enviar el formulario (Paso 1)
-    const handleRegisterSubmit = (e) => {
+    const handleRegisterSubmit = async (e) => {
         e.preventDefault();
+        setError('');
 
         if (formData.password !== formData.confirmPassword) {
-            alert("Las contraseñas no coinciden. Por favor, verifícalas.");
+            setError('Las contraseñas no coinciden.');
             return;
         }
-
         if (!formData.rol) {
-            alert("Por favor, selecciona si deseas ser Agricultor o Comprador.");
+            setError('Por favor selecciona si eres Agricultor o Comprador.');
             return;
         }
 
-        // Guardamos los datos de registro pendientes en localStorage
-        localStorage.setItem('agrolink_pending_user', JSON.stringify(formData));
-        
-        // Redirigimos al usuario a la vista de verificación de correo
-        navigate('/verify-email');
+        setLoading(true);
+        try {
+            await register({
+                nombres: formData.nombres,
+                apellidoPaterno: formData.apellidoPaterno,
+                apellidoMaterno: formData.apellidoMaterno,
+                email: formData.email,
+                password: formData.password,
+                rol: formData.rol
+            });
+
+            // Guardar email para usarlo en la verificación
+            localStorage.setItem('agrolink_pending_email', formData.email);
+            navigate('/verify-email');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Error al registrarse. Intenta de nuevo.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            backgroundColor: 'var(--color-bg)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '60px 20px'
-        }}>
-            <div style={{
-                backgroundColor: 'white',
-                padding: '45px',
-                borderRadius: 'var(--radius-lg)',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
-                width: '100%',
-                maxWidth: '580px',
-                position: 'relative'
-            }}>
+        <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 20px' }}>
+            <div style={{ backgroundColor: 'white', padding: '45px', borderRadius: 'var(--radius-lg)', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '580px' }}>
 
-                <h2 style={{ textAlign: 'center', color: 'var(--color-primary)', marginBottom: '10px', fontFamily: 'var(--font-titles)', fontSize: '2.2rem' }}>
-                    Crea tu Cuenta en AgroLink
-                </h2>
-                <p style={{ textAlign: 'center', color: '#666', marginBottom: '35px', fontSize: '1.05rem' }}>
-                    Únete al mercado de futuros agrícolas más transparente.
-                </p>
+                <h2 style={{ textAlign: 'center', color: 'var(--color-primary)', marginBottom: '10px', fontFamily: 'var(--font-titles)', fontSize: '2.2rem' }}>Crea tu Cuenta en AgroLink</h2>
+                <p style={{ textAlign: 'center', color: '#666', marginBottom: '35px', fontSize: '1.05rem' }}>Únete al mercado de futuros agrícolas más transparente.</p>
+
+                {error && (
+                    <div style={{ backgroundColor: '#FFEBEE', color: '#d32f2f', padding: '12px', borderRadius: 'var(--radius-md)', marginBottom: '20px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleRegisterSubmit}>
                     <div style={{ marginBottom: '25px' }}>
                         <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Nombre</label>
-                        <input type="text" name="nombre" required value={formData.nombre} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
+                        <input type="text" name="nombres" required value={formData.nombres} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '25px' }}>
@@ -93,15 +84,9 @@ function Register() {
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1.2fr', gap: '20px', marginBottom: '25px' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Correo Electrónico</label>
-                            <input type="email" name="email" required value={formData.email} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Fecha de Nacimiento</label>
-                            <input type="date" name="fechaNacimiento" required value={formData.fechaNacimiento} onChange={handleChange} style={{ width: '100%', padding: '15px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', fontFamily: 'inherit' }} />
-                        </div>
+                    <div style={{ marginBottom: '25px' }}>
+                        <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Correo Electrónico</label>
+                        <input type="email" name="email" required value={formData.email} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '35px' }}>
@@ -118,45 +103,25 @@ function Register() {
                     <div style={{ marginBottom: '35px' }}>
                         <label style={{ display: 'block', marginBottom: '15px', fontWeight: 'bold', textAlign: 'center', color: '#333', fontSize: '1.05rem' }}>¿Cuál será tu rol en la plataforma?</label>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-
-                            <button type="button" onClick={() => handleRoleSelect('FARMER')} style={{
-                                padding: '18px 15px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem',
-                                border: formData.rol === 'FARMER' ? '2px solid var(--color-primary)' : '1px solid #ccc',
-                                backgroundColor: formData.rol === 'FARMER' ? '#E8F5E9' : 'white',
-                                color: formData.rol === 'FARMER' ? 'var(--color-primary)' : '#555',
-                                transition: 'all 0.2s ease', boxShadow: formData.rol === 'FARMER' ? '0 4px 8px rgba(46,125,50,0.15)' : 'none'
-                            }}>
-                                🌾 Soy Agricultor <br />
-                                <span style={{ fontSize: '0.75rem', fontWeight: 'normal', display: 'block', marginTop: '6px', color: formData.rol === 'FARMER' ? 'var(--color-primary)' : '#777' }}>Quiero publicar mis cultivos</span>
+                            <button type="button" onClick={() => handleRoleSelect('AGRICULTOR')} style={{ padding: '18px 15px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', border: formData.rol === 'AGRICULTOR' ? '2px solid var(--color-primary)' : '1px solid #ccc', backgroundColor: formData.rol === 'AGRICULTOR' ? '#E8F5E9' : 'white', color: formData.rol === 'AGRICULTOR' ? 'var(--color-primary)' : '#555', transition: 'all 0.2s ease' }}>
+                                🌾 Soy Agricultor<br />
+                                <span style={{ fontSize: '0.75rem', fontWeight: 'normal', display: 'block', marginTop: '6px' }}>Quiero publicar mis cultivos</span>
                             </button>
-
-                            <button type="button" onClick={() => handleRoleSelect('BUYER')} style={{
-                                padding: '18px 15px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem',
-                                border: formData.rol === 'BUYER' ? '2px solid var(--color-secondary)' : '1px solid #ccc',
-                                backgroundColor: formData.rol === 'BUYER' ? '#FFF3E0' : 'white',
-                                color: formData.rol === 'BUYER' ? 'var(--color-secondary)' : '#555',
-                                transition: 'all 0.2s ease', boxShadow: formData.rol === 'BUYER' ? '0 4px 8px rgba(255,152,0,0.15)' : 'none'
-                            }}>
-                                🛒 Soy Comprador <br />
-                                <span style={{ fontSize: '0.75rem', fontWeight: 'normal', display: 'block', marginTop: '6px', color: formData.rol === 'BUYER' ? 'var(--color-secondary)' : '#777' }}>Quiero comprar de antemano</span>
+                            <button type="button" onClick={() => handleRoleSelect('COMPRADOR')} style={{ padding: '18px 15px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', border: formData.rol === 'COMPRADOR' ? '2px solid var(--color-secondary)' : '1px solid #ccc', backgroundColor: formData.rol === 'COMPRADOR' ? '#FFF3E0' : 'white', color: formData.rol === 'COMPRADOR' ? 'var(--color-secondary)' : '#555', transition: 'all 0.2s ease' }}>
+                                🛒 Soy Comprador<br />
+                                <span style={{ fontSize: '0.75rem', fontWeight: 'normal', display: 'block', marginTop: '6px' }}>Quiero comprar de antemano</span>
                             </button>
-
                         </div>
                     </div>
 
-                    <button type="submit" style={{
-                        width: '100%', padding: '15px', backgroundColor: 'var(--color-primary)', color: 'white', border: 'none',
-                        borderRadius: 'var(--radius-md)', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer',
-                        boxShadow: '0 4px 10px rgba(46, 125, 50, 0.2)', marginBottom: '25px', transition: 'background-color 0.2s'
-                    }}>
-                        Registrarse
+                    <button type="submit" disabled={loading} style={{ width: '100%', padding: '15px', backgroundColor: loading ? '#ccc' : 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '1.1rem', fontWeight: 'bold', cursor: loading ? 'default' : 'pointer', marginBottom: '25px' }}>
+                        {loading ? '⏳ Registrando...' : 'Registrarse'}
                     </button>
 
                     <p style={{ textAlign: 'center', margin: 0, color: '#666', fontSize: '0.95rem' }}>
                         ¿Ya tienes una cuenta? <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: 'bold', textDecoration: 'none' }}>Inicia Sesión</Link>
                     </p>
                 </form>
-
             </div>
         </div>
     );
