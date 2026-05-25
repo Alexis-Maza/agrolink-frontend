@@ -28,4 +28,16 @@ api.interceptors.response.use(
     }
 );
 
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        console.error('❌ Error interceptado:', error.response?.status, error.response?.data);
+        if (error.response?.status === 403 || error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default api;

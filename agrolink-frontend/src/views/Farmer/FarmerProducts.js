@@ -1,12 +1,12 @@
-import React, { useState, useRef } from 'react';
-import { initialCrops } from '../../data/mockFarmerData';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+    listarCultivos,
+    registrarCultivo,
+    actualizarCultivo,
+    eliminarCultivo
+} from '../../api/agricultorService';
 
 // --- Funciones Auxiliares ---
-const parseKgValue = (valStr) => {
-    if (!valStr) return '';
-    return valStr.replace(/[^0-9]/g, '');
-};
-
 const addDaysToDate = (dateStr, days) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -19,50 +19,64 @@ const addDaysToDate = (dateStr, days) => {
 const formatDateDisplay = (dateStr) => {
     if (!dateStr) return '---';
     const parts = dateStr.split('-');
-    if(parts.length !== 3) return dateStr;
+    if (parts.length !== 3) return dateStr;
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
 };
 
-const calculateCurrentStage = (fechaSiembraStr, etapasObj) => {
-    if (!fechaSiembraStr || !etapasObj) return { stage: 'Sin Iniciar', progress: 0, isCosechado: false, daysLeft: 0 };
-    
-    const start = new Date(fechaSiembraStr);
-    start.setMinutes(start.getMinutes() + start.getTimezoneOffset());
-    
+// Mapear estadoCultivo del backend a datos visuales del frontend
+const mapearEstadoVisual = (estadoCultivo, diasTotales, fechaSiembra) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const daysElapsed = Math.floor((today - start) / (1000 * 60 * 60 * 24));
-    
-    const g = parseInt(etapasObj.germinacion || 0, 10);
-    const c = parseInt(etapasObj.crecimiento || 0, 10);
-    const f = parseInt(etapasObj.floracion || 0, 10);
-    const m = parseInt(etapasObj.maduracion || 0, 10);
-    const totalDays = g + c + f + m;
-    
-    if (daysElapsed < 0) return { stage: 'Programado', progress: 0, isCosechado: false, daysLeft: totalDays };
-    if (daysElapsed >= totalDays) return { stage: 'Cosechado / Disponible', progress: 100, isCosechado: true, daysLeft: 0 };
-    
+    const start = new Date(fechaSiembra);
+    start.setMinutes(start.getMinutes() + start.getTimezoneOffset());
+    const daysElapsed = Math.max(0, Math.floor((today - start) / (1000 * 60 * 60 * 24)));
+    const totalDays = diasTotales || 1;
     const progress = Math.min(100, Math.round((daysElapsed / totalDays) * 100));
-    const daysLeft = totalDays - daysElapsed;
-    
-    let currentStage = '';
-    if (daysElapsed < g) currentStage = 'Germinación';
-    else if (daysElapsed < g + c) currentStage = 'Crecimiento Vegetativo';
-    else if (daysElapsed < g + c + f) currentStage = 'Floración';
-    else currentStage = 'Maduración';
-    
-    return { stage: currentStage, progress, isCosechado: false, daysLeft };
+    const daysLeft = Math.max(0, totalDays - daysElapsed);
+
+    if (estadoCultivo === 'Listo para cosechar') {
+        return { stage: 'Cosechado / Disponible', progress: 100, isCosechado: true, daysLeft: 0 };
+    } else if (estadoCultivo === 'En crecimiento') {
+        return { stage: 'En Crecimiento', progress, isCosechado: false, daysLeft };
+    } else {
+        return { stage: 'Recién Cultivado', progress, isCosechado: false, daysLeft };
+    }
 };
 
-function FarmerProducts() {
-    // Estados de navegación
-    const [isFormVisible, setIsFormVisible] = useState(false);
-    const [formMode, setFormMode] = useState('create'); // 'create' | 'edit'
-    const [editCropId, setEditCropId] = useState(null);
+// Convertir CultivoResponse del backend al formato que usa el JSX
+const mapearResponseACrop = (c) => ({
+    id: c.id,
+    nombre: c.nombreProductoVariedad || 'Sin nombre',
+    variedad: '',
+    lote: c.lote || '---',
+    hectareas: c.areaSembrada ? c.areaSembrada.toString() : '',
+    cantidadTotal: c.cantidadEstimada ? `${c.cantidadEstimada} ${c.unidad || 'Kg'}` : '---',
+    cantidadDisponible: c.cantidadDisponible ? `${c.cantidadDisponible} ${c.unidad || 'Kg'}` : '---',
+    fechaSiembra: c.fechaSiembra,
+    precio: c.precio ? c.precio.toString() : '0',
+    minimoVenta: c.minimoVenta ? `${c.minimoVenta} Kg` : '0 Kg',
+    imagen: c.imagenUrl || 'https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&q=80&w=600',
+    incidencia: c.alertaRetraso || false,
+    estadoCultivo: c.estadoCultivo,
+    diasTotalesEstimados: c.diasTotalesEstimados || 70,
+    idProductoVariedad: c.idProductoVariedad,
+    // Guardamos etapas como objeto ficticio basado en diasTotales para compatibilidad visual
+    etapas: {
+        germinacion: Math.round((c.diasTotalesEstimados || 70) * 0.14),
+        crecimiento: Math.round((c.diasTotalesEstimados || 70) * 0.43),
+        floracion: Math.round((c.diasTotalesEstimados || 70) * 0.21),
+        maduracion: Math.round((c.diasTotalesEstimados || 70) * 0.22),
+    }
+});
 
-    // Mock Data importada
-    const [crops, setCrops] = useState(initialCrops);
+function FarmerProducts() {
+    const [isFormVisible, setIsFormVisible] = useState(false);
+    const [formMode, setFormMode] = useState('create');
+    const [editCropId, setEditCropId] = useState(null);
+    const [crops, setCrops] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [saving, setSaving] = useState(false);
 
     const defaultFormData = {
         nombre: '', variedad: '', lote: '', hectareas: '', cantidadEstimada: '', unidad: 'Kg',
@@ -70,16 +84,31 @@ function FarmerProducts() {
         etapas: { germinacion: 10, crecimiento: 30, floracion: 15, maduracion: 15 }
     };
 
-    // Estados de Formulario Principal
     const [formData, setFormData] = useState(defaultFormData);
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
-
-    // Estados para el Modal de Edición de Tiempos/Incidencias
-    const [editingCrop, setEditingCrop] = useState(null); 
+    const [editingCrop, setEditingCrop] = useState(null);
     const [incidentData, setIncidentData] = useState({ tipo: '', descripcion: '' });
 
-    // --- LOGICA DE NAVEGACIÓN Y APERTURA DE FORMULARIO ---
+    // --- CARGAR CULTIVOS DEL BACKEND ---
+    useEffect(() => {
+        cargarCultivos();
+    }, []);
+
+    const cargarCultivos = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const data = await listarCultivos();
+            setCrops(data.map(mapearResponseACrop));
+        } catch (err) {
+            setError('No se pudieron cargar los cultivos. Verifica tu conexión.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // --- NAVEGACIÓN ---
     const openCreateForm = () => {
         setFormData(defaultFormData);
         setImagePreview(null);
@@ -89,8 +118,7 @@ function FarmerProducts() {
     };
 
     const openFullEditForm = (crop) => {
-        // Parsear cantidad y unidad del string (ej. "15 Toneladas" -> 15, "Toneladas")
-        const qtyParts = crop.cantidadTotal.split(' ');
+        const qtyParts = (crop.cantidadTotal || '').split(' ');
         const cantEst = qtyParts[0] || '';
         const uni = qtyParts.length > 1 && qtyParts[1].includes('Ton') ? 'Toneladas' : 'Kg';
 
@@ -103,7 +131,7 @@ function FarmerProducts() {
             unidad: uni,
             fechaSiembra: crop.fechaSiembra,
             precio: crop.precio,
-            minimoVenta: parseKgValue(crop.minimoVenta),
+            minimoVenta: (crop.minimoVenta || '').replace(/[^0-9]/g, ''),
             etapas: { ...crop.etapas }
         });
         setImagePreview(crop.imagen);
@@ -112,7 +140,7 @@ function FarmerProducts() {
         setIsFormVisible(true);
     };
 
-    // --- HANDLERS DEL FORMULARIO PRINCIPAL ---
+    // --- HANDLERS FORMULARIO ---
     const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
     const handleEtapaChange = (e) => setFormData({ ...formData, etapas: { ...formData.etapas, [e.target.name]: e.target.value } });
     const handleImageChange = (e) => {
@@ -123,194 +151,226 @@ function FarmerProducts() {
             reader.readAsDataURL(file);
         }
     };
-    
-    const handleSubmitForm = (e) => {
+
+    const handleSubmitForm = async (e) => {
         e.preventDefault();
-        
-        // Formatear la cantidad mínima con "Kg"
-        const formattedMinimoVenta = formData.minimoVenta ? `${formData.minimoVenta} Kg` : '0 Kg';
+        setSaving(true);
 
-        if (formMode === 'create') {
-            const newCrop = {
-                id: crops.length + 1,
-                nombre: formData.nombre,
-                variedad: formData.variedad,
-                lote: formData.lote,
-                hectareas: formData.hectareas,
-                cantidadTotal: `${formData.cantidadEstimada} ${formData.unidad}`,
-                cantidadDisponible: `${formData.cantidadEstimada} ${formData.unidad}`,
-                fechaSiembra: formData.fechaSiembra,
-                precio: formData.precio,
-                minimoVenta: formattedMinimoVenta,
-                etapas: { ...formData.etapas },
-                imagen: imagePreview || 'https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&q=80&w=600',
-                incidencia: false
-            };
-            setCrops([newCrop, ...crops]);
-            alert('¡Cultivo registrado exitosamente!');
-        } else {
-            alert('¡Datos estructurales del cultivo actualizados!');
-            const updated = crops.map(c => {
-                if (c.id === editCropId) {
-                    return {
-                        ...c,
-                        nombre: formData.nombre,
-                        variedad: formData.variedad,
-                        lote: formData.lote,
-                        precio: formData.precio,
-                        minimoVenta: formattedMinimoVenta,
-                        cantidadTotal: `${formData.cantidadEstimada} ${formData.unidad}`,
-                    };
-                }
-                return c;
-            });
-            setCrops(updated);
-        }
-        setIsFormVisible(false);
-    };
+        const totalDias =
+            parseInt(formData.etapas.germinacion || 0) +
+            parseInt(formData.etapas.crecimiento || 0) +
+            parseInt(formData.etapas.floracion || 0) +
+            parseInt(formData.etapas.maduracion || 0);
 
-    const handleDeleteCrop = () => {
-        if (window.confirm('¿Está seguro de que desea eliminar este cultivo permanentemente? Esta acción no se puede deshacer.')) {
-            const filtered = crops.filter(c => c.id !== editCropId);
-            setCrops(filtered);
+        // Armar el payload que espera el backend
+        const payload = {
+            fechaSiembra: formData.fechaSiembra,
+            areaSembrada: parseFloat(formData.hectareas) || 0,
+            diasTotalesEstimados: totalDias,
+            lote: formData.lote,
+            precio: parseFloat(formData.precio) || 0,
+            minimoVenta: parseFloat(formData.minimoVenta) || 0,
+            cantidadEstimada: parseFloat(formData.cantidadEstimada) || 0,
+            unidad: formData.unidad,
+            imagenUrl: imagePreview || null,
+            // idProductoVariedad: null — por ahora no hay selector, se puede agregar después
+        };
+
+        try {
+            if (formMode === 'create') {
+                await registrarCultivo(payload);
+                alert('¡Cultivo registrado exitosamente!');
+            } else {
+                await actualizarCultivo(editCropId, payload);
+                alert('¡Cultivo actualizado exitosamente!');
+            }
+            await cargarCultivos(); // recargar lista desde el backend
             setIsFormVisible(false);
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Error al guardar el cultivo.';
+            alert(msg);
+        } finally {
+            setSaving(false);
         }
     };
 
-    // --- HANDLERS DEL MODAL DE GESTION (Tiempos e Incidencias) ---
+    const handleDeleteCrop = async () => {
+        if (!window.confirm('¿Está seguro de que desea eliminar este cultivo permanentemente?')) return;
+        try {
+            await eliminarCultivo(editCropId);
+            await cargarCultivos();
+            setIsFormVisible(false);
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Error al eliminar el cultivo.';
+            alert(msg);
+        }
+    };
+
+    // --- MODAL DE GESTIÓN ---
+    // Nota: el modal de gestión actualiza diasTotalesEstimados en el backend
     const openGestionModal = (crop) => {
         setEditingCrop({ ...crop, etapas: { ...crop.etapas } });
         setIncidentData({ tipo: '', descripcion: '' });
     };
+
     const handleEditEtapaModalChange = (e) => {
         setEditingCrop({ ...editingCrop, etapas: { ...editingCrop.etapas, [e.target.name]: e.target.value } });
     };
-    const saveGestionChanges = () => {
-        const updatedCrops = crops.map(c => {
-            if (c.id === editingCrop.id) {
-                const hasIncident = incidentData.tipo !== '';
-                return { ...editingCrop, incidencia: hasIncident };
-            }
-            return c;
-        });
-        setCrops(updatedCrops);
-        
-        if (incidentData.tipo !== '') {
-            alert(`Notificación enviada a los compradores: [${incidentData.tipo}]`);
-        } else {
-            alert('Tiempos de cultivo actualizados correctamente.');
-        }
-        setEditingCrop(null);
-    };
 
+    const saveGestionChanges = async () => {
+        const totalDias =
+            parseInt(editingCrop.etapas.germinacion || 0) +
+            parseInt(editingCrop.etapas.crecimiento || 0) +
+            parseInt(editingCrop.etapas.floracion || 0) +
+            parseInt(editingCrop.etapas.maduracion || 0);
+
+        try {
+            await actualizarCultivo(editingCrop.id, {
+                fechaSiembra: editingCrop.fechaSiembra,
+                areaSembrada: parseFloat(editingCrop.hectareas) || 0,
+                diasTotalesEstimados: totalDias,
+                lote: editingCrop.lote,
+                precio: parseFloat(editingCrop.precio) || 0,
+                minimoVenta: parseFloat((editingCrop.minimoVenta || '').replace(/[^0-9.]/g, '')) || 0,
+                cantidadEstimada: parseFloat((editingCrop.cantidadTotal || '').split(' ')[0]) || 0,
+                unidad: (editingCrop.cantidadTotal || '').split(' ')[1] || 'Kg',
+                imagenUrl: editingCrop.imagen || null,
+            });
+
+            if (incidentData.tipo !== '') {
+                alert(`Notificación enviada a los compradores: [${incidentData.tipo}]`);
+            } else {
+                alert('Tiempos de cultivo actualizados correctamente.');
+            }
+
+            await cargarCultivos();
+            setEditingCrop(null);
+        } catch (err) {
+            alert('Error al guardar los cambios.');
+        }
+    };
 
     // --- RENDERS ---
 
-    // VISTA 1: CATÁLOGO
-    const renderListView = () => (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
-                <div>
-                    <h2 style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-titles)', margin: '0 0 10px 0', fontSize: '2rem' }}>
-                        Mis Cultivos
-                    </h2>
-                    <p style={{ color: '#555', fontSize: '1.1rem', margin: 0 }}>
-                        Gestiona tus siembras actuales y reporta incidencias.
-                    </p>
-                </div>
-                <button onClick={openCreateForm} style={{
-                    backgroundColor: 'var(--color-secondary)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: 'var(--radius-md)',
-                    fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(255,152,0,0.2)', fontSize: '1rem', transition: '0.2s'
-                }}>
-                    + Registrar Nueva Siembra
+    const renderListView = () => {
+        if (loading) return <div style={{ textAlign: 'center', padding: '60px', color: '#888', fontSize: '1.1rem' }}>⏳ Cargando cultivos...</div>;
+        if (error) return (
+            <div style={{ textAlign: 'center', padding: '60px' }}>
+                <p style={{ color: '#d32f2f', fontWeight: 'bold' }}>{error}</p>
+                <button onClick={cargarCultivos} style={{ marginTop: '15px', padding: '10px 20px', backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                    🔄 Reintentar
                 </button>
             </div>
+        );
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '25px' }}>
-                {crops.map(crop => {
-                    const stageData = calculateCurrentStage(crop.fechaSiembra, crop.etapas);
-                    const totalD = parseInt(crop.etapas.germinacion) + parseInt(crop.etapas.crecimiento) + parseInt(crop.etapas.floracion) + parseInt(crop.etapas.maduracion);
-                    const harvestDate = formatDateDisplay(addDaysToDate(crop.fechaSiembra, totalD));
+        return (
+            <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
+                    <div>
+                        <h2 style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-titles)', margin: '0 0 10px 0', fontSize: '2rem' }}>Mis Cultivos</h2>
+                        <p style={{ color: '#555', fontSize: '1.1rem', margin: 0 }}>Gestiona tus siembras actuales y reporta incidencias.</p>
+                    </div>
+                    <button onClick={openCreateForm} style={{
+                        backgroundColor: 'var(--color-secondary)', color: 'white', border: 'none', padding: '12px 24px',
+                        borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer',
+                        boxShadow: '0 4px 6px rgba(255,152,0,0.2)', fontSize: '1rem', transition: '0.2s'
+                    }}>
+                        + Registrar Nueva Siembra
+                    </button>
+                </div>
 
-                    return (
-                        <div key={crop.id} style={{ 
-                            backgroundColor: 'white', borderRadius: 'var(--radius-lg)', overflow: 'hidden', 
-                            boxShadow: crop.incidencia ? '0 0 0 2px #d32f2f, 0 4px 15px rgba(211,47,47,0.15)' : '0 4px 15px rgba(0,0,0,0.06)', 
-                            transition: 'transform 0.2s', position: 'relative'
-                        }}>
-                            <div style={{ height: '180px', backgroundImage: `url(${crop.imagen})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
-                                
-                                {/* Etiqueta de Estado Visual Dinámica */}
-                                {crop.incidencia ? (
-                                    <div style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: '#d32f2f', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}>
-                                        ⚠️ Problema Reportado
+                {crops.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '80px 20px', color: '#888' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '15px' }}>🌱</div>
+                        <p style={{ fontSize: '1.1rem' }}>Aún no tienes cultivos registrados.</p>
+                        <button onClick={openCreateForm} style={{ marginTop: '15px', padding: '12px 24px', backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                            Registrar mi primer cultivo
+                        </button>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '25px' }}>
+                        {crops.map(crop => {
+                            const stageData = mapearEstadoVisual(crop.estadoCultivo, crop.diasTotalesEstimados, crop.fechaSiembra);
+                            const harvestDate = formatDateDisplay(addDaysToDate(crop.fechaSiembra, crop.diasTotalesEstimados));
+
+                            return (
+                                <div key={crop.id} style={{
+                                    backgroundColor: 'white', borderRadius: 'var(--radius-lg)', overflow: 'hidden',
+                                    boxShadow: crop.incidencia ? '0 0 0 2px #d32f2f, 0 4px 15px rgba(211,47,47,0.15)' : '0 4px 15px rgba(0,0,0,0.06)',
+                                    transition: 'transform 0.2s', position: 'relative'
+                                }}>
+                                    <div style={{ height: '180px', backgroundImage: `url(${crop.imagen})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
+                                        {crop.incidencia ? (
+                                            <div style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: '#d32f2f', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                ⚠️ Problema Reportado
+                                            </div>
+                                        ) : (
+                                            <div style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: stageData.isCosechado ? '#2E7D32' : 'var(--color-secondary)', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                {stageData.isCosechado ? '📦 Listo' : '🌱 En Crecimiento'}
+                                            </div>
+                                        )}
                                     </div>
-                                ) : (
-                                    <div style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: stageData.isCosechado ? '#2E7D32' : 'var(--color-secondary)', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}>
-                                        {stageData.isCosechado ? '📦 Listo' : '🌱 En Crecimiento'}
+
+                                    <div style={{ width: '100%', height: '6px', backgroundColor: '#e0e0e0' }}>
+                                        <div style={{ width: `${stageData.progress}%`, height: '100%', backgroundColor: crop.incidencia ? '#d32f2f' : (stageData.isCosechado ? '#2E7D32' : 'var(--color-primary)'), transition: 'width 0.5s ease-in-out' }}></div>
                                     </div>
-                                )}
-                            </div>
-                            
-                            {/* Barra de Progreso */}
-                            <div style={{ width: '100%', height: '6px', backgroundColor: '#e0e0e0' }}>
-                                <div style={{ width: `${stageData.progress}%`, height: '100%', backgroundColor: crop.incidencia ? '#d32f2f' : (stageData.isCosechado ? '#2E7D32' : 'var(--color-primary)'), transition: 'width 0.5s ease-in-out' }}></div>
-                            </div>
-                            
-                            <div style={{ padding: '20px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <div>
-                                        <div style={{ color: '#888', fontSize: '0.85rem', marginBottom: '5px', fontWeight: 'bold' }}>LOTE: {crop.lote}</div>
-                                        <h3 style={{ margin: '0 0 10px 0', color: 'var(--color-text)', fontSize: '1.3rem' }}>{crop.nombre}</h3>
-                                    </div>
-                                    <button onClick={() => openFullEditForm(crop)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem', padding: '5px' }} title="Editar Información del Cultivo">
-                                        ✏️
-                                    </button>
-                                </div>
-                                
-                                <div style={{ backgroundColor: crop.incidencia ? '#ffebee' : '#F4F7F5', padding: '10px', borderRadius: 'var(--radius-sm)', marginBottom: '15px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                                        <span style={{ fontSize: '0.9rem', color: '#555', fontWeight: 'bold' }}>Fase actual:</span>
-                                        <span style={{ fontSize: '0.9rem', color: crop.incidencia ? '#d32f2f' : (stageData.isCosechado ? '#2E7D32' : 'var(--color-secondary)'), fontWeight: 'bold' }}>
-                                            {stageData.stage}
-                                        </span>
-                                    </div>
-                                    {!stageData.isCosechado && (
-                                        <div style={{ fontSize: '0.8rem', color: crop.incidencia ? '#d32f2f' : '#777', textAlign: 'right' }}>
-                                            Faltan {stageData.daysLeft} días para cosecha
+
+                                    <div style={{ padding: '20px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <div>
+                                                <div style={{ color: '#888', fontSize: '0.85rem', marginBottom: '5px', fontWeight: 'bold' }}>LOTE: {crop.lote}</div>
+                                                <h3 style={{ margin: '0 0 10px 0', color: 'var(--color-text)', fontSize: '1.3rem' }}>{crop.nombre}</h3>
+                                            </div>
+                                            <button onClick={() => openFullEditForm(crop)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem', padding: '5px' }} title="Editar">✏️</button>
                                         </div>
-                                    )}
-                                </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.95rem' }}>
-                                    <span style={{ color: '#666' }}>Disponible:</span>
-                                    <strong style={{ color: 'var(--color-primary)' }}>{crop.cantidadDisponible} / {crop.cantidadTotal}</strong>
+                                        <div style={{ backgroundColor: crop.incidencia ? '#ffebee' : '#F4F7F5', padding: '10px', borderRadius: 'var(--radius-sm)', marginBottom: '15px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                                <span style={{ fontSize: '0.9rem', color: '#555', fontWeight: 'bold' }}>Fase actual:</span>
+                                                <span style={{ fontSize: '0.9rem', color: crop.incidencia ? '#d32f2f' : (stageData.isCosechado ? '#2E7D32' : 'var(--color-secondary)'), fontWeight: 'bold' }}>
+                                                    {stageData.stage}
+                                                </span>
+                                            </div>
+                                            {!stageData.isCosechado && (
+                                                <div style={{ fontSize: '0.8rem', color: crop.incidencia ? '#d32f2f' : '#777', textAlign: 'right' }}>
+                                                    Faltan {stageData.daysLeft} días para cosecha
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.95rem' }}>
+                                            <span style={{ color: '#666' }}>Disponible:</span>
+                                            <strong style={{ color: 'var(--color-primary)' }}>{crop.cantidadDisponible} / {crop.cantidadTotal}</strong>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.95rem' }}>
+                                            <span style={{ color: '#666' }}>Fecha Est. Cosecha:</span>
+                                            <strong style={{ color: '#333' }}>{harvestDate}</strong>
+                                        </div>
+
+                                        <div style={{ borderTop: '1px solid #eee', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ color: 'var(--color-secondary)', fontWeight: 'bold', fontSize: '1.15rem' }}>S/ {crop.precio}</div>
+                                            <button onClick={() => openGestionModal(crop)} style={{ background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 15px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                                Gestionar ⚙️
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '0.95rem' }}>
-                                    <span style={{ color: '#666' }}>Fecha Est. Cosecha:</span>
-                                    <strong style={{ color: '#333' }}>{harvestDate}</strong>
-                                </div>
-                                
-                                <div style={{ borderTop: '1px solid #eee', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ color: 'var(--color-secondary)', fontWeight: 'bold', fontSize: '1.15rem' }}>S/ {crop.precio}</div>
-                                    <button onClick={() => openGestionModal(crop)} style={{ background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 15px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(46,125,50,0.2)' }}>
-                                        Gestionar ⚙️
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+                            );
+                        })}
+                    </div>
+                )}
             </div>
-        </div>
-    );
+        );
+    };
 
-    // VISTA 2: FORMULARIO PRINCIPAL DE REGISTRO / EDICIÓN
     const renderFormView = () => {
-        const totalDaysForm = parseInt(formData.etapas.germinacion || 0) + parseInt(formData.etapas.crecimiento || 0) + parseInt(formData.etapas.floracion || 0) + parseInt(formData.etapas.maduracion || 0);
+        const totalDaysForm =
+            parseInt(formData.etapas.germinacion || 0) +
+            parseInt(formData.etapas.crecimiento || 0) +
+            parseInt(formData.etapas.floracion || 0) +
+            parseInt(formData.etapas.maduracion || 0);
         const calculatedCosechaForm = addDaysToDate(formData.fechaSiembra, totalDaysForm);
-        
-        // Evaluar la regla de bloqueo transaccional
+
         let hasSales = false;
         if (formMode === 'edit' && editCropId) {
             const activeCrop = crops.find(c => c.id === editCropId);
@@ -319,7 +379,11 @@ function FarmerProducts() {
             }
         }
 
-        const inputStyle = { width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: hasSales ? '#f5f5f5' : 'white', cursor: hasSales ? 'not-allowed' : 'text', color: hasSales ? '#777' : '#000' };
+        const inputStyle = {
+            width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc',
+            fontSize: '1rem', backgroundColor: hasSales ? '#f5f5f5' : 'white',
+            cursor: hasSales ? 'not-allowed' : 'text', color: hasSales ? '#777' : '#000'
+        };
 
         return (
             <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
@@ -328,7 +392,7 @@ function FarmerProducts() {
                         <h2 style={{ color: 'var(--color-primary)', margin: 0, fontSize: '1.8rem' }}>
                             {formMode === 'create' ? 'Registrar Nueva Siembra' : 'Editar Información del Cultivo'}
                         </h2>
-                        {hasSales && <p style={{ color: '#d32f2f', fontWeight: 'bold', margin: '5px 0 0 0', fontSize: '0.9rem' }}>🔒 Este cultivo ya tiene ventas. Algunos campos están bloqueados por seguridad.</p>}
+                        {hasSales && <p style={{ color: '#d32f2f', fontWeight: 'bold', margin: '5px 0 0 0', fontSize: '0.9rem' }}>🔒 Este cultivo ya tiene ventas. Algunos campos están bloqueados.</p>}
                     </div>
                     <button onClick={() => setIsFormVisible(false)} style={{ background: 'transparent', border: '1px solid #ccc', color: '#555', padding: '8px 15px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold' }}>
                         ← Volver a Mis Cultivos
@@ -337,18 +401,17 @@ function FarmerProducts() {
 
                 <form onSubmit={handleSubmitForm}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '40px' }}>
-                        
                         {/* COLUMNA 1 */}
                         <div>
                             <h4 style={{ color: 'var(--color-secondary)', borderBottom: '1px dashed #ccc', paddingBottom: '8px', marginBottom: '20px' }}>1. Información Básica</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Nombre del Cultivo</label>
-                                    <input type="text" name="nombre" required disabled={hasSales} value={formData.nombre} onChange={handleInputChange} style={inputStyle} placeholder="Ej. Maíz Amarillo Duro, Café, Mango Kent" />
+                                    <input type="text" name="nombre" required disabled={hasSales} value={formData.nombre} onChange={handleInputChange} style={inputStyle} placeholder="Ej. Maíz Amarillo Duro" />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Variedad</label>
-                                    <input type="text" name="variedad" disabled={hasSales} value={formData.variedad} onChange={handleInputChange} style={inputStyle} placeholder="Ej. INIA 619, Caturra, CCN-51" />
+                                    <input type="text" name="variedad" disabled={hasSales} value={formData.variedad} onChange={handleInputChange} style={inputStyle} placeholder="Ej. INIA 619" />
                                 </div>
                             </div>
 
@@ -357,7 +420,7 @@ function FarmerProducts() {
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Código de Lote Principal</label>
                                 <input type="text" name="lote" required disabled={hasSales} value={formData.lote} onChange={handleInputChange} style={inputStyle} placeholder="Ej. LOTE-MZD-2025" />
                                 <span style={{ display: 'block', fontSize: '0.82rem', color: '#666', marginTop: '6px', lineHeight: '1.4' }}>
-                                    💡 <strong>Sugerencia de formato:</strong> LOTE-[ABREVIATURA]-[AÑO] para organizar tu catálogo de forma profesional (ej: <code>LOTE-MZD-2025</code> o <code>LOTE-CAF-2026</code>).
+                                    💡 Formato sugerido: LOTE-[ABREVIATURA]-[AÑO]
                                 </span>
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '30px' }}>
@@ -379,7 +442,7 @@ function FarmerProducts() {
 
                             <h4 style={{ color: 'var(--color-secondary)', borderBottom: '1px dashed #ccc', paddingBottom: '8px', marginBottom: '15px' }}>3. Etapas Agronómicas (Días)</h4>
                             <div style={{ backgroundColor: '#F4F7F5', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid #e0e0e0', marginBottom: '25px' }}>
-                                <p style={{ fontSize: '0.85rem', color: '#666', marginTop: 0, marginBottom: '15px' }}>Para realizar ajustes rápidos por clima o plagas, usa el botón "Gestionar" en el catálogo.</p>
+                                <p style={{ fontSize: '0.85rem', color: '#666', marginTop: 0, marginBottom: '15px' }}>Para ajustes rápidos por clima o plagas, usa el botón "Gestionar".</p>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                                     <div><label style={{ display: 'block', fontSize: '0.9rem', color: '#555' }}>Germinación</label><input type="number" name="germinacion" required value={formData.etapas.germinacion} onChange={handleEtapaChange} style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }} /></div>
                                     <div><label style={{ display: 'block', fontSize: '0.9rem', color: '#555' }}>Crec. Vegetativo</label><input type="number" name="crecimiento" required value={formData.etapas.crecimiento} onChange={handleEtapaChange} style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }} /></div>
@@ -409,27 +472,26 @@ function FarmerProducts() {
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Precio Unitario x 1 Kg (S/)</label>
                                     <input type="number" name="precio" min="0.01" step="0.01" required value={formData.precio} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc' }} placeholder="Ej. 4.50" />
-                                    <span style={{ display: 'block', fontSize: '0.82rem', color: '#666', marginTop: '6px' }}>
-                                        Precio de venta por cada kilogramo.
-                                    </span>
+                                    <span style={{ display: 'block', fontSize: '0.82rem', color: '#666', marginTop: '6px' }}>Precio de venta por kilogramo.</span>
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}>Venta Mínima (Kg)</label>
                                     <input type="number" name="minimoVenta" min="1" step="1" required value={formData.minimoVenta} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc' }} placeholder="Ej. 50" />
-                                    <span style={{ display: 'block', fontSize: '0.82rem', color: '#666', marginTop: '6px' }}>
-                                        Cantidad mínima a comprar (en Kilos).
-                                    </span>
+                                    <span style={{ display: 'block', fontSize: '0.82rem', color: '#666', marginTop: '6px' }}>Cantidad mínima a comprar.</span>
                                 </div>
                             </div>
 
                             <h4 style={{ color: 'var(--color-secondary)', borderBottom: '1px dashed #ccc', paddingBottom: '8px', marginBottom: '15px' }}>Foto del Cultivo</h4>
-                            <div style={{ border: '2px dashed #ccc', borderRadius: 'var(--radius-md)', padding: '20px', textAlign: 'center', backgroundColor: '#f9f9f9', cursor: 'pointer', position: 'relative', overflow: 'hidden', minHeight: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }} onClick={() => fileInputRef.current.click()}>
+                            <div
+                                style={{ border: '2px dashed #ccc', borderRadius: 'var(--radius-md)', padding: '20px', textAlign: 'center', backgroundColor: '#f9f9f9', cursor: 'pointer', position: 'relative', overflow: 'hidden', minHeight: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
+                                onClick={() => fileInputRef.current.click()}
+                            >
                                 {imagePreview ? (
                                     <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
                                 ) : (
                                     <>
                                         <span style={{ fontSize: '2.5rem', color: '#aaa', marginBottom: '10px' }}>📷</span>
-                                        <span style={{ color: '#666', fontSize: '0.95rem' }}>Haz clic para actualizar foto</span>
+                                        <span style={{ color: '#666', fontSize: '0.95rem' }}>Haz clic para subir foto</span>
                                     </>
                                 )}
                                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
@@ -438,24 +500,23 @@ function FarmerProducts() {
                     </div>
 
                     <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #eee', paddingTop: '20px' }}>
-                        {/* Zona de Peligro a la izquierda */}
                         <div>
                             {formMode === 'edit' && (
-                                <button type="button" onClick={handleDeleteCrop} disabled={hasSales} style={{ 
-                                    background: hasSales ? '#f5f5f5' : '#FFEBEE', color: hasSales ? '#aaa' : '#d32f2f', border: `1px solid ${hasSales ? '#eee' : '#ffcdd2'}`, padding: '10px 20px', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: hasSales ? 'not-allowed' : 'pointer' 
-                                }} title={hasSales ? 'No puede eliminar un cultivo con ventas activas' : 'Eliminar este cultivo de su catálogo'}>
+                                <button type="button" onClick={handleDeleteCrop} disabled={hasSales} style={{
+                                    background: hasSales ? '#f5f5f5' : '#FFEBEE', color: hasSales ? '#aaa' : '#d32f2f',
+                                    border: `1px solid ${hasSales ? '#eee' : '#ffcdd2'}`, padding: '10px 20px',
+                                    borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: hasSales ? 'not-allowed' : 'pointer'
+                                }}>
                                     🗑️ Eliminar Cultivo
                                 </button>
                             )}
                         </div>
-
-                        {/* Controles de Guardado a la derecha */}
                         <div style={{ display: 'flex', gap: '20px' }}>
-                            <button type="button" onClick={() => setIsFormVisible(false)} style={{ background: 'transparent', color: '#555', border: '1px solid #ccc', padding: '14px 30px', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.05rem', transition: '0.2s' }}>
+                            <button type="button" onClick={() => setIsFormVisible(false)} style={{ background: 'transparent', color: '#555', border: '1px solid #ccc', padding: '14px 30px', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.05rem' }}>
                                 Cancelar
                             </button>
-                            <button type="submit" style={{ backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', padding: '14px 40px', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.05rem', boxShadow: '0 4px 6px rgba(46, 125, 50, 0.2)', transition: '0.2s' }}>
-                                {formMode === 'create' ? 'Publicar Cultivo' : 'Guardar Cambios'}
+                            <button type="submit" disabled={saving} style={{ backgroundColor: saving ? '#ccc' : 'var(--color-primary)', color: 'white', border: 'none', padding: '14px 40px', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: saving ? 'default' : 'pointer', fontSize: '1.05rem', boxShadow: saving ? 'none' : '0 4px 6px rgba(46,125,50,0.2)' }}>
+                                {saving ? '⏳ Guardando...' : (formMode === 'create' ? 'Publicar Cultivo' : 'Guardar Cambios')}
                             </button>
                         </div>
                     </div>
@@ -464,16 +525,18 @@ function FarmerProducts() {
         );
     };
 
-    // VISTA 3: MODAL DE GESTIÓN Y NOTIFICACIÓN
     const renderEditModal = () => {
         if (!editingCrop) return null;
-
-        const eD = parseInt(editingCrop.etapas.germinacion || 0) + parseInt(editingCrop.etapas.crecimiento || 0) + parseInt(editingCrop.etapas.floracion || 0) + parseInt(editingCrop.etapas.maduracion || 0);
+        const eD =
+            parseInt(editingCrop.etapas.germinacion || 0) +
+            parseInt(editingCrop.etapas.crecimiento || 0) +
+            parseInt(editingCrop.etapas.floracion || 0) +
+            parseInt(editingCrop.etapas.maduracion || 0);
         const newHarvestDate = addDaysToDate(editingCrop.fechaSiembra, eD);
 
         return (
             <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
-                <div style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', animation: 'fadeIn 0.3s' }}>
+                <div style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
                     <div style={{ backgroundColor: 'var(--color-primary)', color: 'white', padding: '20px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                             <h2 style={{ margin: 0, fontSize: '1.5rem', fontFamily: 'var(--font-titles)' }}>Gestión de Cultivo Diario</h2>
@@ -500,7 +563,7 @@ function FarmerProducts() {
                         <div style={{ backgroundColor: '#FFEBEE', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid #ffcdd2' }}>
                             <h4 style={{ margin: '0 0 15px 0', color: '#d32f2f' }}>📢 Reportar Imprevisto</h4>
                             <div style={{ marginBottom: '15px' }}>
-                                <select value={incidentData.tipo} onChange={(e) => setIncidentData({...incidentData, tipo: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ef9a9a', backgroundColor: 'white' }}>
+                                <select value={incidentData.tipo} onChange={(e) => setIncidentData({ ...incidentData, tipo: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ef9a9a', backgroundColor: 'white' }}>
                                     <option value="">-- Sin incidencia (No notificar) --</option>
                                     <option value="Plaga o Enfermedad">🐛 Plaga o Enfermedad</option>
                                     <option value="Clima Adverso">⛈️ Clima Adverso</option>
@@ -510,15 +573,15 @@ function FarmerProducts() {
                             </div>
                             {incidentData.tipo !== '' && (
                                 <div style={{ marginBottom: '15px' }}>
-                                    <textarea value={incidentData.descripcion} onChange={(e) => setIncidentData({...incidentData, descripcion: e.target.value})} placeholder="Explique brevemente a sus compradores..." style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ef9a9a', minHeight: '80px', fontFamily: 'inherit' }} />
+                                    <textarea value={incidentData.descripcion} onChange={(e) => setIncidentData({ ...incidentData, descripcion: e.target.value })} placeholder="Explique brevemente a sus compradores..." style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ef9a9a', minHeight: '80px', fontFamily: 'inherit' }} />
                                 </div>
                             )}
                         </div>
                     </div>
-                    
+
                     <div style={{ padding: '20px 30px', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end', gap: '15px', backgroundColor: '#f9f9f9', borderRadius: '0 0 var(--radius-lg) var(--radius-lg)' }}>
                         <button onClick={() => setEditingCrop(null)} style={{ background: 'white', border: '1px solid #ccc', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', color: '#555' }}>Cancelar</button>
-                        <button onClick={saveGestionChanges} style={{ background: incidentData.tipo !== '' ? '#d32f2f' : 'var(--color-primary)', color: 'white', border: 'none', padding: '10px 25px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', transition: '0.2s' }}>
+                        <button onClick={saveGestionChanges} style={{ background: incidentData.tipo !== '' ? '#d32f2f' : 'var(--color-primary)', color: 'white', border: 'none', padding: '10px 25px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
                             {incidentData.tipo !== '' ? '🔔 Guardar y Notificar a Compradores' : '💾 Guardar Cambios'}
                         </button>
                     </div>
