@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initialCatalog } from '../../data/mockBuyerData';
+import api from '../../api/axiosConfig'; 
 
 const AVAILABLE_CERTIFICATIONS = [
     'Certificación de Buenas Prácticas Agrícolas',
@@ -10,17 +11,46 @@ const AVAILABLE_CERTIFICATIONS = [
 ];
 
 function BuyerCatalog({ acquiredIds, onAddToCart }) {
-    const [catalog] = useState(initialCatalog);
+    const [catalog, setCatalog] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCertifications, setSelectedCertifications] = useState([]);
     const [selectedCrop, setSelectedCrop] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [selectedRegion, setSelectedRegion] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
     const itemsPerPage = 9;
 
     const dropdownRef = React.useRef(null);
 
-    // Estado simulado del carrito
+    useEffect(() => {
+        const cargarProductosBackend = async () => {
+            try {
+                const certsParam = selectedCertifications.join(',');
+                
+                const response = await api.get('/public/catalogo', {
+                    params: {
+                        search: searchTerm,
+                        region: selectedRegion,
+                        precioMax: maxPrice,
+                        certificaciones: certsParam
+                    }
+                });
+                
+                setCatalog(response.data);
+            } catch (error) {
+                console.error("Error trayendo el catálogo del backend:", error);
+            }
+        };
+
+        const delayDebounceFn = setTimeout(() => {
+            cargarProductosBackend();
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm, selectedCertifications, selectedRegion, maxPrice]);
+
+
     const [cartItems, setCartItems] = useState(() => {
         const saved = localStorage.getItem('agrolink_cart');
         if (saved) {
@@ -48,14 +78,13 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
 
     React.useEffect(() => {
         localStorage.setItem('agrolink_cart', JSON.stringify(cartItems));
-        // Disparar evento para que otros componentes (como el Navbar) actualicen el conteo
         window.dispatchEvent(new Event('cartUpdated'));
     }, [cartItems]);
 
     // Resetear paginación cuando cambian los filtros
     React.useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, selectedCertifications]);
+    }, [searchTerm, selectedCertifications, selectedRegion, maxPrice]);
 
     const getProfileAddress = () => {
         const saved = localStorage.getItem('agrolink_buyer_profile');
@@ -75,24 +104,9 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         setPurchaseData({ cantidad: '', metodoPago: '', porcentajeAdelanto: 0, direccionEntrega: '', fechaEntregaEstimada: '' });
     };
 
-    const normalizeText = (str) => {
-        if (!str) return '';
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    };
 
     // Filtrar cultivos combinando búsqueda de texto (nombre, lote, agricultor) y certificaciones
-    const filteredCrops = catalog.filter(crop => {
-        const cleanSearch = normalizeText(searchTerm);
-        const matchesSearch =
-            normalizeText(crop.nombre).includes(cleanSearch) ||
-            normalizeText(crop.agricultor).includes(cleanSearch) ||
-            normalizeText(crop.lote).includes(cleanSearch);
-
-        const matchesCertifications = selectedCertifications.length === 0 ||
-            selectedCertifications.every(cert => crop.certificaciones && crop.certificaciones.includes(cert));
-
-        return matchesSearch && matchesCertifications;
-    });
+    const filteredCrops = catalog;
 
     // Paginación Math
     const totalPages = Math.ceil(filteredCrops.length / itemsPerPage);
@@ -121,72 +135,36 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         const qtyNum = parseFloat(purchaseData.cantidad);
         const total = priceNum * qtyNum;
 
-        // Autogenerar lote parcial secuencial de acuerdo al lote central del producto
-        const getNextPartialSuffix = (loteCentral) => {
-            const savedOrders = JSON.parse(localStorage.getItem('agrolink_orders') || '[]');
-            let count = 0;
-            savedOrders.forEach(o => {
-                if (o.productos) {
-                    o.productos.forEach(p => {
-                        if (p.loteParcial && p.loteParcial.startsWith(loteCentral)) {
-                            count++;
-                        }
-                    });
-                }
-            });
-            // Contar también los elementos en el carrito actual
-            const savedCart = JSON.parse(localStorage.getItem('agrolink_cart') || '[]');
-            savedCart.forEach(item => {
-                if (item.loteParcial && item.loteParcial.startsWith(loteCentral)) {
-                    count++;
-                }
-            });
-
-            // Contar con base simulada
-            if (loteCentral === 'LOTE-CAF-2025') count += 2;
-            else if (loteCentral === 'LOTE-MZD-2025') count += 2;
-            else if (loteCentral === 'LOTE-CAC-2025') count += 1;
-
-            return `${loteCentral}-P${count + 1}`;
-        };
-
-        const generatedLoteParcial = getNextPartialSuffix(selectedCrop.lote);
-
-        const newItem = {
-            id: `CART-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-            cultivoId: selectedCrop.id,
+        const nuevoItem = {
+            id: Date.now(), 
+            idCultivo: selectedCrop.idCultivo || selectedCrop.id_cultive || selectedCrop.id,
+            cultivoId: selectedCrop.lote || `CULT-${selectedCrop.idCultivo || selectedCrop.id}`,
             nombre: selectedCrop.nombre,
-            lote: selectedCrop.lote,
-            cantidad: purchaseData.cantidad,
+            lote: selectedCrop.lote || 'L-General',
+            loteParcial: `LP-${Math.floor(Math.random() * 1000)}`,
+            cantidad: qtyNum,
             precio: priceNum,
-            loteParcial: generatedLoteParcial,
             metodoPago: purchaseData.metodoPago,
-            porcentajeAdelanto: parseInt(purchaseData.porcentajeAdelanto),
+            porcentajeAdelanto: parseInt(purchaseData.porcentajeAdelanto) || 0,
             montoTotal: total,
-            direccionEntrega: purchaseData.direccionEntrega,
-            fechaEntregaEstimada: purchaseData.fechaEntregaEstimada,
-            seleccionado: true,
+            seleccionado: true, 
             imagen: selectedCrop.imagen,
-            agricultor: selectedCrop.agricultor,
-            // Snapshot del cultivo en el momento de la compra
-            detallesProducto: {
-                variedad: selectedCrop.variedad || 'Estándar',
-                hectareas: selectedCrop.hectareas,
-                fechaSiembra: selectedCrop.fechaSiembra,
-                cantidadTotal: selectedCrop.cantidadTotal,
-                cantidadDisponible: selectedCrop.cantidadDisponible,
-                minimoVenta: selectedCrop.minimoVenta,
-                certificaciones: selectedCrop.certificaciones || [],
-                incidencia: selectedCrop.incidencia || null,
-                etapas: selectedCrop.etapas || {}
-            }
+            agricultor: typeof selectedCrop.agricultor === 'object' && selectedCrop.agricultor !== null 
+                ? (selectedCrop.agricultor.usuario?.nombre || 'Agricultor Registrado') 
+                : (selectedCrop.agricultor || 'Agricultor Registrado'),
+            direccionEntrega: purchaseData.direccionEntrega,
+            fechaEntregaEstimada: purchaseData.fechaEntregaEstimada || null
         };
 
-        setCartItems([...cartItems, newItem]);
-        if (onAddToCart) {
-            onAddToCart(selectedCrop.id);
-        }
-        alert(`¡${selectedCrop.nombre} añadido al carrito con éxito!\n\nLote Parcial Generado: ${generatedLoteParcial}`);
+        const carritoActual = JSON.parse(localStorage.getItem('agrolink_cart') || '[]');
+        const carritoActualizado = [...carritoActual, nuevoItem];
+        
+        localStorage.setItem('agrolink_cart', JSON.stringify(carritoActualizado));
+        setCartItems(carritoActualizado); 
+        window.dispatchEvent(new Event('cartUpdated')); 
+
+        // 🎉 5. Cierre limpio de Modal
+        alert(`¡${nuevoItem.nombre} añadido al carrito correctamente! 🛒\nPuedes acumular más siembras o proceder al pago desde la pestaña "Mi Carrito".`);
         handleCloseModal();
     };
 
@@ -199,7 +177,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
     };
 
     return (
-        <div>
+        <div>       
             <h2 style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-titles)', marginBottom: '5px', fontSize: '2rem' }}>Catálogo de Cultivos</h2>
             <p style={{ color: '#555', fontSize: '1.1rem', marginBottom: '25px' }}>Explora las siembras disponibles y asegura tu compra con adelantos.</p>
 
@@ -237,8 +215,44 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             onBlur={(e) => e.target.style.borderColor = '#ddd'}
                         />
                     </div>
+                    {/*Filtro de Región (Select Dropdown) */}
+                    <div style={{ minWidth: '180px' }}>
+                        <select
+                            value={selectedRegion}
+                            onChange={(e) => setSelectedRegion(e.target.value)}
+                            style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ddd', backgroundColor: 'white', fontWeight: '500' }}
+                        >
+                            <option value="">🌍 Todas las Regiones</option>
+                            <option value="Junín">Junín</option>
+                            <option value="Lima">Lima</option>
+                            <option value="Pasco">Pasco</option>
+                            <option value="Cajamarca">Cajamarca</option>
+                        </select>
+                    </div>
+
+                    {/* Filtro de Precio Máximo (Input Numérico) */}
+                    <div style={{ minWidth: '150px', position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666', fontWeight: 'bold', fontSize: '0.9rem' }}>S/ Max:</span>
+                        <input
+                            type="number"
+                            min="0"
+                            placeholder="0.00"
+                            value={maxPrice}
+                        
+                            onChange={(e) => {
+                            const valor = e.target.value;
+                            if (valor === '' || parseFloat(valor) >= 0) {
+                                setMaxPrice(valor);
+                            }
+                        }}
+                            style={{ width: '100%', padding: '12px 15px 12px 65px', borderRadius: 'var(--radius-md)', border: '1px solid #ddd', boxSizing: 'border-box' }}
+                        />
+                    </div>
 
                     {/* Selector de Certificaciones Dropdown */}
+                    
+                    
+                    
                     <div ref={dropdownRef} style={{ position: 'relative' }}>
                         <button 
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -261,8 +275,8 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             🛡️ Certificaciones {selectedCertifications.length > 0 && `(${selectedCertifications.length})`}
                             <span style={{ fontSize: '0.8rem', transform: isDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</span>
                         </button>
+                        
 
-                        {/* Popover flotante absoluto */}
                         {isDropdownOpen && (
                             <div style={{
                                 position: 'absolute',
@@ -309,9 +323,10 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                         )}
                     </div>
                 </div>
+                
 
                 {/* Chips de filtros activos */}
-                {(selectedCertifications.length > 0 || searchTerm) && (
+                {(selectedCertifications.length > 0 || searchTerm || selectedRegion || (maxPrice && parseFloat(maxPrice) > 0)) && (
                     <div style={{ 
                         display: 'flex', 
                         gap: '10px', 
@@ -336,7 +351,48 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                                 Texto: "{searchTerm}"
                                 <button 
                                     onClick={() => setSearchTerm('')} 
-                                    style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontWeight: 'bold', padding: 0, fontSize: '1rem', lineHeght: 1 }}
+                                    style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontWeight: 'bold', padding: 0, fontSize: '1rem', lineHeight: 1 }}
+                                >
+                                    &times;
+                                </button>
+                            </span>
+                        )}
+                        {selectedRegion && (
+                            <span style={{
+                                backgroundColor: '#E3F2FD',
+                                color: '#1E88E5',
+                                fontSize: '0.8rem',
+                                padding: '5px 12px',
+                                borderRadius: '15px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}>
+                                🌍 Región: "{selectedRegion}"
+                                <button
+                                    onClick={() => setSelectedRegion('')}
+                                    style={{ background: 'none', border: 'none', color: '#1E88E5', cursor: 'pointer', fontWeight: 'bold', padding: 0, fontSize: '1rem', lineHeight: '1' }}
+                                >
+                                    &times;
+                                </button>
+                            </span>
+                        )}
+
+                        {maxPrice && (
+                            <span style={{
+                                backgroundColor: '#FFF3E0',
+                                color: '#FB8C00',
+                                fontSize: '0.8rem',
+                                padding: '5px 12px',
+                                borderRadius: '15px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}>
+                                💰 Máx: S/ {maxPrice}
+                                <button
+                                    onClick={() => setMaxPrice('')}
+                                    style={{ background: 'none', border: 'none', color: '#FB8C00', cursor: 'pointer', fontWeight: 'bold', padding: 0, fontSize: '1rem', lineHeight: '1' }}
                                 >
                                     &times;
                                 </button>
@@ -358,7 +414,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                                 🛡️ {cert.length > 20 ? cert.substring(0, 18) + '...' : cert}
                                 <button 
                                     onClick={() => handleCertToggle(cert)} 
-                                    style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 'bold', padding: 0, fontSize: '1rem', lineHeght: 1 }}
+                                    style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 'bold', padding: 0, fontSize: '1rem', lineHeight: 1 }}
                                 >
                                     &times;
                                 </button>
@@ -366,7 +422,12 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                         ))}
 
                         <button 
-                            onClick={() => { setSelectedCertifications([]); setSearchTerm(''); }}
+                           onClick={() => {
+                                    setSelectedCertifications([]); 
+                                    setSearchTerm('');             
+                                    setSelectedRegion('');         
+                                    setMaxPrice('');               
+                                }}
                             style={{
                                 background: 'none',
                                 border: 'none',
@@ -392,89 +453,134 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                         <p style={{ color: '#888', fontSize: '1.1rem', margin: 0 }}>No se encontraron cultivos con los filtros seleccionados.</p>
                     </div>
                 ) : (
-                    visibleCrops.map(crop => (
-                        <div 
-                            key={crop.id} 
-                            style={{ 
-                                backgroundColor: 'white', 
-                                borderRadius: 'var(--radius-lg)', 
-                                overflow: 'hidden', 
-                                boxShadow: '0 4px 15px rgba(0,0,0,0.05)', 
-                                border: crop.incidencia ? '1px solid #ffcdd2' : '1px solid #eee',
-                                transition: 'transform 0.3s, box-shadow 0.3s',
-                                display: 'flex',
-                                flexDirection: 'column'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-4px)';
-                                e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.08)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'none';
-                                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
-                            }}
-                        >
-                            <div style={{ height: '180px', backgroundImage: `url(${crop.imagen})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
-                                {crop.incidencia && <div style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: '#d32f2f', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>⚠️ Incidencia</div>}
-                            </div>
-                            <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                        <span style={{ color: '#888', fontSize: '0.8rem', fontWeight: 'bold' }}>LOTE: {crop.lote}</span>
-                                        <span style={{ fontSize: '0.8rem', color: '#666' }}>Var: <strong>{crop.variedad}</strong></span>
-                                    </div>
-                                    <h3 style={{ margin: '0 0 12px 0', color: 'var(--color-text)', fontSize: '1.25rem', fontFamily: 'var(--font-titles)', fontWeight: 'bold' }}>{crop.nombre}</h3>
-                                    
-                                    <p style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#555' }}>
-                                        👤 Agricultor: <strong style={{ color: 'var(--color-text)' }}>{crop.agricultor}</strong>
-                                    </p>
+                    visibleCrops.map(crop => {
+                        const infoProducto = crop.productoVariedad;
+    
+                        // 1. Nombre del producto (Ya te funciona bien)
+                        const nombreCultivo = infoProducto?.nombreProductoVariedad || 'Cultivo Desconocido';
+                        
+                        // 2. CORRECCIÓN DE VARIEDAD: Mapea exactamente con 'variedadProductoVariedad'
+                        const variedadCultivo = infoProducto?.variedadProductoVariedad || 'Variedad General';
+                        
+                        // 3. CORRECCIÓN DE PRECIO: Mapea exactamente con 'precioProductoVariedad'
+                        const precioCultivo = infoProducto?.precioProductoVariedad || 0.00;
+                        
+                        // 4. Identificador único de Lote usando el idCultivo real
+                        const codigoLote = crop.lote || `LOTE-CULT-${crop.idCultivo || '000'}`;
+                        
+                        // 5. Datos de producción
+                        const areaSembrada = crop.areaSembrada || 0;
+                        const cantidadDisponible = crop.cantidadDisponible || 'Por definir';
+                        
+                        // 6. Colocamos fotos referenciales automáticas según el tipo de producto para que se vea espectacular
+                        let imagenCultivo = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=600&auto=format&fit=crop'; 
+                        
+                        const nombreLower = nombreCultivo.toLowerCase();
+    
+                        if (nombreLower.includes('café') || nombreLower.includes('cafe')) {
+                            imagenCultivo = 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop';
+                        } else if (nombreLower.includes('papa')) {
+                            imagenCultivo = 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop';
+                        } else if (nombreLower.includes('palta') || nombreLower.includes('hass')) {
+                            imagenCultivo = 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=600&auto=format&fit=crop';
+                        } else if (nombreLower.includes('camote') || nombreLower.includes('morado') || nombreLower.includes('jonathan')) {
+                            imagenCultivo = 'https://images.unsplash.com/photo-1590005354167-6da97870c913?w=600&auto=format&fit=crop';
+                        } else if (nombreLower.includes('espárrago') || nombreLower.includes('esparrago') || nombreLower.includes('verde')) {
+                            imagenCultivo = 'https://images.unsplash.com/photo-1515471204580-f7c8f3513793?w=600&auto=format&fit=crop';
+                        } else if (nombreLower.includes('maíz') || nombreLower.includes('maiz') || nombreLower.includes('duro')) {
+                            imagenCultivo = 'https://images.unsplash.com/photo-1551754625-70c90487530d?w=600&auto=format&fit=crop';
+                        }
+                        else if (nombreLower.includes('quinua') || nombreLower.includes('quinoa')) {
+                            imagenCultivo = 'https://images.unsplash.com/photo-1506801310323-534be5e7bb77?w=600&auto=format&fit=crop';
+                        }
 
-                                    {/* Certificaciones Badges */}
-                                    {crop.certificaciones && crop.certificaciones.length > 0 && (
-                                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '15px' }}>
-                                            {crop.certificaciones.map((cert, i) => (
-                                                <span key={i} style={{ backgroundColor: '#E8F5E9', color: 'var(--color-primary)', fontSize: '0.7rem', fontWeight: 'bold', padding: '4px 8px', borderRadius: '15px' }} title={cert}>
-                                                    🛡️ {cert.length > 20 ? cert.substring(0, 18) + '...' : cert}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
+                            return (
+                            <div 
+                                key={crop.idCultivo || crop.id} 
+                                style={{ 
+                                    backgroundColor: 'white', 
+                                    borderRadius: 'var(--radius-lg)', 
+                                    overflow: 'hidden', 
+                                    boxShadow: '0 4px 15px rgba(0,0,0,0.05)', 
+                                    border: crop.incidencia ? '1px solid #ffcdd2' : '1px solid #eee',
+                                    transition: 'transform 0.3s, box-shadow 0.3s',
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-4px)';
+                                    e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.08)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'none';
+                                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
+                                }}
+                            >
+                                <div style={{ height: '180px', backgroundImage: `url(${imagenCultivo})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
+                                    {crop.incidencia && <div style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: '#d32f2f', color: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>⚠️ Incidencia</div>}
                                 </div>
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem' }}>
-                                        <span style={{ color: '#666' }}>Disponible:</span>
-                                        <strong style={{ color: 'var(--color-primary)' }}>{crop.cantidadDisponible}</strong>
+                                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                            <span style={{ color: '#888', fontSize: '0.8rem', fontWeight: 'bold' }}>LOTE: {codigoLote}</span>
+                                            <span style={{ fontSize: '0.8rem', color: '#666' }}>Var: <strong>{variedadCultivo}</strong></span>
+                                        </div>
+                                        <h3 style={{ margin: '0 0 12px 0', color: 'var(--color-text)', fontSize: '1.25rem', fontFamily: 'var(--font-titles)', fontWeight: 'bold' }}>{nombreCultivo}</h3>
+                                        
+                                        <p style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#555' }}>
+                                            👤 Agricultor: <strong style={{ color: 'var(--color-text)' }}>
+                                                {typeof crop.agricultor === 'object' && crop.agricultor !== null 
+                                                    ? (crop.agricultor.usuario?.nombre || 'Agricultor Registrado') 
+                                                    : (crop.agricultor || 'Agricultor Registrado')}
+                                            </strong>
+                                        </p>
+
+                                        {crop.certificaciones && crop.certificaciones.length > 0 && (
+                                            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '15px' }}>
+                                                {crop.certificaciones.map((cert, i) => (
+                                                    <span key={i} style={{ backgroundColor: '#E8F5E9', color: 'var(--color-primary)', fontSize: '0.7rem', fontWeight: 'bold', padding: '4px 8px', borderRadius: '15px' }} title={cert}>
+                                                        🛡️ {cert.length > 20 ? cert.substring(0, 18) + '...' : cert}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
-                                        <span style={{ color: '#666', fontSize: '0.9rem' }}>Precio:</span>
-                                        <strong style={{ color: 'var(--color-secondary)', fontSize: '1.15rem' }}>S/ {crop.precio.toFixed(2)} / Kg</strong>
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                            <span style={{ color: '#666' }}>Área / Disponible:</span>
+                                            <strong style={{ color: 'var(--color-primary)' }}>{areaSembrada} Ha / {cantidadDisponible}</strong>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
+                                            <span style={{ color: '#666', fontSize: '0.9rem' }}>Precio:</span>
+                                            <strong style={{ color: 'var(--color-secondary)', fontSize: '1.15rem' }}>S/ {parseFloat(precioCultivo).toFixed(2)} / Kg</strong>
+                                        </div>
+                                        <button 
+                                            onClick={() => {
+                                                setSelectedCrop({ ...crop, nombre: nombreCultivo, precio: precioCultivo, lote: codigoLote, variedad: variedadCultivo, imagen: imagenCultivo });
+                                                setPurchaseData(prev => ({ ...prev, direccionEntrega: getProfileAddress() }));
+                                            }} 
+                                            style={{ 
+                                                width: '100%', 
+                                                backgroundColor: 'var(--color-primary)', 
+                                                color: 'white', 
+                                                border: 'none', 
+                                                padding: '12px', 
+                                                borderRadius: 'var(--radius-md)', 
+                                                fontWeight: 'bold', 
+                                                cursor: 'pointer',
+                                                fontSize: '0.95rem',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--color-primary-hover)'}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--color-primary)'}
+                                        >
+                                            Ver más detalle
+                                        </button>
                                     </div>
-                                    <button 
-                                        onClick={() => {
-                                            setSelectedCrop(crop);
-                                            setPurchaseData(prev => ({ ...prev, direccionEntrega: getProfileAddress() }));
-                                        }} 
-                                        style={{ 
-                                            width: '100%', 
-                                            backgroundColor: 'var(--color-primary)', 
-                                            color: 'white', 
-                                            border: 'none', 
-                                            padding: '12px', 
-                                            borderRadius: 'var(--radius-md)', 
-                                            fontWeight: 'bold', 
-                                            cursor: 'pointer',
-                                            fontSize: '0.95rem',
-                                            transition: 'background-color 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--color-primary-hover)'}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--color-primary)'}
-                                    >
-                                        Ver más detalle
-                                    </button>
                                 </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
 
@@ -488,7 +594,6 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                     marginTop: '45px',
                     flexWrap: 'wrap'
                 }}>
-                    {/* Botón Anterior */}
                     <button
                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
@@ -512,7 +617,6 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                         &laquo; Anterior
                     </button>
 
-                    {/* Números de Página */}
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
                         const isActive = page === currentPage;
                         return (
@@ -542,7 +646,6 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                         );
                     })}
 
-                    {/* Botón Siguiente */}
                     <button
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
@@ -578,7 +681,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             <img src={selectedCrop.imagen} alt={selectedCrop.nombre} style={{ width: '120px', height: '120px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }} />
                             <div>
                                 <h3 style={{ color: 'var(--color-primary)', margin: '0 0 10px 0', fontSize: '1.6rem', fontFamily: 'var(--font-titles)' }}>{selectedCrop.nombre} - {selectedCrop.variedad}</h3>
-                                <p style={{ margin: '0 0 5px 0', color: '#555' }}>Agricultor: <strong>{selectedCrop.agricultor}</strong></p>
+                                <p style={{ margin: '0 0 5px 0', color: '#555' }}>Agricultor: <strong>{typeof selectedCrop.agricultor === 'object' ? (selectedCrop.agricultor?.usuario?.nombre || 'Agricultor Registrado') : (selectedCrop.agricultor || 'Agricultor Registrado')}</strong></p>
                                 <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '10px' }}>
                                     {selectedCrop.certificaciones && selectedCrop.certificaciones.map((cert, idx) => (
                                         <span key={idx} style={{ backgroundColor: '#E8F5E9', color: 'var(--color-primary)', fontSize: '0.75rem', fontWeight: 'bold', padding: '4px 8px', borderRadius: '10px' }}>
@@ -598,7 +701,6 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             </div>
                         )}
 
-                        {/* Ficha técnica comercial del Lote */}
                         <div style={{
                             backgroundColor: '#F1F8F5',
                             border: '1px solid #C8E6C9',
@@ -611,55 +713,42 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                         }}>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '5px' }}>Precio x Kg</span>
-                                <strong style={{ fontSize: '1.2rem', color: 'var(--color-primary)' }}>S/ {parseFloat(selectedCrop.precio).toFixed(2)}</strong>
+                                <strong style={{ fontSize: '1.2rem', color: 'var(--color-primary)' }}>S/ {(parseFloat(selectedCrop.precio) || 0).toFixed(2)}</strong>
                             </div>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '5px' }}>Valor Total Lote</span>
                                 <strong style={{ fontSize: '1.15rem', color: '#2E7D32' }}>
-                                    S/ {((parseFloat(selectedCrop.precio) || 0) * (selectedCrop.cantidadTotal.toLowerCase().includes('ton') ? (parseFloat(selectedCrop.cantidadTotal) * 1000) : (parseFloat(selectedCrop.cantidadTotal) || 0))).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    S/ {((parseFloat(selectedCrop.precio) || 0) * (parseFloat(selectedCrop.areaSembrada || selectedCrop.area_sembrada) * 10000)).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </strong>
                             </div>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '5px' }}>Total Lote Declarado</span>
-                                <strong style={{ fontSize: '1.1rem', color: 'var(--color-text)' }}>{selectedCrop.cantidadTotal}</strong>
+                                <strong style={{ fontSize: '1.1rem', color: 'var(--color-text)' }}>
+                                    {(parseFloat(selectedCrop.areaSembrada || selectedCrop.area_sembrada) * 10).toFixed(1)} Toneladas
+                                </strong>
                             </div>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '5px' }}>Compra Mínima</span>
-                                <strong style={{ fontSize: '1.1rem', color: 'var(--color-secondary)' }}>{selectedCrop.minimoVenta}</strong>
+                                <strong style={{ fontSize: '1.1rem', color: 'var(--color-secondary)' }}>{selectedCrop.minimoVenta || '500 Kg'}</strong>
                             </div>
                         </div>
 
-                        {/* Detalles de Producción y Cultivo */}
                         <div style={{ marginBottom: '25px', border: '1px solid #eee', borderRadius: 'var(--radius-md)', padding: '20px', backgroundColor: '#FAFAFA' }}>
                             <h4 style={{ margin: '0 0 15px 0', color: 'var(--color-text)', fontSize: '1.05rem', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>🌱 Detalles de Producción y Cultivo</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '15px' }}>
                                 <div>
                                     <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Hectáreas Sembradas</span>
-                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.hectareas} Ha</span>
+                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.areaSembrada || selectedCrop.area_sembrada || 0} Ha</span>
                                 </div>
                                 <div>
                                     <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Fecha de Siembra</span>
-                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.fechaSiembra ? new Date(selectedCrop.fechaSiembra).toLocaleDateString('es-PE') : 'No especificada'}</span>
+                                    <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.fecha_inicio || selectedCrop.fechaSiembra ? new Date(selectedCrop.fecha_inicio || selectedCrop.fechaSiembra).toLocaleDateString('es-PE') : 'No especificada'}</span>
                                 </div>
                                 <div>
                                     <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Variedad de Cultivo</span>
                                     <span style={{ fontSize: '1rem', color: '#333', fontWeight: 'bold' }}>{selectedCrop.variedad || 'Estándar'}</span>
                                 </div>
                             </div>
-                            
-                            {selectedCrop.etapas && (
-                                <div style={{ marginTop: '15px' }}>
-                                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '10px' }}>Progreso de Etapas del Cultivo</span>
-                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                        {Object.entries(selectedCrop.etapas).map(([etapa, pct]) => (
-                                            <div key={etapa} style={{ flex: '1 1 100px', backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '5px', padding: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                                                <span style={{ textTransform: 'capitalize', fontSize: '0.75rem', color: '#777', display: 'block' }}>{etapa}</span>
-                                                <strong style={{ color: 'var(--color-primary)', fontSize: '1rem' }}>{pct}%</strong>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
                         <h4 style={{ color: 'var(--color-text)', marginBottom: '15px', fontSize: '1.1rem' }}>Configurar Compra de la Preventa</h4>
@@ -669,7 +758,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             <input 
                                 type="number" 
                                 name="cantidad" 
-                                placeholder={`Mínimo: ${selectedCrop.minimoVenta}`}
+                                placeholder={`Mínimo: ${selectedCrop.minimoVenta || '500 Kg'}`}
                                 value={purchaseData.cantidad} 
                                 onChange={(e) => setPurchaseData({ ...purchaseData, cantidad: e.target.value })} 
                                 style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} 
