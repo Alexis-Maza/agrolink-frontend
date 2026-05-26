@@ -44,3 +44,18 @@ export const actualizarEtapasCultivo = async (id, datos) => {
     const response = await api.post(`/cultivos/${id}/etapas`, datos);
     return response.data;
 };
+
+export const listarProductos = async () => {
+    const response = await api.get('/productos');
+    return response.data;
+};
+
+export const listarVariedadesPorProducto = async (idProducto) => {
+    const response = await api.get(`/productos/${idProducto}/variedades`);
+    return response.data;
+};
+
+export const registrarMerma = async (idCultivo, datos) => {
+    const response = await api.post(`/cultivos/${idCultivo}/merma`, datos);
+    return response.data;
+};
