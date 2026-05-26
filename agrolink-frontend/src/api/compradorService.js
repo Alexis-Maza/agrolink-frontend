@@ -19,3 +19,18 @@ export const obtenerPerfil = async () => {
     const response = await api.get('/comprador/perfil');
     return response.data;
 };
+
+export const obtenerCatalogo = async (filtros = {}) => {
+    const params = new URLSearchParams();
+    if (filtros.search) params.append('search', filtros.search);
+    if (filtros.region) params.append('region', filtros.region);
+    if (filtros.precioMax) params.append('precioMax', filtros.precioMax);
+    if (filtros.productoId) params.append('productoId', filtros.productoId);
+    const response = await api.get(`/public/catalogo?${params.toString()}`);
+    return response.data;
+};
+
+export const crearPedido = async (pedidoData) => {
+    const response = await api.post('/comprador/pedidos/masivo', pedidoData);
+    return response.data;
+};
