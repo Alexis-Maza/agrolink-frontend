@@ -1,70 +1,71 @@
-# Getting Started with Create React App
+# AgroLink 🌾🚜 - Sistema de Gestión de Producción y Comercialización Agrícola
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### 🚀 Despliegue en Vivo: [Visitar AgroLink en internet](https://agrolink-frontend.onrender.com)
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📖 Descripción del Proyecto
+**AgroLink** es una plataforma web innovadora enmarcada en el rubro de la **Tecnología Agrícola (AgriTech)** y el **Comercio Electrónico (E-commerce B2B/B2C)**. El sistema mitiga el impacto de la excesiva intermediación comercial y la falta de digitalización operativa en el sector agrícola nacional. 
 
-### `npm start`
+A través de una arquitectura moderna, AgroLink centraliza el control de los cultivos y establece un canal de comercialización directa y transparente, empoderando al productor y garantizando trazabilidad e información confiable para los compradores.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 👥 Roles de Usuario del Sistema
+El ecosistema de AgroLink está diseñado bajo un control estricto de accesos y vistas basadas en los siguientes perfiles:
 
-### `npm test`
+* **👨‍🌾 Agricultor:** Gestiona su perfil productivo (certificaciones, experiencia y hectáreas), registra lotes de siembra, documenta cronológicamente las etapas del ciclo productivo y reporta mermas o pérdidas que actualizan automáticamente el inventario disponible.
+* **🛒 Comprador:** Explora un catálogo interactivo con filtros avanzados (por categoría, precios, disponibilidad y certificaciones), gestiona un carrito de compras y consolida múltiples cultivos dentro de una misma transacción comercial.
+* **⚙️ Administrador (Nuevo Módulo):** Encargado de la supervisión global de las cuentas del sistema, consolidación del historial de transacciones para la toma de decisiones y la ejecución de tareas de mantenimiento técnico del negocio, tales como el recalculo masivo de los estados de maduración y logística de los cultivos en la base de datos.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🛠️ Stack Tecnológico Utilizado
+La plataforma implementa una separación limpia de responsabilidades mediante una arquitectura desacoplada:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* **Frontend:** React (SPA), JavaScript, Axios para el consumo de API, CSS3 con diseño *Responsive* optimizado para dispositivos móviles en el campo.
+* **Backend:** Java, Spring Boot, Spring Security, JWT (JSON Web Tokens) para la protección de rutas sensibles y Spring Data JPA para la abstracción de datos.
+* **Base de Datos:** PostgreSQL (Sistema Relacional robusto que mapea entidades complejas como cultivos, parcelas, pedidos e historiales).
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📦 Instrucciones para el Desarrollo Local
 
-### `npm run eject`
+> [!IMPORTANT]
+> Este proyecto utiliza **pnpm** como gestor de paquetes principal debido a su alto rendimiento y eficiencia en el manejo del almacenamiento.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Para garantizar la estabilidad de las dependencias y resolver problemas comunes de anidamiento de rutas en el entorno de desarrollo, el repositorio incluye un archivo de configuración `.npmrc` con la regla técnica `node-linker=hoisted`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Guía de Instalación para Colaboradores (Tus Compañeros)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Si vas a clonar el proyecto por primera vez para trabajar de forma local, colócate dentro del directorio del frontend (`agrolink-frontend`) y sigue los comandos correspondientes a tu gestor:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+#### Opción A: Utilizando `pnpm` (Recomendado)
+El archivo `.npmrc` obligará automáticamente a pnpm a estructurar las dependencias de forma plana:
+```bash
+# 1. Limpiar rastro viejo (si existiera) e instalar dependencias limpias
+Remove-Item -Recurse -Force node_modules  # (En PowerShell)
+pnpm install
 
-## Learn More
+# 2. Iniciar el servidor de desarrollo local
+pnpm start
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#### Opción B: Utilizando `npm` Tradicional
+Si prefieres utilizar el npm clásico, el archivo `.npmrc` será ignorado sin generar ningún conflicto operativo:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+# 1. Instalar dependencias generando un árbol tradicional local
+npm install
 
-### Code Splitting
+# 2. Iniciar el servidor de desarrollo local
+npm start
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🎓 Información Académica (Universidad Tecnológica del Perú)
+* **Curso:** Desarrollo Web Integrado - 24829
+* **Docente:** Huamani Uriarte, Enrique Lee
+* **Integrantes del Equipo de Desarrollo:**
+  * Caro Rojas, Dayanara Marlene
+  * Ferrel Julca, Rufo Piero
+  * Maza Lozado, Alexis Jair
+  * Guillen Canales, Eloy
+  * Coronado Melgarejo, Jair
