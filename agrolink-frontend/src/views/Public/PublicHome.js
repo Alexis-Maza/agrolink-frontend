@@ -40,6 +40,7 @@ function PublicHome() {
     const [purchaseData, setPurchaseData] = useState({ cantidad: '', metodoPago: '', porcentajeAdelanto: 0, direccionEntrega: '', fechaEntregaEstimada: '' });
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [companyModal, setCompanyModal] = useState(null); // 'about' | 'mission' | 'vision' | null
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
     // ← Cargar catálogo del backend
     useEffect(() => {
@@ -244,38 +245,18 @@ function PublicHome() {
     return (
         <div style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh', scrollBehavior: 'smooth' }}>
 
-            <style>{`
-                @media (max-width: 992px) {
-                    .page-container {
-                        flex-direction: column !important;
-                    }
-                    .sidebar-panel {
-                        width: 100% !important;
-                        height: auto !important;
-                        position: relative !important;
-                        top: 0 !important;
-                        border-right: none !important;
-                        border-bottom: 1px solid #e2e8f0 !important;
-                        padding: 25px !important;
-                    }
-                    .main-content {
-                        padding: 25px !important;
-                    }
-                }
-            `}</style>
-
             {/* NAVBAR */}
             <Navbar onCartClick={() => setIsCartOpen(true)} />
 
             {/* 1. HERO SECTION */}
-            <header style={{
+            <header className="hero-section" style={{
                 color: 'white',
                 padding: '50px 20px',
                 textAlign: 'center',
                 background: 'linear-gradient(rgba(46, 125, 50, 0.9), rgba(27, 94, 32, 0.95)), url(https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80) no-repeat center/cover',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
             }}>
-                <h1 style={{ fontSize: '2.5rem', fontFamily: 'var(--font-titles)', margin: 0, fontWeight: '800', letterSpacing: '-0.5px' }}>
+                <h1 className="hero-title" style={{ fontSize: '2.5rem', fontFamily: 'var(--font-titles)', margin: 0, fontWeight: '800', letterSpacing: '-0.5px' }}>
                     Asegura la cosecha del futuro hoy
                 </h1>
             </header>
@@ -288,7 +269,7 @@ function PublicHome() {
             }}>
 
                 {/* SIDEBAR */}
-                <aside className="sidebar-panel" style={{
+                <aside className={`sidebar-panel ${isFiltersOpen ? 'open' : ''}`} style={{
                     width: '320px',
                     backgroundColor: 'white',
                     borderRight: '1px solid #e2e8f0',
@@ -364,6 +345,26 @@ function PublicHome() {
                             })}
                         </div>
                     </div>
+
+                    {/* Botón para cerrar filtros en móviles */}
+                    <button
+                        onClick={() => setIsFiltersOpen(false)}
+                        className="mobile-close-filters-btn"
+                        style={{
+                            marginTop: '25px',
+                            width: '100%',
+                            backgroundColor: 'var(--color-primary)',
+                            color: 'white',
+                            border: 'none',
+                            padding: '12px',
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '1rem'
+                        }}
+                    >
+                        Ver {filteredCrops.length} cultivos
+                    </button>
                 </aside>
 
                 {/* CONTENIDO PRINCIPAL */}
@@ -373,6 +374,41 @@ function PublicHome() {
                     boxSizing: 'border-box'
                 }}>
                     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                        {/* Barra de Filtro para móviles */}
+                        <div className="mobile-filter-bar" style={{
+                            display: 'none',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '20px',
+                            backgroundColor: 'white',
+                            padding: '12px 20px',
+                            borderRadius: 'var(--radius-md)',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                        }}>
+                            <span style={{ fontSize: '0.95rem', fontWeight: '600', color: '#555' }}>
+                                Cultivos disponibles: <strong>{filteredCrops.length}</strong>
+                            </span>
+                            <button
+                                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                                style={{
+                                    backgroundColor: 'var(--color-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '8px 16px',
+                                    borderRadius: 'var(--radius-md)',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                }}
+                            >
+                                <span>🔍</span>
+                                <span>{isFiltersOpen ? 'Ocultar Filtros' : 'Filtrar'}</span>
+                            </button>
+                        </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
                             {visibleCrops.length === 0 ? (
                                 <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1px solid #eee' }}>
@@ -547,10 +583,10 @@ function PublicHome() {
             {/* 3. MODAL DETALLE Y ADICIÓN AL CARRITO */}
             {selectedCrop && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1100 }}>
-                    <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+                    <div className="modal-container" style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
                         <button onClick={() => setSelectedCrop(null)} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
 
-                        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
+                        <div className="modal-header" style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
                             <img src={selectedCrop.imagen} alt={selectedCrop.nombre} style={{ width: '120px', height: '120px', borderRadius: 'var(--radius-md)', objectFit: 'cover', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
                             <div>
                                 <h3 style={{ color: 'var(--color-primary)', margin: '0 0 10px 0', fontSize: '1.6rem', fontFamily: 'var(--font-titles)' }}>{selectedCrop.nombre} - {selectedCrop.variedad}</h3>
@@ -672,7 +708,7 @@ function PublicHome() {
                             <span style={{ fontSize: '0.78rem', color: '#888', marginTop: '4px', display: 'block' }}>Opcional. Si se deja vacío se calculará automáticamente (90 días).</span>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                        <div className="modal-form-grid" style={{ display: 'grid', gap: '15px', marginBottom: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Método de Pago Preferido</label>
                                 <select
@@ -725,12 +761,10 @@ function PublicHome() {
             {/* 4. SLIDING DRAWER: CARRITO PÚBLICO */}
             {isCartOpen && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1200, display: 'flex', justifyContent: 'flex-end' }} onClick={() => setIsCartOpen(false)}>
-                    <div style={{
+                    <div className="cart-drawer" style={{
                         backgroundColor: 'white',
                         width: '100%',
-                        maxWidth: '450px',
                         height: '100vh',
-                        padding: '30px',
                         display: 'flex',
                         flexDirection: 'column',
                         boxShadow: '-5px 0 25px rgba(0,0,0,0.15)',
@@ -809,7 +843,7 @@ function PublicHome() {
             {/* 5. MODALES DE INFORMACIÓN CORPORATIVA */}
             {companyModal && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1300 }} onClick={() => setCompanyModal(null)}>
-                    <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '550px', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
+                    <div className="company-modal" style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '550px', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => setCompanyModal(null)} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
 
                         {companyModal === 'about' && (

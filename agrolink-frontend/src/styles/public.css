@@ -1,0 +1,223 @@
+/* ==========================================================================
+   ESTILOS RESPONSIVOS PARA LA VISTA PÚBLICA (AGROLINK)
+   ========================================================================== */
+
+/* 1. ESTILOS DE LA NAVBAR */
+
+/* Ocultar elementos móviles por defecto en escritorio */
+.navbar-burger {
+    display: none;
+}
+
+.navbar-mobile-menu {
+    display: none;
+}
+
+/* Reglas responsivas para tablets y smartphones (<= 768px) */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 12px 20px !important;
+    }
+
+    /* Ocultar botones de autenticación normales */
+    .navbar-desktop-auth {
+        display: none !important;
+    }
+
+    /* Ocular texto del botón del carrito, manteniendo el emoji y el badge */
+    .navbar-cart-text {
+        display: none !important;
+    }
+
+    .navbar-cart-btn {
+        padding: 8px 10px !important;
+    }
+
+    /* Mostrar y dar estilo al botón hamburguesa */
+    .navbar-burger {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 24px;
+        height: 18px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        z-index: 1010;
+        outline: none;
+    }
+
+    .navbar-burger span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: var(--color-text);
+        border-radius: 2px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Transformación del hamburguesa a "X" */
+    .navbar-burger.open span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    .navbar-burger.open span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .navbar-burger.open span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+    /* Estilos del menú desplegable móvil */
+    .navbar-mobile-menu {
+        display: flex !important;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--color-surface);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-bottom: 2px solid var(--color-primary);
+        padding: 20px;
+        gap: 12px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        z-index: 999;
+    }
+
+    .navbar-mobile-menu.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+
+
+/* 2. CATÁLOGO Y FILTROS */
+
+/* Elementos móviles ocultos por defecto en escritorio */
+.mobile-filter-bar {
+    display: none;
+}
+
+.mobile-close-filters-btn {
+    display: none;
+}
+
+@media (max-width: 992px) {
+    .page-container {
+        flex-direction: column !important;
+    }
+
+    /* Mostrar barra de filtros en móviles */
+    .mobile-filter-bar {
+        display: flex !important;
+    }
+
+    /* Mostrar botón de cerrar en la barra lateral */
+    .mobile-close-filters-btn {
+        display: block !important;
+    }
+
+    /* Convertir el sidebar en un panel deslizante superpuesto en móviles */
+    .sidebar-panel {
+        width: 100% !important;
+        position: fixed !important;
+        top: 64px !important; /* Alineado justo debajo del header */
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        height: calc(100vh - 64px) !important;
+        background-color: white !important;
+        z-index: 990 !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        padding: 25px 20px !important;
+        box-sizing: border-box !important;
+        overflow-y: auto !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+        transform: translateY(-100%) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .sidebar-panel.open {
+        transform: translateY(0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    .main-content {
+        padding: 20px 15px !important;
+    }
+}
+
+
+/* 3. MODALES Y FORMULARIOS DE DETALLES */
+
+/* Clases base para modales y drawer (se configuran en desktop) */
+.modal-container {
+    padding: 40px;
+}
+
+.modal-form-grid {
+    grid-template-columns: 1fr 1fr;
+}
+
+.cart-drawer {
+    padding: 30px;
+    max-width: 450px;
+}
+
+.company-modal {
+    padding: 40px;
+}
+
+/* Reglas adaptativas para pantallas pequeñas (<= 600px) */
+@media (max-width: 600px) {
+    .modal-container {
+        padding: 20px !important;
+        max-height: 95vh !important;
+        width: 95% !important;
+    }
+
+    .modal-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 15px !important;
+    }
+
+    .modal-form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+}
+
+/* Reglas adaptativas para pantallas extra pequeñas (<= 480px) */
+@media (max-width: 480px) {
+    /* Hero section */
+    .hero-title {
+        font-size: 1.8rem !important;
+    }
+    
+    .hero-section {
+        padding: 35px 15px !important;
+    }
+
+    /* Carrito */
+    .cart-drawer {
+        padding: 20px !important;
+        max-width: 100% !important;
+    }
+
+    /* Modales de Información */
+    .company-modal {
+        padding: 20px !important;
+    }
+}
