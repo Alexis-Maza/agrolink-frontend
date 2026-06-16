@@ -107,7 +107,7 @@ function Register() {
 
             {/* CONTENEDOR DEL FORMULARIO CENTRAL */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 20px' }}>
-                <div style={{ backgroundColor: 'white', padding: '45px', borderRadius: 'var(--radius-lg)', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '580px' }}>
+                <div className="auth-card" style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '580px' }}>
 
                     <h2 style={{ textAlign: 'center', color: 'var(--color-primary)', marginBottom: '10px', fontFamily: 'var(--font-titles)', fontSize: '2.2rem' }}>Crea tu Cuenta en AgroLink</h2>
                     <p style={{ textAlign: 'center', color: '#666', marginBottom: '35px', fontSize: '1.05rem' }}>Únete al mercado de futuros agrícolas más transparente.</p>
@@ -124,7 +124,7 @@ function Register() {
                             <input type="text" name="nombres" required value={formData.nombres} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '25px' }}>
+                        <div className="auth-form-grid" style={{ marginBottom: '25px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Apellido Paterno</label>
                                 <input type="text" name="apellidoPaterno" required value={formData.apellidoPaterno} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
@@ -140,7 +140,7 @@ function Register() {
                             <input type="email" name="email" required value={formData.email} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '35px' }}>
+                        <div className="auth-form-grid" style={{ marginBottom: '35px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Contraseña</label>
                                 <input type="password" name="password" required value={formData.password} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
@@ -153,7 +153,7 @@ function Register() {
 
                         <div style={{ marginBottom: '35px' }}>
                             <label style={{ display: 'block', marginBottom: '15px', fontWeight: 'bold', textAlign: 'center', color: '#333', fontSize: '1.05rem' }}>¿Cuál será tu rol en la plataforma?</label>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div className="auth-form-grid">
                                 <button type="button" onClick={() => handleRoleSelect('AGRICULTOR')} style={{ padding: '18px 15px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', border: formData.rol === 'AGRICULTOR' ? '2px solid var(--color-primary)' : '1px solid #ccc', backgroundColor: formData.rol === 'AGRICULTOR' ? '#E8F5E9' : 'white', color: formData.rol === 'AGRICULTOR' ? 'var(--color-primary)' : '#555', transition: 'all 0.2s ease' }}>
                                     🌾 Soy Agricultor<br />
                                     <span style={{ fontSize: '0.75rem', fontWeight: 'normal', display: 'block', marginTop: '6px' }}>Quiero publicar mis cultivos</span>

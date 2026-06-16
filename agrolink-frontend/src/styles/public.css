@@ -234,6 +234,16 @@
     box-sizing: border-box;
 }
 
+.auth-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.auth-card {
+    padding: 45px;
+}
+
 @media (max-width: 600px) {
     .auth-header {
         padding: 12px 20px !important;
@@ -246,5 +256,17 @@
     .auth-back-btn {
         padding: 8px 12px !important;
     }
+
+    .auth-form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
 }
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 25px 20px !important;
+    }
+}
+
 
