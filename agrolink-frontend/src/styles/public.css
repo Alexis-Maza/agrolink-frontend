@@ -221,3 +221,30 @@
         padding: 20px !important;
     }
 }
+
+/* 4. NAVBAR DE PÁGINAS DE AUTENTICACIÓN (LOGIN / REGISTER) */
+.auth-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: var(--color-surface);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    .auth-header {
+        padding: 12px 20px !important;
+    }
+    
+    .auth-back-btn span.btn-text {
+        display: none !important;
+    }
+    
+    .auth-back-btn {
+        padding: 8px 12px !important;
+    }
+}
+
