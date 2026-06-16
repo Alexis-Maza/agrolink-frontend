@@ -15,19 +15,43 @@ function Register() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleChange = (e) => {
+        let value = e.target.value;
+        if (['nombres', 'apellidoPaterno', 'apellidoMaterno'].includes(e.target.name)) {
+            // Permitir solo letras españolas y ñ/Ñ. Eliminar números, espacios y caracteres especiales.
+            value = value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚüÜ]/g, '');
+        }
+        setFormData({ ...formData, [e.target.name]: value });
+    };
 
     const handleRoleSelect = (selectedRole) => setFormData({ ...formData, rol: selectedRole });
+
+    // Validaciones de contraseña derivadas del estado
+    const password = formData.password;
+    const hasLetter = /[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[^A-Za-z0-9ñÑáéíóúÁÉÍÓÚüÜ]/.test(password);
+    const hasMinLength = password.length >= 8;
+    const isPasswordValid = hasLetter && hasNumber && hasSpecial && hasMinLength;
 
     const handleRegisterSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
+        if (!isPasswordValid) {
+            setError('La contraseña no cumple con los requisitos mínimos de seguridad.');
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             setError('Las contraseñas no coinciden.');
             return;
         }
+
         if (!formData.rol) {
             setError('Por favor selecciona si eres Agricultor o Comprador.');
             return;
@@ -143,11 +167,148 @@ function Register() {
                         <div className="auth-form-grid" style={{ marginBottom: '35px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Contraseña</label>
-                                <input type="password" name="password" required value={formData.password} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
+                                <div style={{ position: 'relative' }}>
+                                    <input 
+                                        type={showPassword ? 'text' : 'password'} 
+                                        name="password" 
+                                        required 
+                                        value={formData.password} 
+                                        onChange={handleChange} 
+                                        onFocus={() => setIsPasswordFocused(true)}
+                                        onBlur={() => setIsPasswordFocused(false)}
+                                        style={{ width: '100%', padding: '16px', paddingRight: '48px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} 
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#777',
+                                            padding: '6px',
+                                            borderRadius: '50%',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    >
+                                        {showPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        )}
+                                    </button>
+
+                                    {/* Requisitos de seguridad de la contraseña flotante */}
+                                    {(isPasswordFocused || formData.password.length > 0) && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '100%',
+                                            left: 0,
+                                            right: 0,
+                                            marginTop: '6px',
+                                            padding: '12px 14px',
+                                            backgroundColor: 'white',
+                                            border: '1px solid #E0E6E1',
+                                            borderRadius: 'var(--radius-md)',
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                            zIndex: 10,
+                                            fontSize: '0.8rem'
+                                        }}>
+                                            <span style={{ fontWeight: 'bold', color: 'var(--color-text)', display: 'block', marginBottom: '6px' }}>
+                                                La contraseña debe cumplir con:
+                                            </span>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasMinLength ? '#2E7D32' : '#777', fontWeight: hasMinLength ? 'bold' : 'normal' }}>
+                                                    <span style={{ fontSize: '0.9rem' }}>{hasMinLength ? '✅' : '⚪'}</span> Mínimo 8 caracteres
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasLetter ? '#2E7D32' : '#777', fontWeight: hasLetter ? 'bold' : 'normal' }}>
+                                                    <span style={{ fontSize: '0.9rem' }}>{hasLetter ? '✅' : '⚪'}</span> Al menos una letra
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasNumber ? '#2E7D32' : '#777', fontWeight: hasNumber ? 'bold' : 'normal' }}>
+                                                    <span style={{ fontSize: '0.9rem' }}>{hasNumber ? '✅' : '⚪'}</span> Al menos un número
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasSpecial ? '#2E7D32' : '#777', fontWeight: hasSpecial ? 'bold' : 'normal' }}>
+                                                    <span style={{ fontSize: '0.9rem' }}>{hasSpecial ? '✅' : '⚪'}</span> Un carácter especial (ej. @$!%*?&)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Confirmar Contraseña</label>
-                                <input type="password" name="confirmPassword" required value={formData.confirmPassword} onChange={handleChange} style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} />
+                                <div style={{ position: 'relative' }}>
+                                    <input 
+                                        type={showConfirmPassword ? 'text' : 'password'} 
+                                        name="confirmPassword" 
+                                        required 
+                                        value={formData.confirmPassword} 
+                                        onChange={handleChange} 
+                                        style={{ width: '100%', padding: '16px', paddingRight: '48px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} 
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#777',
+                                            padding: '6px',
+                                            borderRadius: '50%',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                                {formData.confirmPassword && (
+                                    <div style={{
+                                        marginTop: '8px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: 'bold',
+                                        color: formData.password === formData.confirmPassword ? '#2E7D32' : '#d32f2f',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}>
+                                        <span>{formData.password === formData.confirmPassword ? '🟢 Las contraseñas coinciden' : '🔴 Las contraseñas no coinciden'}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
