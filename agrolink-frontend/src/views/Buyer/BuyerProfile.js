@@ -158,22 +158,14 @@ function BuyerProfile() {
         Administra la información de tu cuenta y datos de facturación.
       </p>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-          gap: "30px",
-        }}
-      >
+      <div className="buyer-profile-grid">
         {/* COLUMNA 1: CUENTA Y SEGURIDAD */}
         <div
+          className="buyer-profile-card"
           style={{
             backgroundColor: "white",
-            padding: "30px",
             borderRadius: "var(--radius-lg)",
             boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-            display: "flex",
-            flexDirection: "column",
           }}
         >
           <h3
@@ -254,14 +246,7 @@ function BuyerProfile() {
           </div>
 
           <form onSubmit={handleProfileSubmit} style={{ flex: 1 }}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
-                marginBottom: "20px",
-              }}
-            >
+            <div className="buyer-profile-fields-grid">
               <div>
                 <label
                   style={{
@@ -301,14 +286,7 @@ function BuyerProfile() {
                 />
               </div>
             </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
-                marginBottom: "20px",
-              }}
-            >
+            <div className="buyer-profile-fields-grid">
               <div>
                 <label
                   style={{
@@ -400,14 +378,7 @@ function BuyerProfile() {
                   style={inputStyle}
                 />
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "15px",
-                  marginBottom: "20px",
-                }}
-              >
+              <div className="buyer-profile-fields-grid">
                 <div>
                   <label
                     style={{
@@ -472,9 +443,9 @@ function BuyerProfile() {
 
         {/* COLUMNA 2: PERFIL COMERCIAL */}
         <div
+          className="buyer-profile-card"
           style={{
             backgroundColor: "white",
-            padding: "30px",
             borderRadius: "var(--radius-lg)",
             boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
           }}
@@ -490,14 +461,7 @@ function BuyerProfile() {
             Perfil Comercial
           </h3>
           <form onSubmit={handlePerfilComercialSubmit}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
-                marginBottom: "20px",
-              }}
-            >
+            <div className="buyer-profile-fields-grid">
               <div>
                 <label
                   style={{

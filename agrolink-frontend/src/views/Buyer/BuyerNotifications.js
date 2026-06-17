@@ -35,7 +35,7 @@ function BuyerNotifications() {
             <p style={{ color: '#555', fontSize: '1.1rem', marginBottom: '30px' }}>Alertas sobre tus pedidos y problemas en los cultivos adquiridos.</p>
 
             {/* PESTAÑAS (TABS) */}
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', borderBottom: '2px solid #eee', paddingBottom: '12px' }}>
+            <div className="buyer-notifications-tabs">
                 <button 
                     onClick={() => setActiveTab('new')}
                     style={{
@@ -121,16 +121,11 @@ function BuyerNotifications() {
                     </div>
                 ) : (
                     displayedNotifications.map(notif => (
-                        <div key={notif.id} style={{ 
+                        <div key={notif.id} className="buyer-notification-card" style={{ 
                             backgroundColor: 'white', 
-                            padding: '25px', 
                             borderRadius: 'var(--radius-lg)', 
                             boxShadow: '0 4px 12px rgba(0,0,0,0.04)', 
                             borderLeft: notif.tipo === 'Incidencia' ? '5px solid #d32f2f' : '5px solid var(--color-primary)', 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            alignItems: 'center',
-                            transition: 'all 0.3s ease'
                         }}>
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
