@@ -32,7 +32,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Rutas de los paneles privados */}
-        <Route path="/admin" element={<AdminHome />} />
+        <Route path="/admin/*" element={<AdminHome />} />
         <Route path="/farmer/*" element={<FarmerHome />} />
         
         {/* AQUÍ ESTÁ EL CAMBIO: Se agregó el /* al final de /buyer */}
