@@ -1,7 +1,420 @@
 .theme-admin {
-    --color-primary: #455A64;
-    /* Gris Azulado institucional */
-    --color-primary-hover: #263238;
-    --color-bg: #ECEFF1;
-    /* Fondo un poco más frío tipo oficina */
+    --color-primary: #455A64;          /* Gris azulado profesional */
+    --color-primary-hover: #37474F;    /* Gris azulado oscuro */
+    --color-bg: #ECEFF1;               /* Fondo frío y moderno */
+    --color-surface: #FFFFFF;          /* Fondo de tarjetas y tablas */
+    --color-text: #263238;             /* Texto principal muy oscuro */
+    --color-text-secondary: #546E7A;   /* Texto secundario suave */
+    --color-border: #CFD8DC;           /* Bordes sutiles */
+    --color-success: #2E7D32;          /* Estado Activo */
+    --color-danger: #C62828;           /* Estado Inactivo / Desactivar */
+    --color-info: #0288D1;             /* Variante / Acciones */
+    
+    background-color: var(--color-bg);
+    min-height: 100vh;
+    color: var(--color-text);
+    padding: 24px;
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+}
+
+/* Contenedor principal */
+.admin-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-header h1 {
+    font-family: 'Merriweather', Georgia, serif;
+    font-size: 2rem;
+    color: var(--color-primary-hover);
+    margin: 0;
+}
+
+.admin-badge {
+    background-color: var(--color-primary);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Grid de Formularios de Creación */
+.admin-creation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 768px) {
+    .admin-creation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-card {
+    background-color: var(--color-surface);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--color-border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.admin-card h2 {
+    font-size: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: var(--color-primary-hover);
+    border-left: 4px solid var(--color-primary);
+    padding-left: 10px;
+}
+
+/* Formularios */
+.admin-form-group {
+    margin-bottom: 16px;
+}
+
+.admin-form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    color: var(--color-text-secondary);
+}
+
+.admin-input, .admin-select, .admin-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    font-size: 0.9rem;
+    background-color: #F8F9FA;
+    color: var(--color-text);
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.admin-input:focus, .admin-select:focus, .admin-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background-color: #FFFFFF;
+}
+
+.admin-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Botones */
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    gap: 8px;
+}
+
+.admin-btn:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.admin-btn:active {
+    transform: scale(0.98);
+}
+
+.admin-btn-secondary {
+    background-color: #78909C;
+}
+
+.admin-btn-secondary:hover {
+    background-color: #607D8B;
+}
+
+.admin-btn-danger {
+    background-color: var(--color-danger);
+}
+
+.admin-btn-danger:hover {
+    background-color: #B71C1C;
+}
+
+.admin-btn-success {
+    background-color: var(--color-success);
+}
+
+.admin-btn-success:hover {
+    background-color: #1B5E20;
+}
+
+/* Tabla de Productos */
+.admin-table-container {
+    background-color: var(--color-surface);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--color-border);
+    overflow-x: auto;
+}
+
+.admin-table-container h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: var(--color-primary-hover);
+    font-size: 1.4rem;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-table th, .admin-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #ECEFF1;
+    font-size: 0.9rem;
+}
+
+.admin-table th {
+    background-color: #F8F9FA;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.admin-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #F5F7F8;
+}
+
+/* Badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-badge.active {
+    background-color: #E8F5E9;
+    color: var(--color-success);
+}
+
+.status-badge.inactive {
+    background-color: #FFEBEE;
+    color: var(--color-danger);
+}
+
+.details-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.details-btn:hover {
+    background-color: #CFD8DC;
+}
+
+/* Modal Estructura */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(38, 50, 56, 0.65); /* Fondo oscuro gris-azulado */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+}
+
+.modal-container {
+    background-color: var(--color-surface);
+    width: 100%;
+    max-width: 900px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: modalFadeIn 0.3s ease-out;
+    border: 1px solid var(--color-border);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-family: 'Merriweather', Georgia, serif;
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: opacity 0.2s;
+}
+
+.modal-close-btn:hover {
+    opacity: 0.8;
+}
+
+/* Layout de Doble Columna (Split view) */
+.modal-split-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .modal-split-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Columnas */
+.modal-col-left {
+    padding: 24px;
+    border-right: 1px solid var(--color-border);
+}
+
+.modal-col-right {
+    padding: 24px;
+    background-color: #F8F9FA;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+    .modal-col-left {
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+    }
+}
+
+.modal-col-left h4, .modal-col-right h4 {
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: var(--color-primary-hover);
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 8px;
+}
+
+/* Lista de Variantes en Modal */
+.variants-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.variant-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 8px;
+    background-color: #F8F9FA;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.variant-item input {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+    color: var(--color-text);
+}
+
+.variant-item input:not(:disabled) {
+    background-color: #FFFFFF;
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
+}
+
+/* Botones de acción inferiores en la edición del producto */
+.product-status-actions {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.product-status-actions span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.status-buttons-row {
+    display: flex;
+    gap: 12px;
+}
+
+.status-buttons-row button {
+    flex: 1;
 }
