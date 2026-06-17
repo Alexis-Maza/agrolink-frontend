@@ -8,6 +8,7 @@ import { logout } from '../../api/authService';
 
 function AdminHome() {
     const location = useLocation();
+    const userRole = localStorage.getItem('userRole');
 
     // Función auxiliar para determinar si un enlace está activo
     const isActive = (path) => {
@@ -70,7 +71,7 @@ function AdminHome() {
                         Agro<span style={{ color: "var(--color-secondary)" }}>Link</span>
                     </h2>
                     <p style={{ color: "#888", fontSize: "0.9rem", margin: "5px 0 0 0" }}>
-                        Panel Administrador
+                        {userRole === 'SUBADMIN' ? 'Panel Subadministrador' : 'Panel Administrador'}
                     </p>
                 </div>
 

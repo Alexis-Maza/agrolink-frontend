@@ -30,5 +30,6 @@ export const resetPassword = async (token, newPassword) => {
 export const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('loggedSubadmin');
     window.location.href = '/login';
 };

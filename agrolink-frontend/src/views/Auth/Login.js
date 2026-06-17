@@ -15,6 +15,32 @@ function Login() {
         setError('');
         setIsLoggingIn(true);
 
+        // Interceptar login si es un Subadministrador local
+        const subData = localStorage.getItem('agrolink_admin_subadmins');
+        let localSubadmin = null;
+        if (subData) {
+            try {
+                const subadmins = JSON.parse(subData);
+                localSubadmin = subadmins.find(s => s.correo === formData.email && s.clave === formData.password);
+            } catch (err) {
+                console.error("Error al buscar subadmin local", err);
+            }
+        }
+
+        if (localSubadmin) {
+            if (localSubadmin.estado !== 'Activo') {
+                setError('Esta cuenta de subadministrador está suspendida o inactiva.');
+                setIsLoggingIn(false);
+                return;
+            }
+            localStorage.setItem('token', `mock-subadmin-token-${localSubadmin.id}`);
+            localStorage.setItem('userRole', 'SUBADMIN');
+            localStorage.setItem('loggedSubadmin', JSON.stringify(localSubadmin));
+            setIsLoggingIn(false);
+            navigate('/admin');
+            return;
+        }
+
         try {
             const data = await login(formData.email, formData.password);
 
@@ -22,6 +48,7 @@ function Login() {
             const payload = JSON.parse(atob(data.token.split('.')[1]));
             const rol = payload.rol;
             localStorage.setItem('userRole', rol);
+            localStorage.removeItem('loggedSubadmin'); // Limpiar sesión anterior de subadmin
 
             // Redirigir según rol
             if (rol === 'ADMIN') {

@@ -47,33 +47,61 @@ function AdminProfile() {
 
     // --- CARGAR / INICIALIZAR DATOS ---
     const cargarDatos = useCallback(() => {
-        // Cargar Superadmin
-        const superData = localStorage.getItem(LOCAL_STORAGE_SUPER_KEY);
-        if (superData) {
-            try {
-                const parsed = JSON.parse(superData);
-                setSuperPerfil(parsed);
-                setFormSuper({ nombre: parsed.nombre, correo: parsed.correo });
-            } catch (e) {
-                console.error("Error al parsear SuperPerfil", e);
-            }
-        } else {
-            localStorage.setItem(LOCAL_STORAGE_SUPER_KEY, JSON.stringify(superPerfilInicial));
-            setSuperPerfil(superPerfilInicial);
-            setFormSuper({ nombre: superPerfilInicial.nombre, correo: superPerfilInicial.correo });
-        }
-
-        // Cargar Subadmins
+        const role = localStorage.getItem('userRole');
+        
+        // Cargar Subadmins (siempre necesario para listado de equipo y para actualizar datos del subadmin)
+        let loadedSubadmins = [];
         const subData = localStorage.getItem(LOCAL_STORAGE_SUBADMINS_KEY);
         if (subData) {
             try {
-                setSubadmins(JSON.parse(subData));
+                loadedSubadmins = JSON.parse(subData);
+                setSubadmins(loadedSubadmins);
             } catch (e) {
                 console.error("Error al parsear Subadmins", e);
             }
         } else {
             localStorage.setItem(LOCAL_STORAGE_SUBADMINS_KEY, JSON.stringify(subadminsIniciales));
             setSubadmins(subadminsIniciales);
+            loadedSubadmins = subadminsIniciales;
+        }
+
+        if (role === 'SUBADMIN') {
+            const loggedSub = localStorage.getItem('loggedSubadmin');
+            if (loggedSub) {
+                try {
+                    const parsed = JSON.parse(loggedSub);
+                    // Buscar la versión más fresca en la lista
+                    const freshSub = loadedSubadmins.find(s => s.id === parsed.id) || parsed;
+                    const profileData = {
+                        id: freshSub.id,
+                        nombre: freshSub.nombre,
+                        correo: freshSub.correo,
+                        clave: freshSub.clave,
+                        miembroDesde: freshSub.fechaRegistro || 'Junio, 2026',
+                        isSubadmin: true
+                    };
+                    setSuperPerfil(profileData);
+                    setFormSuper({ nombre: freshSub.nombre, correo: freshSub.correo });
+                } catch (e) {
+                    console.error("Error al parsear loggedSubadmin", e);
+                }
+            }
+        } else {
+            // Cargar Superadmin
+            const superData = localStorage.getItem(LOCAL_STORAGE_SUPER_KEY);
+            if (superData) {
+                try {
+                    const parsed = JSON.parse(superData);
+                    setSuperPerfil(parsed);
+                    setFormSuper({ nombre: parsed.nombre, correo: parsed.correo });
+                } catch (e) {
+                    console.error("Error al parsear SuperPerfil", e);
+                }
+            } else {
+                localStorage.setItem(LOCAL_STORAGE_SUPER_KEY, JSON.stringify(superPerfilInicial));
+                setSuperPerfil(superPerfilInicial);
+                setFormSuper({ nombre: superPerfilInicial.nombre, correo: superPerfilInicial.correo });
+            }
         }
     }, []);
 
@@ -107,14 +135,41 @@ function AdminProfile() {
             return;
         }
 
-        const actualizado = {
-            ...superPerfil,
-            nombre: formSuper.nombre.trim(),
-            correo: formSuper.correo.trim()
-        };
+        const role = localStorage.getItem('userRole');
 
-        localStorage.setItem(LOCAL_STORAGE_SUPER_KEY, JSON.stringify(actualizado));
-        setSuperPerfil(actualizado);
+        if (role === 'SUBADMIN') {
+            // Actualizar datos del subadmin en la lista de subadmins
+            const actualizados = subadmins.map(s => {
+                if (s.id === superPerfil.id) {
+                    return {
+                        ...s,
+                        correo: formSuper.correo.trim()
+                    };
+                }
+                return s;
+            });
+            localStorage.setItem(LOCAL_STORAGE_SUBADMINS_KEY, JSON.stringify(actualizados));
+            setSubadmins(actualizados);
+
+            // Actualizar loggedSubadmin session
+            const freshSub = actualizados.find(s => s.id === superPerfil.id);
+            localStorage.setItem('loggedSubadmin', JSON.stringify(freshSub));
+
+            setSuperPerfil({
+                ...superPerfil,
+                correo: freshSub.correo
+            });
+        } else {
+            // Superadmin normal
+            const actualizado = {
+                ...superPerfil,
+                nombre: formSuper.nombre.trim(),
+                correo: formSuper.correo.trim()
+            };
+            localStorage.setItem(LOCAL_STORAGE_SUPER_KEY, JSON.stringify(actualizado));
+            setSuperPerfil(actualizado);
+        }
+
         setIsEditingEmail(false);
         setMsgSuper({ type: 'success', text: '¡Datos actualizados con éxito!' });
         setTimeout(() => setMsgSuper({ type: '', text: '' }), 3000);
@@ -149,13 +204,40 @@ function AdminProfile() {
             return;
         }
 
-        const actualizado = {
-            ...superPerfil,
-            clave: formClaveSuper.nueva
-        };
+        const role = localStorage.getItem('userRole');
 
-        localStorage.setItem(LOCAL_STORAGE_SUPER_KEY, JSON.stringify(actualizado));
-        setSuperPerfil(actualizado);
+        if (role === 'SUBADMIN') {
+            // Actualizar contraseña del subadmin en la lista
+            const actualizados = subadmins.map(s => {
+                if (s.id === superPerfil.id) {
+                    return {
+                        ...s,
+                        clave: formClaveSuper.nueva
+                    };
+                }
+                return s;
+            });
+            localStorage.setItem(LOCAL_STORAGE_SUBADMINS_KEY, JSON.stringify(actualizados));
+            setSubadmins(actualizados);
+
+            // Actualizar loggedSubadmin session
+            const freshSub = actualizados.find(s => s.id === superPerfil.id);
+            localStorage.setItem('loggedSubadmin', JSON.stringify(freshSub));
+
+            setSuperPerfil({
+                ...superPerfil,
+                clave: freshSub.clave
+            });
+        } else {
+            // Superadmin normal
+            const actualizado = {
+                ...superPerfil,
+                clave: formClaveSuper.nueva
+            };
+            localStorage.setItem(LOCAL_STORAGE_SUPER_KEY, JSON.stringify(actualizado));
+            setSuperPerfil(actualizado);
+        }
+
         setFormClaveSuper({ actual: '', nueva: '', confirmar: '' });
         setIsEditingPassword(false);
         setMsgClave({ type: 'success', text: '¡Contraseña cambiada exitosamente!' });
@@ -260,21 +342,25 @@ function AdminProfile() {
             {/* Cabecera */}
             <div className="admin-header">
                 <h1>Mi Perfil</h1>
-                <span className="admin-badge">Super Administrador</span>
+                <span className="admin-badge">
+                    {superPerfil.isSubadmin ? 'Subadministrador' : 'Super Administrador'}
+                </span>
             </div>
 
-            {/* Pestañas de Navegación (Tabs) */}
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '24px' }}>
-                <button style={tabStyle('mis-datos')} onClick={() => setActiveTab('mis-datos')}>
-                    👤 Mis Datos
-                </button>
-                <button style={tabStyle('equipo')} onClick={() => setActiveTab('equipo')}>
-                    👥 Equipo de Administradores
-                </button>
-            </div>
+            {/* Pestañas de Navegación (Tabs) - Solo para Superadmin */}
+            {!superPerfil.isSubadmin && (
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '24px' }}>
+                    <button style={tabStyle('mis-datos')} onClick={() => setActiveTab('mis-datos')}>
+                        👤 Mis Datos
+                    </button>
+                    <button style={tabStyle('equipo')} onClick={() => setActiveTab('equipo')}>
+                        👥 Equipo de Administradores
+                    </button>
+                </div>
+            )}
 
             {/* CONTENIDO DE TABS */}
-            {activeTab === 'mis-datos' ? (
+            {activeTab === 'mis-datos' || superPerfil.isSubadmin ? (
                 /* PESTAÑA: MIS DATOS */
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     
@@ -301,7 +387,9 @@ function AdminProfile() {
                             <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
                                 <div>
                                     <strong style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem', marginRight: '6px' }}>RANGO DEL SISTEMA:</strong>
-                                    <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>SUPERADMINISTRADOR</span>
+                                    <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
+                                        {superPerfil.isSubadmin ? 'SUBADMINISTRADOR' : 'SUPERADMINISTRADOR'}
+                                    </span>
                                 </div>
                                 <div>
                                     <strong style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem', marginRight: '6px' }}>MIEMBRO DESDE:</strong>
