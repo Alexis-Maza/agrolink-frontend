@@ -209,3 +209,134 @@
         padding: 14px !important;
     }
 }
+
+/* CLASES DE COMPRAS (PURCHASES) */
+.buyer-purchases-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.buyer-purchases-table td:last-child {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.buyer-purchases-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.buyer-purchases-prod-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 18px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.buyer-purchases-prod-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.buyer-purchases-finance-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.buyer-purchases-modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .buyer-purchases-table thead {
+        display: none;
+    }
+
+    .buyer-purchases-table,
+    .buyer-purchases-table tbody,
+    .buyer-purchases-table tr,
+    .buyer-purchases-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .buyer-purchases-table tr {
+        border-bottom: 2px solid #eee;
+        padding: 12px 0;
+    }
+
+    .buyer-purchases-table td {
+        text-align: right;
+        padding: 10px 15px;
+        position: relative;
+        border-bottom: none;
+        font-size: 0.95rem;
+    }
+
+    .buyer-purchases-table td:last-child {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .buyer-purchases-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        text-align: left;
+        font-weight: bold;
+        color: #555;
+    }
+}
+
+@media (max-width: 640px) {
+    .buyer-purchases-prod-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .buyer-purchases-prod-header button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .buyer-purchases-info-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .buyer-purchases-finance-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .buyer-purchases-modal-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .buyer-purchases-modal-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .buyer-purchases-prod-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

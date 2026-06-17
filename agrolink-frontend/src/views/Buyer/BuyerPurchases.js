@@ -218,28 +218,30 @@ function BuyerPurchases() {
                     </button>
                 </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead><tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}><th style={{ padding: '15px', color: '#555' }}>N° Pedido</th><th style={{ padding: '15px', color: '#555' }}>Fecha</th><th style={{ padding: '15px', color: '#555' }}>Estado</th><th style={{ padding: '15px', color: '#555' }}>Total</th><th style={{ padding: '15px', color: '#555', textAlign: 'center' }}>Acciones</th></tr></thead>
-                    <tbody>
-                        {filteredOrders.map(order => (
-                            <tr key={order.id} style={{ borderBottom: '1px solid #eee' }}>
-                                <td style={{ padding: '15px', fontWeight: 'bold', color: 'var(--color-primary)' }}>{order.id}</td>
-                                <td style={{ padding: '15px', color: '#555' }}>{order.fecha}</td>
-                                <td style={{ padding: '15px' }}><span style={{ padding: '5px 10px', borderRadius: '15px', fontSize: '0.85rem', fontWeight: 'bold', backgroundColor: order.estado === 'Entregado' ? '#D4EDDA' : order.estado === 'Cancelado' ? '#FFEBEE' : '#FFF3E0', color: order.estado === 'Entregado' ? '#155724' : order.estado === 'Cancelado' ? '#d32f2f' : '#E65100' }}>{order.estado}</span></td>
-                                <td style={{ padding: '15px', fontWeight: 'bold' }}>{order.total}</td>
-                                <td style={{ padding: '15px', textAlign: 'center', display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                    <button onClick={() => setSelectedOrder(order)} style={{ backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', padding: '8px 15px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}>Ver Detalle</button>
-                                    <button onClick={() => handleDownloadBoleta(order)} style={{ backgroundColor: '#E8F5E9', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}>📄 Boleta</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                <div style={{ overflowX: 'auto' }}>
+                    <table className="buyer-purchases-table">
+                        <thead><tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}><th style={{ padding: '15px', color: '#555' }}>N° Pedido</th><th style={{ padding: '15px', color: '#555' }}>Fecha</th><th style={{ padding: '15px', color: '#555' }}>Estado</th><th style={{ padding: '15px', color: '#555' }}>Total</th><th style={{ padding: '15px', color: '#555', textAlign: 'center' }}>Acciones</th></tr></thead>
+                        <tbody>
+                            {filteredOrders.map(order => (
+                                <tr key={order.id} style={{ borderBottom: '1px solid #eee' }}>
+                                    <td data-label="N° Pedido" style={{ padding: '15px', fontWeight: 'bold', color: 'var(--color-primary)' }}>{order.id}</td>
+                                    <td data-label="Fecha" style={{ padding: '15px', color: '#555' }}>{order.fecha}</td>
+                                    <td data-label="Estado" style={{ padding: '15px' }}><span style={{ padding: '5px 10px', borderRadius: '15px', fontSize: '0.85rem', fontWeight: 'bold', backgroundColor: order.estado === 'Entregado' ? '#D4EDDA' : order.estado === 'Cancelado' ? '#FFEBEE' : '#FFF3E0', color: order.estado === 'Entregado' ? '#155724' : order.estado === 'Cancelado' ? '#d32f2f' : '#E65100' }}>{order.estado}</span></td>
+                                    <td data-label="Total" style={{ padding: '15px', fontWeight: 'bold' }}>{order.total}</td>
+                                    <td data-label="Acciones" style={{ padding: '15px', textAlign: 'center' }}>
+                                        <button onClick={() => setSelectedOrder(order)} style={{ backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', padding: '8px 15px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}>Ver Detalle</button>
+                                        <button onClick={() => handleDownloadBoleta(order)} style={{ backgroundColor: '#E8F5E9', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}>📄 Boleta</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {selectedOrder && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                    <div style={{ backgroundColor: 'white', padding: '35px', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                <div className="buyer-modal-overlay" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+                    <div className="buyer-modal-container" style={{ backgroundColor: 'white', padding: '35px', borderRadius: 'var(--radius-lg)', maxWidth: '700px' }}>
                         <button onClick={() => setSelectedOrder(null)} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', cursor: 'pointer' }}>&times;</button>
                         
                         <div style={{ marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '15px' }}>
@@ -249,7 +251,7 @@ function BuyerPurchases() {
                         {/* INFORMACIÓN DE LA ORDEN */}
                         <div style={{ backgroundColor: '#F4F7F5', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid #e0e0e0', marginBottom: '25px' }}>
                             <h4 style={{ margin: '0 0 15px 0', color: 'var(--color-text)', fontSize: '1.1rem', borderBottom: '1px dashed #ccc', paddingBottom: '5px' }}>📋 Información de la Orden</h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                            <div className="buyer-purchases-info-grid">
                                 <div>
                                     <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: '#555' }}>📅 Fecha de Compra: <br/><strong style={{color: '#333', fontSize: '1rem'}}>{selectedOrder.fecha}</strong></p>
                                     <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: '#555' }}>🚚 Entrega Estimada: <br/><strong style={{color: 'var(--color-secondary)', fontSize: '1rem'}}>{selectedOrder.fechaEntregaEstimada}</strong></p>
@@ -268,8 +270,8 @@ function BuyerPurchases() {
                         {selectedOrder.productos.map((prod, idx) => (
                             <div key={idx} style={{ backgroundColor: '#FFFFFF', borderRadius: 'var(--radius-md)', border: '1px solid #eee', marginBottom: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
                                 {/* Cabecera del producto */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px', borderBottom: '1px solid #f0f0f0' }}>
-                                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                <div className="buyer-purchases-prod-header">
+                                    <div className="buyer-purchases-prod-info">
                                         <img src={prod.imagen} alt={prod.nombre} style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover' }} />
                                         <div>
                                             <h4 style={{ margin: '0 0 5px 0', color: 'var(--color-text)', fontSize: '1.1rem' }}>{prod.nombre}</h4>
@@ -285,7 +287,7 @@ function BuyerPurchases() {
                                 </div>
 
                                 {/* Resumen financiero */}
-                                <div style={{ backgroundColor: '#F8F9FA', padding: '14px 18px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                                <div className="buyer-purchases-finance-grid" style={{ backgroundColor: '#F8F9FA', padding: '14px 18px' }}>
                                     <div>
                                         <span style={{ fontSize: '0.8rem', color: '#555', display: 'block' }}>Cantidad</span>
                                         <strong style={{ color: '#333' }}>{prod.cantidad}</strong>
@@ -377,7 +379,7 @@ function BuyerPurchases() {
                             </div>
                         ))}
 
-                        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="buyer-purchases-modal-actions">
                             <button onClick={() => handleDownloadBoleta(selectedOrder)} style={{ backgroundColor: '#E8F5E9', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', padding: '10px 20px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 📄 Descargar Boleta de Venta
                             </button>
