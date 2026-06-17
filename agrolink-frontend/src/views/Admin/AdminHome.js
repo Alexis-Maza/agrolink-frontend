@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import AdminProducts from './AdminProducts';
-import AdminUsers from './AdminUsers';
+import AdminFarmers from './AdminFarmers';
 import AdminProfile from './AdminProfile';
 import { logout } from '../../api/authService';
 
@@ -78,8 +78,8 @@ function AdminHome() {
                     <Link to="/admin/productos" style={linkStyle("/admin/productos")}>
                         📦 Productos
                     </Link>
-                    <Link to="/admin/usuarios" style={linkStyle("/admin/usuarios")}>
-                        👥 Usuarios
+                    <Link to="/admin/agricultores" style={linkStyle("/admin/agricultores")}>
+                        👨‍🌾 Agricultores
                     </Link>
                     <Link to="/admin/perfil" style={linkStyle("/admin/perfil")}>
                         👤 Mi Perfil
@@ -108,7 +108,7 @@ function AdminHome() {
                     {/* Redirección automática de /admin a /admin/productos */}
                     <Route path="/" element={<Navigate to="productos" replace />} />
                     <Route path="productos" element={<AdminProducts />} />
-                    <Route path="usuarios" element={<AdminUsers />} />
+                    <Route path="agricultores" element={<AdminFarmers />} />
                     <Route path="perfil" element={<AdminProfile />} />
                 </Routes>
             </main>
