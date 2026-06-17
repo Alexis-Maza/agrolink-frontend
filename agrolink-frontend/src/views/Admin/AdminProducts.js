@@ -327,48 +327,8 @@ function AdminProducts() {
                         {/* Cuerpo de Doble Columna */}
                         <div className="modal-split-body">
                             
-                            {/* Columna Izquierda: Variantes */}
+                            {/* Columna Izquierda: Edición de Producto */}
                             <div className="modal-col-left">
-                                <h4>Variantes del Producto</h4>
-                                {selectedProd.variedades && selectedProd.variedades.length > 0 ? (
-                                    <ul className="variants-list">
-                                        {selectedProd.variedades.map(v => (
-                                            <li key={v.id} className="variant-item">
-                                                <input 
-                                                    type="text"
-                                                    value={editingVarId === v.id ? editVarName : v.nombre}
-                                                    disabled={editingVarId !== v.id}
-                                                    onChange={(e) => setEditVarName(e.target.value)}
-                                                />
-                                                {editingVarId === v.id ? (
-                                                    <button 
-                                                        className="admin-btn admin-btn-success"
-                                                        style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                                                        onClick={() => handleGuardarVariedad(v.id)}
-                                                    >
-                                                        Guardar
-                                                    </button>
-                                                ) : (
-                                                    <button 
-                                                        className="admin-btn"
-                                                        style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: '#78909C' }}
-                                                        onClick={() => iniciarEdicionVariante(v)}
-                                                    >
-                                                        Editar
-                                                    </button>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                                        Este producto aún no cuenta con variantes registradas.
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Columna Derecha: Edición de Producto */}
-                            <div className="modal-col-right">
                                 <div>
                                     <h4>Datos del Producto</h4>
                                     <div className="admin-form-group">
@@ -412,7 +372,7 @@ function AdminProducts() {
                                 </div>
 
                                 {/* Cambio de Estado */}
-                                <div className="product-status-actions">
+                                <div className="product-status-actions" style={{ marginTop: '24px' }}>
                                     <span>Estado del Producto en Plataforma</span>
                                     <div className="status-buttons-row">
                                         <button 
@@ -433,7 +393,46 @@ function AdminProducts() {
                                         </button>
                                     </div>
                                 </div>
+                            </div>
 
+                            {/* Columna Derecha: Variantes */}
+                            <div className="modal-col-right" style={{ justifyContent: 'flex-start' }}>
+                                <h4>Variantes del Producto</h4>
+                                {selectedProd.variedades && selectedProd.variedades.length > 0 ? (
+                                    <ul className="variants-list">
+                                        {selectedProd.variedades.map(v => (
+                                            <li key={v.id} className="variant-item">
+                                                <input 
+                                                    type="text"
+                                                    value={editingVarId === v.id ? editVarName : v.nombre}
+                                                    disabled={editingVarId !== v.id}
+                                                    onChange={(e) => setEditVarName(e.target.value)}
+                                                />
+                                                {editingVarId === v.id ? (
+                                                    <button 
+                                                        className="admin-btn admin-btn-success"
+                                                        style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                                                        onClick={() => handleGuardarVariedad(v.id)}
+                                                    >
+                                                        Guardar
+                                                    </button>
+                                                ) : (
+                                                    <button 
+                                                        className="admin-btn"
+                                                        style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: '#78909C' }}
+                                                        onClick={() => iniciarEdicionVariante(v)}
+                                                    >
+                                                        Editar
+                                                    </button>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                                        Este producto aún no cuenta con variantes registradas.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
