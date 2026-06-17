@@ -16,6 +16,7 @@ function BuyerHome() {
   // Estado global para ocultar productos ya añadidos al carrito
   const [acquiredIds, setAcquiredIds] = useState([]);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkNotifications = () => {
@@ -62,22 +63,51 @@ function BuyerHome() {
 
   return (
     <div
+      className="buyer-layout"
       style={{
-        display: "flex",
-        minHeight: "100vh",
         backgroundColor: "var(--color-bg)",
       }}
     >
+      {/* HEADER MÓVIL */}
+      <div className="buyer-mobile-header">
+        <div className="buyer-mobile-logo">
+          <h2
+            style={{
+              color: "var(--color-primary)",
+              fontFamily: "var(--font-titles)",
+              margin: 0,
+              fontSize: "1.35rem",
+            }}
+          >
+            Agro<span style={{ color: "var(--color-secondary)" }}>Link</span>
+          </h2>
+        </div>
+        <button
+          className="buyer-hamburger-btn"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          style={{
+            color: "var(--color-primary)",
+          }}
+          aria-label="Abrir menú"
+        >
+          ☰
+        </button>
+      </div>
+
+      {/* OVERLAY PARA MÓVIL */}
+      {isMobileMenuOpen && (
+        <div
+          className="buyer-sidebar-overlay"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* BARRA LATERAL */}
       <nav
+        className={`buyer-sidebar ${isMobileMenuOpen ? "open" : ""}`}
         style={{
-          width: "250px",
           backgroundColor: "white",
           boxShadow: "2px 0 5px rgba(0,0,0,0.05)",
-          display: "flex",
-          flexDirection: "column",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
         }}
       >
         <div
@@ -102,23 +132,40 @@ function BuyerHome() {
           </p>
         </div>
         <div style={{ flex: 1, padding: "20px 0" }}>
-          <Link to="/buyer" style={linkStyle("/buyer")}>
+          <Link
+            to="/buyer"
+            className="buyer-menu-link"
+            style={linkStyle("/buyer")}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
             🌿 Catálogo
           </Link>
-          <Link to="/buyer/cart" style={linkStyle("/buyer/cart")}>
+          <Link
+            to="/buyer/cart"
+            className="buyer-menu-link"
+            style={linkStyle("/buyer/cart")}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
             🛒 Mi Carrito
           </Link>
-          <Link to="/buyer/purchases" style={linkStyle("/buyer/purchases")}>
+          <Link
+            to="/buyer/purchases"
+            className="buyer-menu-link"
+            style={linkStyle("/buyer/purchases")}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
             📦 Mis Compras
           </Link>
           <Link
             to="/buyer/notifications"
+            className="buyer-menu-link"
             style={{
               ...linkStyle("/buyer/notifications"),
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
             }}
+            onClick={() => setIsMobileMenuOpen(false)}
           >
             <span>🔔 Notificaciones</span>
             {unreadNotificationsCount > 0 && (
@@ -137,14 +184,22 @@ function BuyerHome() {
               </span>
             )}
           </Link>
-          <Link to="/buyer/profile" style={linkStyle("/buyer/profile")}>
+          <Link
+            to="/buyer/profile"
+            className="buyer-menu-link"
+            style={linkStyle("/buyer/profile")}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
             👤 Mi Perfil
           </Link>
         </div>
         <div style={{ padding: "20px", borderTop: "1px solid #eee" }}>
           <Link
             to="/"
-            onClick={logout}
+            onClick={() => {
+              logout();
+              setIsMobileMenuOpen(false);
+            }}
             style={{
               color: "#dc3545",
               textDecoration: "none",
@@ -156,7 +211,8 @@ function BuyerHome() {
         </div>
       </nav>
 
-      <main style={{ flex: 1, padding: "40px" }}>
+      {/* CONTENIDO PRINCIPAL */}
+      <main className="buyer-main">
         <Routes>
           <Route
             path="/"

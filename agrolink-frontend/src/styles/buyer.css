@@ -5,3 +5,207 @@
     --color-secondary: #FF9800;
     /* Tu Naranja para el botón de "Comprar ahora" */
 }
+
+/* LAYOUT ESTRUCTURAL */
+.buyer-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.buyer-sidebar {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.buyer-mobile-header {
+    display: none;
+}
+
+.buyer-main {
+    flex: 1;
+    padding: 40px;
+    min-width: 0; /* Evita desbordamientos de flex */
+}
+
+/* MENÚ Y NAVEGACIÓN */
+.buyer-menu-link {
+    display: block;
+    padding: 15px 20px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+/* MEDIA QUERIES PARA LAYOUT (MÓVIL) */
+@media (max-width: 768px) {
+    .buyer-layout {
+        flex-direction: column;
+    }
+
+    .buyer-mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: white;
+        border-bottom: 1px solid #eee;
+        position: sticky;
+        top: 0;
+        z-index: 990;
+    }
+
+    .buyer-mobile-logo h2 {
+        font-family: var(--font-titles);
+        margin: 0;
+        font-size: 1.35rem;
+    }
+
+    .buyer-hamburger-btn {
+        background: none;
+        border: none;
+        font-size: 1.6rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .buyer-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        transform: translateX(-100%);
+    }
+
+    .buyer-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .buyer-sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(2px);
+        z-index: 995;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    .buyer-main {
+        padding: 20px 15px;
+    }
+}
+
+/* ANIMACIONES */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* CLASES DE CATÁLOGO */
+.buyer-catalog-search {
+    margin-bottom: 30px;
+}
+
+.buyer-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 30px;
+}
+
+/* MODAL DE DETALLE Y COMPRA */
+.buyer-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 15px;
+    backdrop-filter: blur(3px);
+}
+
+.buyer-modal-container {
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.buyer-modal-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.buyer-modal-fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.buyer-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+/* MEDIA QUERIES PARA CATÁLOGO Y MODAL (MÓVIL Y TABLET) */
+@media (max-width: 768px) {
+    .buyer-catalog-search {
+        padding: 15px !important;
+        margin-bottom: 20px;
+    }
+
+    .buyer-modal-container {
+        padding: 25px 20px !important;
+        max-height: 95vh;
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .buyer-catalog-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .buyer-modal-details-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px !important;
+    }
+
+    .buyer-modal-fields-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .buyer-modal-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .buyer-modal-actions button {
+        width: 100%;
+        padding: 14px !important;
+    }
+}

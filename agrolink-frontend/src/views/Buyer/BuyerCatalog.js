@@ -128,7 +128,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             <p style={{ color: '#555', fontSize: '1.1rem', marginBottom: '25px' }}>Explora las siembras disponibles y asegura tu compra con adelantos.</p>
 
             {/* BARRA DE BÚSQUEDA */}
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: 'var(--radius-lg)', boxShadow: '0 4px 15px rgba(0,0,0,0.04)', marginBottom: '30px' }}>
+            <div className="buyer-catalog-search" style={{ backgroundColor: 'white', padding: '20px', borderRadius: 'var(--radius-lg)', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
                 <div style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}>🔍</span>
                     <input
@@ -142,7 +142,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
             </div>
 
             {/* GRILLA DE PRODUCTOS */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '30px' }}>
+            <div className="buyer-catalog-grid">
                 {visibleCrops.length === 0 ? (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px', backgroundColor: 'white', borderRadius: 'var(--radius-lg)' }}>
                         <span style={{ fontSize: '3rem', display: 'block', marginBottom: '15px' }}>🍃</span>
@@ -201,13 +201,13 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
 
             {/* MODAL DETALLE Y COMPRA */}
             {selectedCrop && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                    <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)', width: '90%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                <div className="buyer-modal-overlay" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+                    <div className="buyer-modal-container" style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)' }}>
                         <button onClick={handleCloseModal} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
 
                         <h3 style={{ color: 'var(--color-primary)', margin: '0 0 20px 0', fontSize: '1.6rem' }}>{selectedCrop.nombreProductoVariedad}</h3>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', backgroundColor: '#F1F8F5', padding: '18px', borderRadius: 'var(--radius-md)', marginBottom: '25px' }}>
+                        <div className="buyer-modal-details-grid" style={{ backgroundColor: '#F1F8F5', padding: '18px', borderRadius: 'var(--radius-md)' }}>
                             <div>
                                 <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', fontWeight: 'bold' }}>Precio x {selectedCrop.unidad}</span>
                                 <strong style={{ fontSize: '1.2rem', color: 'var(--color-primary)' }}>S/ {parseFloat(selectedCrop.precio).toFixed(2)}</strong>
@@ -236,7 +236,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             <input type="text" value={purchaseData.direccionEntrega} onChange={(e) => setPurchaseData({ ...purchaseData, direccionEntrega: e.target.value })} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', boxSizing: 'border-box' }} />
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                        <div className="buyer-modal-fields-grid">
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Método de Pago</label>
                                 <select value={purchaseData.metodoPago} onChange={(e) => setPurchaseData({ ...purchaseData, metodoPago: e.target.value })} style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem', backgroundColor: 'white' }}>
@@ -265,7 +265,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             </div>
                         )}
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
+                        <div className="buyer-modal-actions">
                             <button onClick={handleCloseModal} style={{ background: 'transparent', border: '1px solid #ccc', padding: '10px 20px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold' }}>Cancelar</button>
                             <button onClick={handleAddToCart} style={{ backgroundColor: 'var(--color-secondary)', color: 'white', border: 'none', padding: '10px 25px', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 'bold' }}>
                                 🛒 Añadir al Carrito
