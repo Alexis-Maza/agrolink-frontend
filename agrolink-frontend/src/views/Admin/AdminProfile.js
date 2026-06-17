@@ -22,9 +22,12 @@ function AdminProfile() {
 
     // Datos Superadmin (Mi Perfil)
     const [superPerfil, setSuperPerfil] = useState(null);
-    const [isEditingSuper, setIsEditingSuper] = useState(false);
     const [formSuper, setFormSuper] = useState({ nombre: '', correo: '' });
     const [formClaveSuper, setFormClaveSuper] = useState({ actual: '', nueva: '', confirmar: '' });
+    const [showPass, setShowPass] = useState({ actual: false, nueva: false, confirmar: false });
+    const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+    const [isEditingEmail, setIsEditingEmail] = useState(false);
+    const [isEditingPassword, setIsEditingPassword] = useState(false);
     
     // Lista Subadmins (Mi Equipo)
     const [subadmins, setSubadmins] = useState([]);
@@ -112,12 +115,18 @@ function AdminProfile() {
 
         localStorage.setItem(LOCAL_STORAGE_SUPER_KEY, JSON.stringify(actualizado));
         setSuperPerfil(actualizado);
-        setIsEditingSuper(false);
+        setIsEditingEmail(false);
         setMsgSuper({ type: 'success', text: '¡Datos actualizados con éxito!' });
         setTimeout(() => setMsgSuper({ type: '', text: '' }), 3000);
     };
 
     // Cambiar contraseña
+    // Requisitos dinámicos de contraseña
+    const tieneMinLongitud = formClaveSuper.nueva.length >= 8;
+    const tieneNumero = /[0-9]/.test(formClaveSuper.nueva);
+    const tieneMayuscula = /[A-Z]/.test(formClaveSuper.nueva);
+    const tieneCaracterEspecial = /[^A-Za-z0-9]/.test(formClaveSuper.nueva);
+
     const handleCambiarClaveSuper = (e) => {
         e.preventDefault();
         if (!formClaveSuper.actual || !formClaveSuper.nueva || !formClaveSuper.confirmar) {
@@ -130,8 +139,8 @@ function AdminProfile() {
             return;
         }
 
-        if (formClaveSuper.nueva.length < 6) {
-            setMsgClave({ type: 'error', text: 'La nueva contraseña debe tener al menos 6 caracteres.' });
+        if (!tieneMinLongitud || !tieneNumero || !tieneMayuscula || !tieneCaracterEspecial) {
+            setMsgClave({ type: 'error', text: 'La nueva contraseña debe cumplir con todos los requisitos de seguridad.' });
             return;
         }
 
@@ -148,6 +157,7 @@ function AdminProfile() {
         localStorage.setItem(LOCAL_STORAGE_SUPER_KEY, JSON.stringify(actualizado));
         setSuperPerfil(actualizado);
         setFormClaveSuper({ actual: '', nueva: '', confirmar: '' });
+        setIsEditingPassword(false);
         setMsgClave({ type: 'success', text: '¡Contraseña cambiada exitosamente!' });
         setTimeout(() => setMsgClave({ type: '', text: '' }), 3000);
     };
@@ -266,164 +276,375 @@ function AdminProfile() {
             {/* CONTENIDO DE TABS */}
             {activeTab === 'mis-datos' ? (
                 /* PESTAÑA: MIS DATOS */
-                <div className="admin-creation-grid">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     
-                    {/* Tarjeta de Detalles Fijos */}
-                    <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                        <div>
-                            <h2>Detalles de Cuenta</h2>
-                            <div style={{ textAlign: 'center', margin: '24px 0' }}>
-                                <div style={{ 
-                                    width: '90px', 
-                                    height: '90px', 
-                                    borderRadius: '50%', 
-                                    backgroundColor: 'var(--color-primary)', 
-                                    color: '#FFFFFF',
-                                    fontSize: '2.5rem',
-                                    fontWeight: 700,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto 16px auto'
-                                }}>
-                                    {superPerfil.nombre.charAt(0)}
-                                </div>
-                                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem' }}>{superPerfil.nombre}</h3>
-                                <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{superPerfil.correo}</p>
-                            </div>
-
-                            <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '16px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '8px' }}>
-                                    <span style={{ color: 'var(--color-text-secondary)', fontWeight: 600 }}>Rango del Sistema:</span>
+                    {/* Tarjeta de Detalles Fijos (Diseño Horizontal) */}
+                    <div className="admin-card" style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap', padding: '24px' }}>
+                        <div style={{ 
+                            width: '80px', 
+                            height: '80px', 
+                            borderRadius: '50%', 
+                            backgroundColor: 'var(--color-primary)', 
+                            color: '#FFFFFF',
+                            fontSize: '2.2rem',
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            {superPerfil.nombre.charAt(0)}
+                        </div>
+                        <div style={{ flex: 1, minWidth: '200px' }}>
+                            <h3 style={{ margin: '0 0 4px 0', fontSize: '1.4rem' }}>{superPerfil.nombre}</h3>
+                            <p style={{ margin: '0 0 12px 0', color: 'var(--color-text-secondary)', fontSize: '0.95rem' }}>{superPerfil.correo}</p>
+                            
+                            <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
+                                <div>
+                                    <strong style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem', marginRight: '6px' }}>RANGO DEL SISTEMA:</strong>
                                     <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>SUPERADMINISTRADOR</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                    <span style={{ color: 'var(--color-text-secondary)', fontWeight: 600 }}>Miembro desde:</span>
-                                    <span>{superPerfil.miembroDesde}</span>
+                                <div>
+                                    <strong style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem', marginRight: '6px' }}>MIEMBRO DESDE:</strong>
+                                    <span style={{ fontWeight: 600 }}>{superPerfil.miembroDesde}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Formularios de Actualización */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                        
-                        {/* Formulario 1: Datos Personales */}
-                        <div className="admin-card">
-                            <h2>Actualizar Información</h2>
-                            <form onSubmit={handleGuardarDatosSuper}>
-                                <div className="admin-form-group">
-                                    <label htmlFor="super-nombre">Nombre de Administrador</label>
-                                    <input 
-                                        id="super-nombre"
-                                        type="text" 
-                                        className="admin-input" 
-                                        value={formSuper.nombre}
-                                        disabled={!isEditingSuper}
-                                        onChange={(e) => setFormSuper({ ...formSuper, nombre: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="super-correo">Correo Electrónico</label>
-                                    <input 
-                                        id="super-correo"
-                                        type="email" 
-                                        className="admin-input" 
-                                        value={formSuper.correo}
-                                        disabled={!isEditingSuper}
-                                        onChange={(e) => setFormSuper({ ...formSuper, correo: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                
-                                {isEditingSuper ? (
-                                    <button type="submit" className="admin-btn admin-btn-success" style={{ width: '100%' }}>
-                                        Guardar Información
+                    {/* Formulario 1: Datos Personales (Ancho completo) */}
+                    <div className="admin-card">
+                        <h2>Actualizar Información</h2>
+                        <form onSubmit={handleGuardarDatosSuper}>
+                            <div className="admin-form-group">
+                                <label htmlFor="super-nombre">Nombre de Administrador</label>
+                                <input 
+                                    id="super-nombre"
+                                    type="text" 
+                                    className="admin-input" 
+                                    value={formSuper.nombre}
+                                    disabled={true}
+                                    style={{ backgroundColor: '#F5F5F5', cursor: 'not-allowed' }}
+                                    required
+                                />
+                            </div>
+                            <div className="admin-form-group">
+                                <label htmlFor="super-correo">Correo Electrónico</label>
+                                <input 
+                                    id="super-correo"
+                                    type="email" 
+                                    className="admin-input" 
+                                    value={formSuper.correo}
+                                    disabled={!isEditingEmail}
+                                    style={!isEditingEmail ? { backgroundColor: '#F5F5F5', cursor: 'not-allowed' } : {}}
+                                    onChange={(e) => setFormSuper({ ...formSuper, correo: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            
+                            {isEditingEmail ? (
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <button type="submit" className="admin-btn admin-btn-success" style={{ flex: 1 }}>
+                                        Guardar Cambios
                                     </button>
-                                ) : (
                                     <button 
                                         type="button" 
-                                        className="admin-btn" 
-                                        style={{ width: '100%', backgroundColor: 'var(--color-primary)' }}
-                                        onClick={() => setIsEditingSuper(true)}
+                                        className="admin-btn admin-btn-danger" 
+                                        style={{ flex: 1 }} 
+                                        onClick={() => {
+                                            setFormSuper({ ...formSuper, correo: superPerfil.correo });
+                                            setIsEditingEmail(false);
+                                        }}
                                     >
-                                        Editar Información
+                                        Cancelar
                                     </button>
-                                )}
+                                </div>
+                            ) : (
+                                <button 
+                                    type="button" 
+                                    className="admin-btn" 
+                                    style={{ width: '100%', backgroundColor: 'var(--color-primary)' }}
+                                    onClick={() => setIsEditingEmail(true)}
+                                >
+                                    Editar Correo
+                                </button>
+                            )}
 
-                                {msgSuper.text && (
-                                    <div style={{ 
-                                        marginTop: '12px', 
-                                        fontSize: '0.85rem', 
-                                        color: msgSuper.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
-                                        fontWeight: 'bold',
-                                        textAlign: 'center'
-                                    }}>
-                                        {msgSuper.text}
-                                    </div>
-                                )}
-                            </form>
-                        </div>
+                            {msgSuper.text && (
+                                <div style={{ 
+                                    marginTop: '12px', 
+                                    fontSize: '0.85rem', 
+                                    color: msgSuper.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
+                                    fontWeight: 'bold',
+                                    textAlign: 'center'
+                                }}>
+                                    {msgSuper.text}
+                                </div>
+                            )}
+                        </form>
+                    </div>
 
-                        {/* Formulario 2: Cambiar Contraseña */}
-                        <div className="admin-card">
-                            <h2>Seguridad y Contraseña</h2>
-                            <form onSubmit={handleCambiarClaveSuper}>
-                                <div className="admin-form-group">
-                                    <label htmlFor="pass-actual">Contraseña Actual</label>
+                    {/* Formulario 2: Cambiar Contraseña (Ancho completo con Toggles y Recomendaciones) */}
+                    <div className="admin-card">
+                        <h2>Seguridad y Contraseña</h2>
+                        <form onSubmit={handleCambiarClaveSuper}>
+                            
+                            {/* Clave Actual */}
+                            <div className="admin-form-group">
+                                <label htmlFor="pass-actual">Contraseña Actual</label>
+                                <div style={{ position: 'relative' }}>
                                     <input 
                                         id="pass-actual"
-                                        type="password" 
+                                        type={showPass.actual ? "text" : "password"} 
                                         className="admin-input" 
                                         placeholder="Escribe tu clave actual"
                                         value={formClaveSuper.actual}
                                         onChange={(e) => setFormClaveSuper({ ...formClaveSuper, actual: e.target.value })}
+                                        disabled={!isEditingPassword}
+                                        style={!isEditingPassword ? { paddingRight: '48px', backgroundColor: '#F5F5F5', cursor: 'not-allowed' } : { paddingRight: '48px' }}
                                         required
                                     />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowPass({ ...showPass, actual: !showPass.actual })}
+                                        disabled={!isEditingPassword}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: !isEditingPassword ? 'not-allowed' : 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#777',
+                                            opacity: !isEditingPassword ? 0.4 : 1,
+                                            padding: '6px',
+                                            borderRadius: '50%',
+                                            transition: 'background-color 0.2s',
+                                            zIndex: 2
+                                        }}
+                                        onMouseEnter={(e) => { if (isEditingPassword) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; }}
+                                        onMouseLeave={(e) => { if (isEditingPassword) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                    >
+                                        {showPass.actual ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        )}
+                                    </button>
                                 </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="pass-nueva">Nueva Contraseña</label>
+                            </div>
+
+                            {/* Nueva Clave */}
+                            <div className="admin-form-group">
+                                <label htmlFor="pass-nueva">Nueva Contraseña</label>
+                                <div style={{ position: 'relative' }}>
                                     <input 
                                         id="pass-nueva"
-                                        type="password" 
+                                        type={showPass.nueva ? "text" : "password"} 
                                         className="admin-input" 
-                                        placeholder="Mínimo 6 caracteres"
+                                        placeholder="Escribe tu nueva clave"
                                         value={formClaveSuper.nueva}
                                         onChange={(e) => setFormClaveSuper({ ...formClaveSuper, nueva: e.target.value })}
+                                        onFocus={() => setIsPasswordFocused(true)}
+                                        onBlur={() => setIsPasswordFocused(false)}
+                                        disabled={!isEditingPassword}
+                                        style={!isEditingPassword ? { paddingRight: '48px', backgroundColor: '#F5F5F5', cursor: 'not-allowed' } : { paddingRight: '48px' }}
                                         required
                                     />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowPass({ ...showPass, nueva: !showPass.nueva })}
+                                        disabled={!isEditingPassword}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: !isEditingPassword ? 'not-allowed' : 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#777',
+                                            opacity: !isEditingPassword ? 0.4 : 1,
+                                            padding: '6px',
+                                            borderRadius: '50%',
+                                            transition: 'background-color 0.2s',
+                                            zIndex: 2
+                                        }}
+                                        onMouseEnter={(e) => { if (isEditingPassword) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; }}
+                                        onMouseLeave={(e) => { if (isEditingPassword) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                    >
+                                        {showPass.nueva ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        )}
+                                    </button>
+
+                                    {/* Checklist de Recomendaciones dinámicas flotante */}
+                                    {(isPasswordFocused || formClaveSuper.nueva.length > 0) && !(tieneMinLongitud && tieneNumero && tieneMayuscula && tieneCaracterEspecial) && (
+                                        <div style={{ 
+                                            position: 'absolute',
+                                            top: '100%',
+                                            left: 0,
+                                            right: 0,
+                                            marginTop: '6px', 
+                                            padding: '12px 14px', 
+                                            backgroundColor: 'white', 
+                                            borderRadius: '8px', 
+                                            border: '1px solid var(--color-border)',
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                            zIndex: 10,
+                                            fontSize: '0.82rem',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '6px'
+                                        }}>
+                                            <span style={{ fontWeight: 'bold', color: 'var(--color-text-secondary)', marginBottom: '2px' }}>
+                                                Requisitos de seguridad de la contraseña:
+                                            </span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: tieneMinLongitud ? '#2E7D32' : '#777', fontWeight: tieneMinLongitud ? 'bold' : 'normal' }}>
+                                                <span>{tieneMinLongitud ? '✅' : '⚪'}</span> Mínimo 8 caracteres
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: tieneNumero ? '#2E7D32' : '#777', fontWeight: tieneNumero ? 'bold' : 'normal' }}>
+                                                <span>{tieneNumero ? '✅' : '⚪'}</span> Al menos un número (0-9)
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: tieneMayuscula ? '#2E7D32' : '#777', fontWeight: tieneMayuscula ? 'bold' : 'normal' }}>
+                                                <span>{tieneMayuscula ? '✅' : '⚪'}</span> Al menos una letra mayúscula (A-Z)
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: tieneCaracterEspecial ? '#2E7D32' : '#777', fontWeight: tieneCaracterEspecial ? 'bold' : 'normal' }}>
+                                                <span>{tieneCaracterEspecial ? '✅' : '⚪'}</span> Al menos un carácter especial (ej. !@#$%^&*)
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="pass-confirmar">Confirmar Nueva Contraseña</label>
+                            </div>
+
+                            {/* Confirmar Nueva Clave */}
+                            <div className="admin-form-group">
+                                <label htmlFor="pass-confirmar">Confirmar Nueva Contraseña</label>
+                                <div style={{ position: 'relative' }}>
                                     <input 
                                         id="pass-confirmar"
-                                        type="password" 
+                                        type={showPass.confirmar ? "text" : "password"} 
                                         className="admin-input" 
                                         placeholder="Repite tu nueva clave"
                                         value={formClaveSuper.confirmar}
                                         onChange={(e) => setFormClaveSuper({ ...formClaveSuper, confirmar: e.target.value })}
+                                        disabled={!isEditingPassword}
+                                        style={!isEditingPassword ? { paddingRight: '48px', backgroundColor: '#F5F5F5', cursor: 'not-allowed' } : { paddingRight: '48px' }}
                                         required
                                     />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowPass({ ...showPass, confirmar: !showPass.confirmar })}
+                                        disabled={!isEditingPassword}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: !isEditingPassword ? 'not-allowed' : 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#777',
+                                            opacity: !isEditingPassword ? 0.4 : 1,
+                                            padding: '6px',
+                                            borderRadius: '50%',
+                                            transition: 'background-color 0.2s',
+                                            zIndex: 2
+                                        }}
+                                        onMouseEnter={(e) => { if (isEditingPassword) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; }}
+                                        onMouseLeave={(e) => { if (isEditingPassword) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                    >
+                                        {showPass.confirmar ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        )}
+                                    </button>
                                 </div>
-                                <button type="submit" className="admin-btn admin-btn-secondary" style={{ width: '100%' }}>
-                                    Actualizar Contraseña
-                                </button>
-
-                                {msgClave.text && (
-                                    <div style={{ 
-                                        marginTop: '12px', 
-                                        fontSize: '0.85rem', 
-                                        color: msgClave.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
+                                {formClaveSuper.confirmar && (
+                                    <div style={{
+                                        marginTop: '8px',
+                                        fontSize: '0.85rem',
                                         fontWeight: 'bold',
-                                        textAlign: 'center'
+                                        color: formClaveSuper.nueva === formClaveSuper.confirmar ? '#2E7D32' : '#d32f2f',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
                                     }}>
-                                        {msgClave.text}
+                                        <span>{formClaveSuper.nueva === formClaveSuper.confirmar ? '🟢 Las contraseñas coinciden' : '🔴 Las contraseñas no coinciden'}</span>
                                     </div>
                                 )}
-                            </form>
-                        </div>
+                            </div>
 
+                            {isEditingPassword ? (
+                                <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                    <button type="submit" className="admin-btn admin-btn-success" style={{ flex: 1 }}>
+                                        Guardar Contraseña
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className="admin-btn admin-btn-danger" 
+                                        style={{ flex: 1 }} 
+                                        onClick={() => {
+                                            setFormClaveSuper({ actual: '', nueva: '', confirmar: '' });
+                                            setIsEditingPassword(false);
+                                        }}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            ) : (
+                                <button 
+                                    type="button" 
+                                    className="admin-btn" 
+                                    style={{ width: '100%', marginTop: '8px', backgroundColor: 'var(--color-primary)' }}
+                                    onClick={() => setIsEditingPassword(true)}
+                                >
+                                    Cambiar Contraseña
+                                </button>
+                            )}
+
+                            {msgClave.text && (
+                                <div style={{ 
+                                    marginTop: '12px', 
+                                    fontSize: '0.85rem', 
+                                    color: msgClave.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
+                                    fontWeight: 'bold',
+                                    textAlign: 'center'
+                                }}>
+                                    {msgClave.text}
+                                </div>
+                            )}
+                        </form>
                     </div>
 
                 </div>
