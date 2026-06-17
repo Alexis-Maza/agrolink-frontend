@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import AdminProducts from './AdminProducts';
 import AdminFarmers from './AdminFarmers';
+import AdminBuyers from './AdminBuyers';
 import AdminProfile from './AdminProfile';
 import { logout } from '../../api/authService';
 
@@ -81,6 +82,9 @@ function AdminHome() {
                     <Link to="/admin/agricultores" style={linkStyle("/admin/agricultores")}>
                         👨‍🌾 Agricultores
                     </Link>
+                    <Link to="/admin/compradores" style={linkStyle("/admin/compradores")}>
+                        👥 Compradores
+                    </Link>
                     <Link to="/admin/perfil" style={linkStyle("/admin/perfil")}>
                         👤 Mi Perfil
                     </Link>
@@ -109,6 +113,7 @@ function AdminHome() {
                     <Route path="/" element={<Navigate to="productos" replace />} />
                     <Route path="productos" element={<AdminProducts />} />
                     <Route path="agricultores" element={<AdminFarmers />} />
+                    <Route path="compradores" element={<AdminBuyers />} />
                     <Route path="perfil" element={<AdminProfile />} />
                 </Routes>
             </main>
