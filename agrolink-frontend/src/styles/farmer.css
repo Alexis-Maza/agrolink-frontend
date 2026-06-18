@@ -629,5 +629,66 @@
     }
 }
 
+/* RESPONSIVIDAD PARA EL PERFIL (FARMER PROFILE) */
+
+.farmer-profile-grid-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    width: 100%;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .farmer-profile-grid-cols {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+}
+
+.farmer-profile-card {
+    background-color: white;
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+@media (max-width: 768px) {
+    .farmer-profile-card {
+        padding: 20px 15px;
+    }
+}
+
+.farmer-profile-avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 480px) {
+    .farmer-profile-avatar-row {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+}
+
+.farmer-profile-row-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 576px) {
+    .farmer-profile-row-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+}
+
+
 
 

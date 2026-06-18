@@ -183,26 +183,11 @@ function FarmerProfile() {
         compradores.
       </p>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-          gap: "30px",
-          width: "100%",
-          alignItems: "start",
-        }}
-      >
+      <div className="farmer-profile-grid-cols">
         {/* COLUMNA 1 */}
         <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
           {/* TARJETA 1: DATOS PERSONALES */}
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "30px",
-              borderRadius: "var(--radius-lg)",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-            }}
-          >
+          <div className="farmer-profile-card">
             <h3
               style={{
                 color: "var(--color-text)",
@@ -214,14 +199,7 @@ function FarmerProfile() {
               Cuenta y Datos Personales
             </h3>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "20px",
-                marginBottom: "30px",
-              }}
-            >
+            <div className="farmer-profile-avatar-row">
               <div
                 style={{
                   width: "90px",
@@ -307,14 +285,7 @@ function FarmerProfile() {
                   }}
                 />
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "20px",
-                  marginBottom: "20px",
-                }}
-              >
+              <div className="farmer-profile-row-grid">
                 <div>
                   <label
                     style={{
@@ -368,14 +339,7 @@ function FarmerProfile() {
                   />
                 </div>
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "20px",
-                  marginBottom: "30px",
-                }}
-              >
+              <div className="farmer-profile-row-grid" style={{ marginBottom: "30px" }}>
                 <div>
                   <label
                     style={{
@@ -425,14 +389,7 @@ function FarmerProfile() {
           </div>
 
           {/* TARJETA 2: CONTRASEÑA */}
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "30px",
-              borderRadius: "var(--radius-lg)",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-            }}
-          >
+          <div className="farmer-profile-card">
             <h3
               style={{
                 color: "var(--color-text)",
@@ -673,14 +630,7 @@ function FarmerProfile() {
         </div>
 
         {/* COLUMNA 2: PERFIL AGRÍCOLA */}
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: "30px",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-          }}
-        >
+        <div className="farmer-profile-card">
           <h3
             style={{
               color: "var(--color-text)",
@@ -733,14 +683,7 @@ function FarmerProfile() {
               </div>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
-                marginBottom: "20px",
-              }}
-            >
+            <div className="farmer-profile-row-grid">
               <div>
                 <label
                   style={{
@@ -795,14 +738,7 @@ function FarmerProfile() {
               </div>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
-                marginBottom: "30px",
-              }}
-            >
+            <div className="farmer-profile-row-grid" style={{ marginBottom: "30px" }}>
               <div>
                 <label
                   style={{
