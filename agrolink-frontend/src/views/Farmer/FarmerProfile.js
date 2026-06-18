@@ -134,12 +134,22 @@ function FarmerProfile() {
 
   const handleProfileChange = (e) => {
     let value = e.target.value;
-    if (["nombres", "apellidoPaterno", "apellidoMaterno"].includes(e.target.name)) {
+    const name = e.target.name;
+
+    if (["nombres", "apellidoPaterno", "apellidoMaterno"].includes(name)) {
       value = value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]/g, "");
-    } else if (e.target.name === "dniRuc") {
-      value = value.replace(/[^0-9]/g, "");
+    } else if (name === "dniRuc") {
+      value = value.replace(/[^0-9]/g, "").slice(0, 11);
+    } else if (name === "hectareasTotales") {
+      value = value.replace(/[^0-9.]/g, "");
+      const parts = value.split(".");
+      if (parts.length > 2) {
+        value = parts[0] + "." + parts.slice(1).join("");
+      }
+    } else if (name === "anosExperiencia") {
+      value = value.replace(/[^0-9]/g, "").slice(0, 3);
     }
-    setProfileData({ ...profileData, [e.target.name]: value });
+    setProfileData({ ...profileData, [name]: value });
   };
 
   const handlePasswordChange = (e) => {
@@ -191,8 +201,8 @@ function FarmerProfile() {
         descripcion: profileData.descripcion,
         dniRuc: profileData.dniRuc,
         ubicacion: profileData.ubicacion,
-        hectareasTotales: profileData.hectareasTotales,
-        anosExperiencia: profileData.anosExperiencia,
+        hectareasTotales: profileData.hectareasTotales ? parseFloat(profileData.hectareasTotales) : null,
+        anosExperiencia: profileData.anosExperiencia ? parseInt(profileData.anosExperiencia, 10) : null,
         certificaciones: certificaciones.join(", "), // ← convierte array a string
       });
       alert("Perfil agrícola actualizado correctamente");
@@ -952,14 +962,13 @@ function FarmerProfile() {
                   Hectáreas Totales
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   name="hectareasTotales"
                   disabled={!isEditingAgricola}
                   value={profileData.hectareasTotales || ""}
                   onChange={handleProfileChange}
                   placeholder="Ej. 50"
-                  min="0"
-                  step="0.1"
                   style={{
                     width: "100%",
                     padding: "14px",
@@ -983,13 +992,13 @@ function FarmerProfile() {
                   Años de Experiencia
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   name="anosExperiencia"
                   disabled={!isEditingAgricola}
                   value={profileData.anosExperiencia || ""}
                   onChange={handleProfileChange}
                   placeholder="Ej. 10"
-                  min="0"
                   style={{
                     width: "100%",
                     padding: "14px",
