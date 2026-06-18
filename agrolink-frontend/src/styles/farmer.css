@@ -488,4 +488,146 @@
     }
 }
 
+/* RESPONSIVIDAD PARA MIS VENTAS (FARMER SALES) */
+
+.farmer-sales-card {
+    background-color: white;
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+@media (max-width: 768px) {
+    .farmer-sales-card {
+        padding: 20px 15px;
+    }
+}
+
+.farmer-sales-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+@media (max-width: 576px) {
+    .farmer-sales-actions-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .farmer-sales-actions-bar > div {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    .farmer-sales-actions-bar input {
+        max-width: 100% !important;
+    }
+    .farmer-sales-actions-bar button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.farmer-sales-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -15px;
+    padding: 0 15px;
+}
+
+@media (min-width: 769px) {
+    .farmer-sales-table-wrapper {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.farmer-sales-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.farmer-sales-table th,
+.farmer-sales-table td {
+    padding: 15px;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .farmer-sales-table th,
+    .farmer-sales-table td {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+}
+
+.farmer-sales-modal {
+    background-color: white;
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@media (max-width: 576px) {
+    .farmer-sales-modal {
+        padding: 25px 15px;
+        width: 95%;
+        max-height: 95vh;
+    }
+}
+
+.farmer-sales-modal-header {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+@media (max-width: 480px) {
+    .farmer-sales-modal-header h3 {
+        font-size: 1.35rem !important;
+    }
+}
+
+.farmer-sales-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 576px) {
+    .farmer-sales-modal-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+.farmer-sales-modal-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 576px) {
+    .farmer-sales-modal-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    .farmer-sales-modal-actions button {
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+    }
+}
+
+
 

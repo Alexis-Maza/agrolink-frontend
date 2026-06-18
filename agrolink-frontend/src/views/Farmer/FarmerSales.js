@@ -52,10 +52,10 @@ function FarmerSales() {
                 Monitorea el historial y estado de tus ventas o preventas adquiridas.
             </p>
 
-            <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: 'var(--radius-lg)', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+            <div className="farmer-sales-card">
                 
                 {/* BARRA SUPERIOR: Buscador y Botón de Exportar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+                <div className="farmer-sales-actions-bar">
                     
                     {/* Buscador */}
                     <div style={{ flex: '1', minWidth: '300px' }}>
@@ -98,15 +98,15 @@ function FarmerSales() {
                 </div>
 
                 {/* TABLA DE VENTAS */}
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <div className="farmer-sales-table-wrapper">
+                    <table className="farmer-sales-table">
                         <thead>
                             <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>N° de Venta</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>Producto</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>Comprador</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>Empresa</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold', textAlign: 'center' }}>Acciones</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>N° de Venta</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>Producto</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>Comprador</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>Empresa</th>
+                                <th style={{ color: '#555', fontWeight: 'bold', textAlign: 'center' }}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -119,11 +119,11 @@ function FarmerSales() {
                             ) : (
                                 filteredSales.map((sale) => (
                                     <tr key={sale.id} style={{ borderBottom: '1px solid #eee', transition: '0.2s' }}>
-                                        <td style={{ padding: '15px', fontWeight: 'bold', color: 'var(--color-primary)' }}>{sale.id}</td>
-                                        <td style={{ padding: '15px', color: '#333' }}>{sale.producto}</td>
-                                        <td style={{ padding: '15px', color: '#555' }}>{sale.comprador}</td>
-                                        <td style={{ padding: '15px', color: '#555' }}>{sale.empresa}</td>
-                                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                                        <td style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>{sale.id}</td>
+                                        <td style={{ color: '#333' }}>{sale.producto}</td>
+                                        <td style={{ color: '#555' }}>{sale.comprador}</td>
+                                        <td style={{ color: '#555' }}>{sale.empresa}</td>
+                                        <td style={{ textAlign: 'center' }}>
                                             <button 
                                                 onClick={() => setSelectedSale(sale)}
                                                 style={{
@@ -151,24 +151,8 @@ function FarmerSales() {
 
             {/* MODAL FLOTANTE (Se muestra solo si hay una venta seleccionada) */}
             {selectedSale && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.6)', // Fondo más oscuro para destacar el modal
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        backgroundColor: 'white',
-                        padding: '40px',
-                        borderRadius: 'var(--radius-lg)',
-                        width: '90%',
-                        maxWidth: '700px', // Hacemos el modal un poco más ancho para que quepa bien la data
-                        boxShadow: '0 15px 30px rgba(0,0,0,0.3)',
-                        position: 'relative'
-                    }}>
+                <div className="farmer-modal-overlay">
+                    <div className="farmer-sales-modal">
                         {/* Botón de cerrar modal */}
                         <button 
                             onClick={() => setSelectedSale(null)}
@@ -181,14 +165,14 @@ function FarmerSales() {
                             &times;
                         </button>
                         
-                        <div style={{ borderBottom: '2px solid #eee', paddingBottom: '15px', marginBottom: '25px' }}>
+                        <div className="farmer-sales-modal-header">
                             <h3 style={{ color: 'var(--color-primary)', margin: 0, fontSize: '1.6rem' }}>
                                 Detalle de la Venta: <span style={{ color: 'var(--color-text)' }}>{selectedSale.id}</span>
                             </h3>
                         </div>
                         
                         {/* Grilla para los detalles de la venta */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div className="farmer-sales-modal-grid">
                             
                             {/* Columna Izquierda */}
                             <div>
@@ -254,7 +238,7 @@ function FarmerSales() {
                         </div>
 
                         {/* Botones de acción del Modal */}
-                        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
+                        <div className="farmer-sales-modal-actions">
                             <button onClick={handleDownload} disabled={downloadStatus !== 'idle'} style={{
                                 backgroundColor: downloadStatus === 'success' ? '#D4EDDA' : 'transparent',
                                 color: downloadStatus === 'success' ? '#155724' : 'var(--color-primary)',
