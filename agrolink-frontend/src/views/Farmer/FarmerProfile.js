@@ -37,6 +37,15 @@ function FarmerProfile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+  // Validaciones de contraseña derivadas del estado
+  const password = passwordData.newPassword;
+  const hasLetter = /[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[^A-Za-z0-9ñÑáéíóúÁÉÍÓÚüÜ]/.test(password);
+  const hasMinLength = password.length >= 8;
+  const isPasswordValid = hasLetter && hasNumber && hasSpecial && hasMinLength;
 
   // ← Cargar datos del backend al montar el componente
   useEffect(() => {
@@ -102,6 +111,7 @@ function FarmerProfile() {
     setShowCurrentPassword(false);
     setShowNewPassword(false);
     setShowConfirmNewPassword(false);
+    setIsPasswordFocused(false);
     setIsEditingPassword(false);
   };
 
@@ -215,17 +225,17 @@ function FarmerProfile() {
   // ← Cambia contraseña en el backend
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
+    if (!isPasswordValid) {
+      setPasswordMsg({
+        type: "error",
+        text: "La contraseña no cumple con los requisitos mínimos de seguridad.",
+      });
+      return;
+    }
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       setPasswordMsg({
         type: "error",
         text: "Las nuevas contraseñas no coinciden.",
-      });
-      return;
-    }
-    if (passwordData.newPassword.length < 6) {
-      setPasswordMsg({
-        type: "error",
-        text: "La contraseña debe tener al menos 6 caracteres.",
       });
       return;
     }
@@ -653,6 +663,8 @@ function FarmerProfile() {
                     disabled={!isEditingPassword}
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
+                    onFocus={() => setIsPasswordFocused(true)}
+                    onBlur={() => setIsPasswordFocused(false)}
                     style={{
                       width: "100%",
                       padding: "12px",
@@ -699,6 +711,42 @@ function FarmerProfile() {
                       </svg>
                     )}
                   </button>
+
+                  {/* Requisitos de seguridad de la contraseña flotante */}
+                  {isEditingPassword && (isPasswordFocused || passwordData.newPassword.length > 0) && !isPasswordValid && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      marginTop: '6px',
+                      padding: '12px 14px',
+                      backgroundColor: 'white',
+                      border: '1px solid #E0E6E1',
+                      borderRadius: 'var(--radius-md)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                      zIndex: 10,
+                      fontSize: '0.8rem'
+                    }}>
+                      <span style={{ fontWeight: 'bold', color: 'var(--color-text)', display: 'block', marginBottom: '6px' }}>
+                        La contraseña debe cumplir con:
+                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasMinLength ? '#2E7D32' : '#777', fontWeight: hasMinLength ? 'bold' : 'normal' }}>
+                          <span style={{ fontSize: '0.9rem' }}>{hasMinLength ? '✅' : '⚪'}</span> Mínimo 8 caracteres
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasLetter ? '#2E7D32' : '#777', fontWeight: hasLetter ? 'bold' : 'normal' }}>
+                          <span style={{ fontSize: '0.9rem' }}>{hasLetter ? '✅' : '⚪'}</span> Al menos una letra
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasNumber ? '#2E7D32' : '#777', fontWeight: hasNumber ? 'bold' : 'normal' }}>
+                          <span style={{ fontSize: '0.9rem' }}>{hasNumber ? '✅' : '⚪'}</span> Al menos un número
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasSpecial ? '#2E7D32' : '#777', fontWeight: hasSpecial ? 'bold' : 'normal' }}>
+                          <span style={{ fontSize: '0.9rem' }}>{hasSpecial ? '✅' : '⚪'}</span> Un carácter especial (ej. @$!%*?&)
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div style={{ marginBottom: "25px" }}>
@@ -767,6 +815,19 @@ function FarmerProfile() {
                     )}
                   </button>
                 </div>
+                {isEditingPassword && passwordData.confirmNewPassword && (
+                  <div style={{
+                    marginTop: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    color: passwordData.newPassword === passwordData.confirmNewPassword ? '#2E7D32' : '#d32f2f',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <span>{passwordData.newPassword === passwordData.confirmNewPassword ? '🟢 Las contraseñas coinciden' : '🔴 Las contraseñas no coinciden'}</span>
+                  </div>
+                )}
               </div>
               {!isEditingPassword ? (
                 <button
