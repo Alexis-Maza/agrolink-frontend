@@ -21,6 +21,13 @@ function FarmerProfile() {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [certificaciones, setCertificaciones] = useState([]);
 
+  const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [personalBackup, setPersonalBackup] = useState(null);
+
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [isEditingAgricola, setIsEditingAgricola] = useState(false);
+  const [agricolaBackup, setAgricolaBackup] = useState(null);
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -41,6 +48,14 @@ function FarmerProfile() {
         if (data.fotoPerfil) {
           setAvatarPreview(data.fotoPerfil);
         }
+        // ← Cargar certificaciones guardadas
+        if (data.certificaciones) {
+          const list = data.certificaciones
+            .split(",")
+            .map((c) => c.trim())
+            .filter(Boolean);
+          setCertificaciones(list);
+        }
       } catch (error) {
         console.error("Error cargando perfil:", error);
       } finally {
@@ -49,6 +64,73 @@ function FarmerProfile() {
     };
     cargarPerfil();
   }, []);
+
+  const handleStartEditingPersonal = () => {
+    setPersonalBackup({
+      nombres: profileData.nombres || "",
+      apellidoPaterno: profileData.apellidoPaterno || "",
+      apellidoMaterno: profileData.apellidoMaterno || "",
+      avatarPreview: avatarPreview,
+    });
+    setIsEditingPersonal(true);
+  };
+
+  const handleCancelEditingPersonal = () => {
+    if (personalBackup) {
+      setProfileData({
+        ...profileData,
+        nombres: personalBackup.nombres,
+        apellidoPaterno: personalBackup.apellidoPaterno,
+        apellidoMaterno: personalBackup.apellidoMaterno,
+      });
+      setAvatarPreview(personalBackup.avatarPreview);
+    }
+    setIsEditingPersonal(false);
+  };
+
+  const handleStartEditingPassword = () => {
+    setIsEditingPassword(true);
+  };
+
+  const handleCancelEditingPassword = () => {
+    setPasswordData({
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    });
+    setPasswordMsg({ type: "", text: "" });
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmNewPassword(false);
+    setIsEditingPassword(false);
+  };
+
+  const handleStartEditingAgricola = () => {
+    setAgricolaBackup({
+      descripcion: profileData.descripcion || "",
+      dniRuc: profileData.dniRuc || "",
+      ubicacion: profileData.ubicacion || "",
+      hectareasTotales: profileData.hectareasTotales || "",
+      anosExperiencia: profileData.anosExperiencia || "",
+      certificaciones: [...certificaciones],
+    });
+    setIsEditingAgricola(true);
+  };
+
+  const handleCancelEditingAgricola = () => {
+    if (agricolaBackup) {
+      setProfileData({
+        ...profileData,
+        descripcion: agricolaBackup.descripcion,
+        dniRuc: agricolaBackup.dniRuc,
+        ubicacion: agricolaBackup.ubicacion,
+        hectareasTotales: agricolaBackup.hectareasTotales,
+        anosExperiencia: agricolaBackup.anosExperiencia,
+      });
+      setCertificaciones(agricolaBackup.certificaciones);
+    }
+    setIsEditingAgricola(false);
+  };
 
   const handleProfileChange = (e) => {
     let value = e.target.value;
@@ -74,6 +156,7 @@ function FarmerProfile() {
   };
 
   const handleCertToggle = (cert) => {
+    if (!isEditingAgricola) return;
     const isEnabled = certificaciones.includes(cert);
     if (isEnabled) {
       setCertificaciones(certificaciones.filter((c) => c !== cert));
@@ -94,6 +177,7 @@ function FarmerProfile() {
         fotoPerfil: avatarPreview || profileData.fotoPerfil,
       });
       alert("Datos personales actualizados correctamente");
+      setIsEditingPersonal(false);
     } catch (error) {
       alert("Error al actualizar los datos personales");
     }
@@ -112,6 +196,7 @@ function FarmerProfile() {
         certificaciones: certificaciones.join(", "), // ← convierte array a string
       });
       alert("Perfil agrícola actualizado correctamente");
+      setIsEditingAgricola(false);
     } catch (error) {
       alert("Error al actualizar el perfil agrícola");
     }
@@ -152,6 +237,7 @@ function FarmerProfile() {
       setShowCurrentPassword(false);
       setShowNewPassword(false);
       setShowConfirmNewPassword(false);
+      setIsEditingPassword(false);
     } catch (error) {
       setPasswordMsg({
         type: "error",
@@ -241,16 +327,18 @@ function FarmerProfile() {
                 />
                 <button
                   type="button"
+                  disabled={!isEditingPersonal}
                   onClick={() => fileInputRef.current.click()}
                   style={{
-                    backgroundColor: "#E8F5E9",
-                    border: "1px solid var(--color-primary)",
-                    color: "var(--color-primary)",
+                    backgroundColor: isEditingPersonal ? "#E8F5E9" : "#f5f5f5",
+                    border: `1px solid ${isEditingPersonal ? "var(--color-primary)" : "#ccc"}`,
+                    color: isEditingPersonal ? "var(--color-primary)" : "#999",
                     padding: "8px 15px",
                     borderRadius: "var(--radius-md)",
-                    cursor: "pointer",
+                    cursor: isEditingPersonal ? "pointer" : "not-allowed",
                     fontSize: "0.9rem",
                     fontWeight: "bold",
+                    transition: "all 0.2s ease",
                   }}
                 >
                   📷 Elegir Imagen
@@ -274,6 +362,7 @@ function FarmerProfile() {
                   type="text"
                   name="nombres"
                   required
+                  disabled={!isEditingPersonal}
                   value={profileData.nombres || ""}
                   onChange={handleProfileChange}
                   style={{
@@ -282,6 +371,8 @@ function FarmerProfile() {
                     borderRadius: "var(--radius-md)",
                     border: "1px solid #ccc",
                     fontSize: "1rem",
+                    backgroundColor: isEditingPersonal ? "white" : "#fdfdfd",
+                    color: isEditingPersonal ? "#000" : "#555",
                   }}
                 />
               </div>
@@ -301,6 +392,7 @@ function FarmerProfile() {
                     type="text"
                     name="apellidoPaterno"
                     required
+                    disabled={!isEditingPersonal}
                     value={profileData.apellidoPaterno || ""}
                     onChange={handleProfileChange}
                     style={{
@@ -309,6 +401,8 @@ function FarmerProfile() {
                       borderRadius: "var(--radius-md)",
                       border: "1px solid #ccc",
                       fontSize: "1rem",
+                      backgroundColor: isEditingPersonal ? "white" : "#fdfdfd",
+                      color: isEditingPersonal ? "#000" : "#555",
                     }}
                   />
                 </div>
@@ -327,6 +421,7 @@ function FarmerProfile() {
                     type="text"
                     name="apellidoMaterno"
                     required
+                    disabled={!isEditingPersonal}
                     value={profileData.apellidoMaterno || ""}
                     onChange={handleProfileChange}
                     style={{
@@ -335,56 +430,99 @@ function FarmerProfile() {
                       borderRadius: "var(--radius-md)",
                       border: "1px solid #ccc",
                       fontSize: "1rem",
+                      backgroundColor: isEditingPersonal ? "white" : "#fdfdfd",
+                      color: isEditingPersonal ? "#000" : "#555",
                     }}
                   />
                 </div>
               </div>
-              <div className="farmer-profile-row-grid" style={{ marginBottom: "30px" }}>
-                <div>
-                  <label
+              <div style={{ marginBottom: "30px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "8px",
+                    fontWeight: "500",
+                    color: "#333",
+                  }}
+                >
+                  Correo Electrónico
+                </label>
+                <input
+                  type="email"
+                  disabled
+                  value={profileData.email || ""}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px solid #c8d6cb",
+                    backgroundColor: "#f0f4f1",
+                    color: "#555",
+                    fontSize: "1rem",
+                    cursor: "not-allowed",
+                    boxShadow: "inset 0 1px 3px rgba(0,0,0,0.05)",
+                  }}
+                />
+              </div>
+              {!isEditingPersonal ? (
+                <button
+                  type="button"
+                  onClick={handleStartEditingPersonal}
+                  style={{
+                    backgroundColor: "var(--color-primary)",
+                    color: "white",
+                    border: "none",
+                    padding: "14px",
+                    borderRadius: "var(--radius-md)",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    fontSize: "1.05rem",
+                    width: "100%",
+                    boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
+                  }}
+                >
+                  Editar Datos
+                </button>
+              ) : (
+                <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={handleCancelEditingPersonal}
                     style={{
-                      display: "block",
-                      marginBottom: "8px",
-                      fontWeight: "500",
-                      color: "#333",
+                      flex: 1,
+                      minWidth: "120px",
+                      backgroundColor: "#f5f5f5",
+                      border: "1px solid #ccc",
+                      color: "#555",
+                      padding: "14px",
+                      borderRadius: "var(--radius-md)",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      fontSize: "1.05rem",
                     }}
                   >
-                    Correo Electrónico
-                  </label>
-                  <input
-                    type="email"
-                    disabled
-                    value={profileData.email || ""}
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
                     style={{
-                      width: "100%",
-                      padding: "11px",
+                      flex: 1,
+                      minWidth: "120px",
+                      backgroundColor: "var(--color-primary)",
+                      color: "white",
+                      border: "none",
+                      padding: "14px",
                       borderRadius: "var(--radius-md)",
-                      border: "1px solid #e0e0e0",
-                      backgroundColor: "#f9f9f9",
-                      color: "#888",
-                      fontSize: "1rem",
-                      cursor: "not-allowed",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      fontSize: "1.05rem",
+                      boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
                     }}
-                  />
+                  >
+                    Guardar
+                  </button>
                 </div>
-              </div>
-              <button
-                type="submit"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  color: "white",
-                  border: "none",
-                  padding: "14px",
-                  borderRadius: "var(--radius-md)",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  fontSize: "1.05rem",
-                  width: "100%",
-                  boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
-                }}
-              >
-                Guardar Datos Personales
-              </button>
+              )}
             </form>
           </div>
 
@@ -435,6 +573,7 @@ function FarmerProfile() {
                     type={showCurrentPassword ? 'text' : 'password'}
                     name="currentPassword"
                     required
+                    disabled={!isEditingPassword}
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange}
                     style={{
@@ -444,10 +583,13 @@ function FarmerProfile() {
                       borderRadius: "var(--radius-md)",
                       border: "1px solid #ccc",
                       fontSize: "0.95rem",
+                      backgroundColor: isEditingPassword ? "white" : "#fdfdfd",
+                      color: isEditingPassword ? "#000" : "#555",
                     }}
                   />
                   <button
                     type="button"
+                    disabled={!isEditingPassword}
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                     style={{
                       position: 'absolute',
@@ -456,7 +598,7 @@ function FarmerProfile() {
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
-                      cursor: 'pointer',
+                      cursor: isEditingPassword ? 'pointer' : 'not-allowed',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -498,6 +640,7 @@ function FarmerProfile() {
                     type={showNewPassword ? 'text' : 'password'}
                     name="newPassword"
                     required
+                    disabled={!isEditingPassword}
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
                     style={{
@@ -507,10 +650,13 @@ function FarmerProfile() {
                       borderRadius: "var(--radius-md)",
                       border: "1px solid #ccc",
                       fontSize: "0.95rem",
+                      backgroundColor: isEditingPassword ? "white" : "#fdfdfd",
+                      color: isEditingPassword ? "#000" : "#555",
                     }}
                   />
                   <button
                     type="button"
+                    disabled={!isEditingPassword}
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     style={{
                       position: 'absolute',
@@ -519,7 +665,7 @@ function FarmerProfile() {
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
-                      cursor: 'pointer',
+                      cursor: isEditingPassword ? 'pointer' : 'not-allowed',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -561,6 +707,7 @@ function FarmerProfile() {
                     type={showConfirmNewPassword ? 'text' : 'password'}
                     name="confirmNewPassword"
                     required
+                    disabled={!isEditingPassword}
                     value={passwordData.confirmNewPassword}
                     onChange={handlePasswordChange}
                     style={{
@@ -570,10 +717,13 @@ function FarmerProfile() {
                       borderRadius: "var(--radius-md)",
                       border: "1px solid #ccc",
                       fontSize: "0.95rem",
+                      backgroundColor: isEditingPassword ? "white" : "#fdfdfd",
+                      color: isEditingPassword ? "#000" : "#555",
                     }}
                   />
                   <button
                     type="button"
+                    disabled={!isEditingPassword}
                     onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
                     style={{
                       position: 'absolute',
@@ -582,7 +732,7 @@ function FarmerProfile() {
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
-                      cursor: 'pointer',
+                      cursor: isEditingPassword ? 'pointer' : 'not-allowed',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -608,23 +758,65 @@ function FarmerProfile() {
                   </button>
                 </div>
               </div>
-              <button
-                type="submit"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  color: "white",
-                  border: "none",
-                  padding: "14px",
-                  borderRadius: "var(--radius-md)",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  fontSize: "1rem",
-                  width: "100%",
-                  boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
-                }}
-              >
-                Actualizar Contraseña
-              </button>
+              {!isEditingPassword ? (
+                <button
+                  type="button"
+                  onClick={handleStartEditingPassword}
+                  style={{
+                    backgroundColor: "var(--color-primary)",
+                    color: "white",
+                    border: "none",
+                    padding: "14px",
+                    borderRadius: "var(--radius-md)",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    fontSize: "1.05rem",
+                    width: "100%",
+                    boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
+                  }}
+                >
+                  Cambiar Contraseña
+                </button>
+              ) : (
+                <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={handleCancelEditingPassword}
+                    style={{
+                      flex: 1,
+                      minWidth: "120px",
+                      backgroundColor: "#f5f5f5",
+                      border: "1px solid #ccc",
+                      color: "#555",
+                      padding: "14px",
+                      borderRadius: "var(--radius-md)",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      fontSize: "1.05rem",
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    style={{
+                      flex: 1,
+                      minWidth: "120px",
+                      backgroundColor: "var(--color-primary)",
+                      color: "white",
+                      border: "none",
+                      padding: "14px",
+                      borderRadius: "var(--radius-md)",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      fontSize: "1.05rem",
+                      boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
+                    }}
+                  >
+                    Actualizar Contraseña
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>
@@ -658,6 +850,7 @@ function FarmerProfile() {
                 name="descripcion"
                 maxLength="500"
                 rows="5"
+                disabled={!isEditingAgricola}
                 value={profileData.descripcion || ""}
                 onChange={handleProfileChange}
                 placeholder="Escribe algo sobre tu experiencia..."
@@ -669,6 +862,8 @@ function FarmerProfile() {
                   fontSize: "1rem",
                   fontFamily: "inherit",
                   resize: "vertical",
+                  backgroundColor: isEditingAgricola ? "white" : "#fdfdfd",
+                  color: isEditingAgricola ? "#000" : "#555",
                 }}
               />
               <div
@@ -698,6 +893,7 @@ function FarmerProfile() {
                 <input
                   type="text"
                   name="dniRuc"
+                  disabled={!isEditingAgricola}
                   value={profileData.dniRuc || ""}
                   onChange={handleProfileChange}
                   placeholder="Documento de identidad"
@@ -707,6 +903,8 @@ function FarmerProfile() {
                     borderRadius: "var(--radius-md)",
                     border: "1px solid #ccc",
                     fontSize: "1rem",
+                    backgroundColor: isEditingAgricola ? "white" : "#fdfdfd",
+                    color: isEditingAgricola ? "#000" : "#555",
                   }}
                 />
               </div>
@@ -724,6 +922,7 @@ function FarmerProfile() {
                 <input
                   type="text"
                   name="ubicacion"
+                  disabled={!isEditingAgricola}
                   value={profileData.ubicacion || ""}
                   onChange={handleProfileChange}
                   placeholder="Ej. Piura, Perú"
@@ -733,6 +932,8 @@ function FarmerProfile() {
                     borderRadius: "var(--radius-md)",
                     border: "1px solid #ccc",
                     fontSize: "1rem",
+                    backgroundColor: isEditingAgricola ? "white" : "#fdfdfd",
+                    color: isEditingAgricola ? "#000" : "#555",
                   }}
                 />
               </div>
@@ -753,6 +954,7 @@ function FarmerProfile() {
                 <input
                   type="number"
                   name="hectareasTotales"
+                  disabled={!isEditingAgricola}
                   value={profileData.hectareasTotales || ""}
                   onChange={handleProfileChange}
                   placeholder="Ej. 50"
@@ -764,6 +966,8 @@ function FarmerProfile() {
                     borderRadius: "var(--radius-md)",
                     border: "1px solid #ccc",
                     fontSize: "1rem",
+                    backgroundColor: isEditingAgricola ? "white" : "#fdfdfd",
+                    color: isEditingAgricola ? "#000" : "#555",
                   }}
                 />
               </div>
@@ -781,6 +985,7 @@ function FarmerProfile() {
                 <input
                   type="number"
                   name="anosExperiencia"
+                  disabled={!isEditingAgricola}
                   value={profileData.anosExperiencia || ""}
                   onChange={handleProfileChange}
                   placeholder="Ej. 10"
@@ -791,6 +996,8 @@ function FarmerProfile() {
                     borderRadius: "var(--radius-md)",
                     border: "1px solid #ccc",
                     fontSize: "1rem",
+                    backgroundColor: isEditingAgricola ? "white" : "#fdfdfd",
+                    color: isEditingAgricola ? "#000" : "#555",
                   }}
                 />
               </div>
@@ -853,7 +1060,7 @@ function FarmerProfile() {
                           display: "flex",
                           alignItems: "center",
                           gap: "10px",
-                          cursor: "pointer",
+                          cursor: isEditingAgricola ? "pointer" : "not-allowed",
                           fontWeight: "500",
                           color: isEnabled ? "var(--color-primary)" : "#555",
                           fontSize: "0.95rem",
@@ -862,11 +1069,12 @@ function FarmerProfile() {
                         <input
                           type="checkbox"
                           checked={isEnabled}
+                          disabled={!isEditingAgricola}
                           onChange={() => handleCertToggle(cert)}
                           style={{
                             width: "18px",
                             height: "18px",
-                            cursor: "pointer",
+                            cursor: isEditingAgricola ? "pointer" : "not-allowed",
                             accentColor: "var(--color-primary)",
                           }}
                         />
@@ -878,23 +1086,65 @@ function FarmerProfile() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              style={{
-                backgroundColor: "var(--color-primary)",
-                color: "white",
-                border: "none",
-                padding: "15px",
-                borderRadius: "var(--radius-md)",
-                fontWeight: "bold",
-                cursor: "pointer",
-                fontSize: "1.1rem",
-                width: "100%",
-                boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
-              }}
-            >
-              Guardar Perfil Agrícola
-            </button>
+            {!isEditingAgricola ? (
+              <button
+                type="button"
+                onClick={handleStartEditingAgricola}
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  color: "white",
+                  border: "none",
+                  padding: "14px",
+                  borderRadius: "var(--radius-md)",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  fontSize: "1.05rem",
+                  width: "100%",
+                  boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
+                }}
+              >
+                Editar Perfil
+              </button>
+            ) : (
+              <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={handleCancelEditingAgricola}
+                  style={{
+                    flex: 1,
+                    minWidth: "120px",
+                    backgroundColor: "#f5f5f5",
+                    border: "1px solid #ccc",
+                    color: "#555",
+                    padding: "14px",
+                    borderRadius: "var(--radius-md)",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    fontSize: "1.05rem",
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    minWidth: "120px",
+                    backgroundColor: "var(--color-primary)",
+                    color: "white",
+                    border: "none",
+                    padding: "14px",
+                    borderRadius: "var(--radius-md)",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    fontSize: "1.05rem",
+                    boxShadow: "0 4px 6px rgba(46, 125, 50, 0.2)",
+                  }}
+                >
+                  Guardar Perfil Agrícola
+                </button>
+              </div>
+            )}
           </form>
         </div>
       </div>
