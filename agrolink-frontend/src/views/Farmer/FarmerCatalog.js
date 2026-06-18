@@ -58,10 +58,10 @@ function FarmerCatalog() {
                 Historial completo de todos los productos y cultivos que has registrado en la plataforma.
             </p>
 
-            <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: 'var(--radius-lg)', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+            <div className="farmer-catalog-card">
                 
                 {/* BARRA SUPERIOR: Buscador y Botón de Exportar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+                <div className="farmer-catalog-actions-bar">
                     
                     {/* Buscador */}
                     <div style={{ flex: '1', minWidth: '300px' }}>
@@ -104,16 +104,16 @@ function FarmerCatalog() {
                 </div>
 
                 {/* TABLA DE PRODUCTOS */}
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <div className="farmer-catalog-table-wrapper">
+                    <table className="farmer-catalog-table">
                         <thead>
                             <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>ID</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>Producto</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>Variedad</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>Lote</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold' }}>Cantidad Total</th>
-                                <th style={{ padding: '15px', color: '#555', fontWeight: 'bold', textAlign: 'center' }}>Acciones</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>ID</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>Producto</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>Variedad</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>Lote</th>
+                                <th style={{ color: '#555', fontWeight: 'bold' }}>Cantidad Total</th>
+                                <th style={{ color: '#555', fontWeight: 'bold', textAlign: 'center' }}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -126,15 +126,15 @@ function FarmerCatalog() {
                             ) : (
                                 filteredCrops.map((crop) => (
                                     <tr key={crop.id} style={{ borderBottom: '1px solid #eee', transition: '0.2s' }}>
-                                        <td style={{ padding: '15px', fontWeight: 'bold', color: 'var(--color-primary)' }}>{crop.id}</td>
-                                        <td style={{ padding: '15px', color: '#333' }}>
+                                        <td style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>{crop.id}</td>
+                                        <td style={{ color: '#333' }}>
                                             {crop.nombre}
                                             {crop.incidencia && <span style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#d32f2f' }}>⚠️</span>}
                                         </td>
-                                        <td style={{ padding: '15px', color: '#555' }}>{crop.variedad || 'N/A'}</td>
-                                        <td style={{ padding: '15px', color: '#555' }}>{crop.lote}</td>
-                                        <td style={{ padding: '15px', color: '#555' }}>{crop.cantidadTotal}</td>
-                                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                                        <td style={{ color: '#555' }}>{crop.variedad || 'N/A'}</td>
+                                        <td style={{ color: '#555' }}>{crop.lote}</td>
+                                        <td style={{ color: '#555' }}>{crop.cantidadTotal}</td>
+                                        <td style={{ textAlign: 'center' }}>
                                             <button 
                                                 onClick={() => setSelectedCrop(crop)}
                                                 style={{
@@ -162,26 +162,8 @@ function FarmerCatalog() {
 
             {/* MODAL FLOTANTE (Se muestra solo si hay un cultivo seleccionado) */}
             {selectedCrop && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.6)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        backgroundColor: 'white',
-                        padding: '40px',
-                        borderRadius: 'var(--radius-lg)',
-                        width: '90%',
-                        maxWidth: '800px',
-                        maxHeight: '90vh',
-                        overflowY: 'auto',
-                        boxShadow: '0 15px 30px rgba(0,0,0,0.3)',
-                        position: 'relative'
-                    }}>
+                <div className="farmer-modal-overlay">
+                    <div className="farmer-catalog-modal">
                         {/* Botón de cerrar modal */}
                         <button 
                             onClick={() => setSelectedCrop(null)}
@@ -194,7 +176,7 @@ function FarmerCatalog() {
                             &times;
                         </button>
                         
-                        <div style={{ borderBottom: '2px solid #eee', paddingBottom: '15px', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <div className="farmer-catalog-modal-header">
                             {selectedCrop.imagen && (
                                 <img src={selectedCrop.imagen} alt={selectedCrop.nombre} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #eee' }} />
                             )}
@@ -206,7 +188,7 @@ function FarmerCatalog() {
                             </div>
                         </div>
                         
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+                        <div className="farmer-catalog-modal-grid">
                             
                             {/* Columna Izquierda: Info Básica y Producción */}
                             <div>
@@ -230,7 +212,7 @@ function FarmerCatalog() {
 
                                 <h4 style={{ color: 'var(--color-secondary)', borderBottom: '1px dashed #ccc', paddingBottom: '5px', marginBottom: '15px', marginTop: '25px' }}>Ciclo de Vida (Días)</h4>
                                 <div style={{ backgroundColor: '#F8F9FA', padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid #eee' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.9rem' }}>
+                                    <div className="farmer-catalog-lifecycle-grid">
                                         <div><strong style={{ color: '#666' }}>Germinación:</strong> {selectedCrop.etapas?.germinacion || 0}</div>
                                         <div><strong style={{ color: '#666' }}>Crecimiento:</strong> {selectedCrop.etapas?.crecimiento || 0}</div>
                                         <div><strong style={{ color: '#666' }}>Floración:</strong> {selectedCrop.etapas?.floracion || 0}</div>
@@ -257,7 +239,7 @@ function FarmerCatalog() {
                         )}
 
                         {/* Botones de acción del Modal */}
-                        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
+                        <div className="farmer-catalog-modal-actions">
                             <button onClick={handleDownload} disabled={downloadStatus !== 'idle'} style={{
                                 backgroundColor: downloadStatus === 'success' ? '#D4EDDA' : 'transparent',
                                 color: downloadStatus === 'success' ? '#155724' : 'var(--color-primary)',
