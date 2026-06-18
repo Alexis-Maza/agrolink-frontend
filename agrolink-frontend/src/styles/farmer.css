@@ -107,3 +107,229 @@
         padding: 20px 15px;
     }
 }
+
+/* RESPONSIVIDAD PARA MIS CULTIVOS (FARMER PRODUCTS) */
+
+/* Rejilla de tarjetas de cultivos */
+.farmer-crops-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+@media (max-width: 480px) {
+    .farmer-crops-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* Tarjeta contenedora de formulario */
+.farmer-form-card {
+    background-color: white;
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+@media (max-width: 768px) {
+    .farmer-form-card {
+        padding: 20px 15px;
+    }
+}
+
+/* Cabecera del formulario */
+.farmer-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+@media (max-width: 576px) {
+    .farmer-form-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .farmer-form-header button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Rejilla de columnas principales en formulario */
+.farmer-form-grid-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+}
+
+@media (max-width: 768px) {
+    .farmer-form-grid-cols {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+}
+
+/* Fila de cuadrícula interna (2 columnas lado a lado que se apilan) */
+.farmer-form-row-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+@media (max-width: 576px) {
+    .farmer-form-row-grid {
+        grid-template-columns: 1fr;
+        margin-bottom: 20px;
+    }
+}
+
+/* MODALES RESPONSIVOS DE GESTIÓN */
+.farmer-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+@media (max-width: 576px) {
+    .farmer-modal-overlay {
+        padding: 10px;
+    }
+}
+
+.farmer-modal-content {
+    background-color: white;
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 576px) {
+    .farmer-modal-content {
+        max-height: 95vh;
+    }
+}
+
+.farmer-modal-header {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (max-width: 576px) {
+    .farmer-modal-header {
+        padding: 15px 20px;
+    }
+    .farmer-modal-header h2 {
+        font-size: 1.25rem;
+    }
+}
+
+.farmer-modal-grid {
+    padding: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .farmer-modal-grid {
+        padding: 20px 15px;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.farmer-modal-actions {
+    padding: 20px 30px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    background-color: #f9f9f9;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    flex-wrap: wrap;
+}
+
+@media (max-width: 576px) {
+    .farmer-modal-actions {
+        padding: 15px 20px;
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    .farmer-modal-actions button {
+        width: 100%;
+        padding: 12px;
+        text-align: center;
+    }
+}
+
+.farmer-modal-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 480px) {
+    .farmer-modal-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Acciones del formulario de cultivos */
+.farmer-form-actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 2px solid #eee;
+    padding-top: 20px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.farmer-form-actions-buttons {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 576px) {
+    .farmer-form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+    .farmer-form-actions > div {
+        width: 100%;
+    }
+    .farmer-form-actions-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .farmer-form-actions button {
+        width: 100%;
+        text-align: center;
+    }
+}
+

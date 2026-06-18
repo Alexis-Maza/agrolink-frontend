@@ -530,13 +530,7 @@ function FarmerProducts() {
             </button>
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: "25px",
-            }}
-          >
+          <div className="farmer-crops-grid">
             {crops.map((crop) => {
               const stageData = mapearEstadoVisual(
                 crop.estadoCultivo,
@@ -851,24 +845,8 @@ function FarmerProducts() {
     };
 
     return (
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "40px",
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "30px",
-            borderBottom: "2px solid #eee",
-            paddingBottom: "20px",
-          }}
-        >
+      <div className="farmer-form-card">
+        <div className="farmer-form-header">
           <div>
             <h2
               style={{
@@ -912,13 +890,7 @@ function FarmerProducts() {
         </div>
 
         <form onSubmit={handleSubmitForm}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-              gap: "40px",
-            }}
-          >
+          <div className="farmer-form-grid-cols">
             {/* COLUMNA 1 */}
             <div>
               <h4
@@ -932,14 +904,7 @@ function FarmerProducts() {
                 1. Información Básica
               </h4>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "15px",
-                  marginBottom: "25px",
-                }}
-              >
+              <div className="farmer-form-row-grid">
                 <div>
                   <label
                     style={{
@@ -1044,14 +1009,7 @@ function FarmerProducts() {
                   💡 Formato sugerido: LOTE-[ABREVIATURA]-[AÑO]
                 </span>
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "15px",
-                  marginBottom: "30px",
-                }}
-              >
+              <div className="farmer-form-row-grid">
                 <div>
                   <label
                     style={{
@@ -1151,13 +1109,7 @@ function FarmerProducts() {
                   Para ajustes rápidos por clima o plagas, usa el botón
                   "Gestionar".
                 </p>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "15px",
-                  }}
-                >
+                <div className="farmer-form-row-grid" style={{ marginBottom: 0 }}>
                   <div>
                     <label
                       style={{
@@ -1282,14 +1234,7 @@ function FarmerProducts() {
               >
                 4. Cálculo de Fechas Clave
               </h4>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "15px",
-                  marginBottom: "25px",
-                }}
-              >
+              <div className="farmer-form-row-grid">
                 <div>
                   <label
                     style={{
@@ -1354,14 +1299,7 @@ function FarmerProducts() {
               >
                 5. Comercialización
               </h4>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "15px",
-                  marginBottom: "25px",
-                }}
-              >
+              <div className="farmer-form-row-grid">
                 <div>
                   <label
                     style={{
@@ -1508,16 +1446,7 @@ function FarmerProducts() {
             </div>
           </div>
 
-          <div
-            style={{
-              marginTop: "40px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderTop: "2px solid #eee",
-              paddingTop: "20px",
-            }}
-          >
+          <div className="farmer-form-actions">
             <div>
               {formMode === "edit" && (
                 <button
@@ -1538,7 +1467,7 @@ function FarmerProducts() {
                 </button>
               )}
             </div>
-            <div style={{ display: "flex", gap: "20px" }}>
+            <div className="farmer-form-actions-buttons">
               <button
                 type="button"
                 onClick={() => setIsFormVisible(false)}
@@ -1584,27 +1513,6 @@ function FarmerProducts() {
   };
 
   const renderEditModal = () => {
-    {
-      editingCrop &&
-        calcularAlerta20(
-          editingCrop.fechaSiembra,
-          editingCrop.diasTotalesEstimados,
-        ) && (
-          <div
-            style={{
-              backgroundColor: "#FFEBEE",
-              color: "#d32f2f",
-              padding: "10px 20px",
-              fontWeight: "bold",
-              fontSize: "0.9rem",
-              borderBottom: "1px solid #ffcdd2",
-            }}
-          >
-            ⚠️ Este cultivo lleva más del 20% de tiempo extra sin cosechar.
-            Considera ajustar los días estimados.
-          </div>
-        );
-    }
     if (!editingCrop) return null;
     const eD =
       parseInt(editingCrop.etapas.germinacion || 0) +
@@ -1614,42 +1522,9 @@ function FarmerProducts() {
     const newHarvestDate = addDaysToDate(editingCrop.fechaSiembra, eD);
 
     return (
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 1000,
-          padding: "20px",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "white",
-            borderRadius: "var(--radius-lg)",
-            width: "100%",
-            maxWidth: "800px",
-            maxHeight: "90vh",
-            overflowY: "auto",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "var(--color-primary)",
-              color: "white",
-              padding: "20px 30px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+      <div className="farmer-modal-overlay">
+        <div className="farmer-modal-content">
+          <div className="farmer-modal-header">
             <div>
               <h2
                 style={{
@@ -1678,14 +1553,26 @@ function FarmerProducts() {
             </button>
           </div>
 
-          <div
-            style={{
-              padding: "30px",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "30px",
-            }}
-          >
+          {calcularAlerta20(
+            editingCrop.fechaSiembra,
+            editingCrop.diasTotalesEstimados,
+          ) && (
+            <div
+              style={{
+                backgroundColor: "#FFEBEE",
+                color: "#d32f2f",
+                padding: "10px 20px",
+                fontWeight: "bold",
+                fontSize: "0.9rem",
+                borderBottom: "1px solid #ffcdd2",
+              }}
+            >
+              ⚠️ Este cultivo lleva más del 20% de tiempo extra sin cosechar.
+              Considera ajustar los días estimados.
+            </div>
+          )}
+
+          <div className="farmer-modal-grid">
             <div
               style={{
                 backgroundColor: "#F8F9FA",
@@ -1702,14 +1589,7 @@ function FarmerProducts() {
               >
                 ⏱️ Ajuste Rápido de Tiempos (Días)
               </h4>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "10px",
-                  marginBottom: "20px",
-                }}
-              >
+              <div className="farmer-modal-form-grid">
                 <div>
                   <label style={{ fontSize: "0.85rem" }}>Germinación</label>
                   <input
@@ -2006,17 +1886,7 @@ function FarmerProducts() {
             </div>
           </div>
 
-          <div
-            style={{
-              padding: "20px 30px",
-              borderTop: "1px solid #eee",
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "15px",
-              backgroundColor: "#f9f9f9",
-              borderRadius: "0 0 var(--radius-lg) var(--radius-lg)",
-            }}
-          >
+          <div className="farmer-modal-actions">
             <button
               onClick={() => setEditingCrop(null)}
               style={{
