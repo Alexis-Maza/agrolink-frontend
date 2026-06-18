@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 
 // Importamos las sub-vistas
@@ -11,6 +11,7 @@ import { logout } from '../../api/authService';
 
 function FarmerHome() {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Función auxiliar para determinar si un enlace está activo
   const isActive = (path) => {
@@ -32,24 +33,47 @@ function FarmerHome() {
   });
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        backgroundColor: "var(--color-bg)",
-      }}
-    >
+    <div className="farmer-layout" style={{ backgroundColor: "var(--color-bg)" }}>
+      {/* HEADER MÓVIL */}
+      <div className="farmer-mobile-header">
+        <div className="farmer-mobile-logo">
+          <h2
+            style={{
+              color: "var(--color-primary)",
+              fontFamily: "var(--font-titles)",
+              margin: 0,
+              fontSize: "1.35rem",
+            }}
+          >
+            Agro<span style={{ color: "var(--color-secondary)" }}>Link</span>
+          </h2>
+        </div>
+        <button
+          className="farmer-hamburger-btn"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          style={{
+            color: "var(--color-primary)",
+          }}
+          aria-label="Abrir menú"
+        >
+          ☰
+        </button>
+      </div>
+
+      {/* OVERLAY PARA MÓVIL */}
+      {isMobileMenuOpen && (
+        <div
+          className="farmer-sidebar-overlay"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* BARRA LATERAL (Sidebar) */}
       <nav
+        className={`farmer-sidebar ${isMobileMenuOpen ? "open" : ""}`}
         style={{
-          width: "250px",
           backgroundColor: "white",
           boxShadow: "2px 0 5px rgba(0,0,0,0.05)",
-          display: "flex",
-          flexDirection: "column",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
         }}
       >
         <div
@@ -75,19 +99,19 @@ function FarmerHome() {
         </div>
 
         <div style={{ flex: 1, padding: "20px 0" }}>
-          <Link to="/farmer" style={linkStyle("/farmer")}>
+          <Link to="/farmer" style={linkStyle("/farmer")} onClick={() => setIsMobileMenuOpen(false)}>
             🏠 Inicio
           </Link>
-          <Link to="/farmer/products" style={linkStyle("/farmer/products")}>
+          <Link to="/farmer/products" style={linkStyle("/farmer/products")} onClick={() => setIsMobileMenuOpen(false)}>
             🌾 Mis Cultivos
           </Link>
-          <Link to="/farmer/catalog" style={linkStyle("/farmer/catalog")}>
+          <Link to="/farmer/catalog" style={linkStyle("/farmer/catalog")} onClick={() => setIsMobileMenuOpen(false)}>
             📦 Historial Productos
           </Link>
-          <Link to="/farmer/sales" style={linkStyle("/farmer/sales")}>
+          <Link to="/farmer/sales" style={linkStyle("/farmer/sales")} onClick={() => setIsMobileMenuOpen(false)}>
             💰 Mis Ventas
           </Link>
-          <Link to="/farmer/profile" style={linkStyle("/farmer/profile")}>
+          <Link to="/farmer/profile" style={linkStyle("/farmer/profile")} onClick={() => setIsMobileMenuOpen(false)}>
             👤 Mi Perfil
           </Link>
         </div>
@@ -95,7 +119,10 @@ function FarmerHome() {
         <div style={{ padding: "20px", borderTop: "1px solid #eee" }}>
           <Link
             to="/"
-            onClick={logout}
+            onClick={() => {
+              logout();
+              setIsMobileMenuOpen(false);
+            }}
             style={{
               color: "#dc3545",
               textDecoration: "none",
@@ -108,7 +135,7 @@ function FarmerHome() {
       </nav>
 
       {/* ÁREA PRINCIPAL (Contenido dinámico) */}
-      <main style={{ flex: 1, padding: "40px" }}>
+      <main className="farmer-main">
         <Routes>
           <Route path="/" element={<FarmerDashboard />} />
           <Route path="products" element={<FarmerProducts />} />

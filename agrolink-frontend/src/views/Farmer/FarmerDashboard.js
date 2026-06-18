@@ -107,7 +107,7 @@ function FarmerDashboard() {
             </div>
 
             {/* SECCIONES DE DETALLE (Grid 2 columnas) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '30px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '30px' }}>
                 
                 {/* Estado de Cultivos */}
                 <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: 'var(--radius-lg)', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
