@@ -47,3 +47,34 @@ h5,
 h6 {
     font-family: var(--font-titles);
 }
+
+/* OVERRIDE FOCUS STATES GLOBALLY */
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none !important;
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important; /* soft green shadow */
+}
+
+/* PREVENT BROWSER AUTOFILL BLUE BACKGROUND */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: var(--color-text) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* PREVENT BLUE/GRAY SHADING ON DISABLED INPUTS THAT ARE SAVED */
+input:disabled:not([type="email"]),
+textarea:disabled,
+select:disabled {
+    background-color: white !important;
+    color: var(--color-text) !important;
+    border-color: #ccc !important;
+    cursor: default !important;
+    opacity: 0.9 !important;
+}

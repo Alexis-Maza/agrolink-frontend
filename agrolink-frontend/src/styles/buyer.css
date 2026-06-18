@@ -341,6 +341,15 @@
     }
 }
 
+/* OVERRIDE EN ENFOQUE DE INPUTS (EVITA BORDE AZUL DEFAULT) */
+.buyer-layout input:focus,
+.buyer-layout textarea:focus,
+.buyer-layout select:focus {
+    outline: none !important;
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+}
+
 /* CLASES DE NOTIFICACIONES */
 .buyer-notifications-tabs {
     display: flex;

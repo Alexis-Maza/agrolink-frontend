@@ -9,6 +9,8 @@ function ResetPassword() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -65,11 +67,99 @@ function ResetPassword() {
                         <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
                             <div style={{ marginBottom: '25px' }}>
                                 <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Nueva Contraseña</label>
-                                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} disabled={isUpdating} />
+                                <div style={{ position: 'relative' }}>
+                                    <input 
+                                        type={showPassword ? 'text' : 'password'} 
+                                        required 
+                                        value={password} 
+                                        onChange={(e) => setPassword(e.target.value)} 
+                                        placeholder="Mínimo 6 caracteres" 
+                                        style={{ width: '100%', padding: '16px', paddingRight: '48px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} 
+                                        disabled={isUpdating} 
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#777',
+                                            padding: '6px',
+                                            borderRadius: '50%',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    >
+                                        {showPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                             <div style={{ marginBottom: '35px' }}>
                                 <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: '#333' }}>Confirmar Nueva Contraseña</label>
-                                <input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repite la contraseña" style={{ width: '100%', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} disabled={isUpdating} />
+                                <div style={{ position: 'relative' }}>
+                                    <input 
+                                        type={showConfirmPassword ? 'text' : 'password'} 
+                                        required 
+                                        value={confirmPassword} 
+                                        onChange={(e) => setConfirmPassword(e.target.value)} 
+                                        placeholder="Repite la contraseña" 
+                                        style={{ width: '100%', padding: '16px', paddingRight: '48px', borderRadius: 'var(--radius-md)', border: '1px solid #ccc', fontSize: '1rem' }} 
+                                        disabled={isUpdating} 
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#777',
+                                            padding: '6px',
+                                            borderRadius: '50%',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                             <button type="submit" disabled={isUpdating} style={{ width: '100%', padding: '15px', backgroundColor: isUpdating ? '#ccc' : 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '1.1rem', fontWeight: 'bold', cursor: isUpdating ? 'default' : 'pointer', marginBottom: '15px' }}>
                                 {isUpdating ? '⏳ Guardando...' : '🔄 Actualizar Contraseña'}

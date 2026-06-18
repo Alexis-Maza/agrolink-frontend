@@ -22,8 +22,8 @@ function Register() {
     const handleChange = (e) => {
         let value = e.target.value;
         if (['nombres', 'apellidoPaterno', 'apellidoMaterno'].includes(e.target.name)) {
-            // Permitir solo letras españolas y ñ/Ñ. Eliminar números, espacios y caracteres especiales.
-            value = value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚüÜ]/g, '');
+            // Permitir solo letras españolas, ñ/Ñ y espacios.
+            value = value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]/g, '');
         }
         setFormData({ ...formData, [e.target.name]: value });
     };
@@ -214,7 +214,7 @@ function Register() {
                                     </button>
 
                                     {/* Requisitos de seguridad de la contraseña flotante */}
-                                    {(isPasswordFocused || formData.password.length > 0) && (
+                                    {(isPasswordFocused || formData.password.length > 0) && !isPasswordValid && (
                                         <div style={{
                                             position: 'absolute',
                                             top: '100%',
