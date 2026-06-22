@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { initialOrders } from '../../data/mockBuyerData';
+import api from '../../api/axiosConfig';
 
 function BuyerPurchases() {
     const [orders, setOrders] = useState(() => {
@@ -18,12 +19,28 @@ function BuyerPurchases() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [exportStatus, setExportStatus] = useState('idle');
 
-    const filteredOrders = orders.filter(o => o.id.toLowerCase().includes(searchTerm.toLowerCase()) || (o.productos && o.productos.length > 0 && o.productos[0].nombre.toLowerCase().includes(searchTerm.toLowerCase())));
+    const filteredOrders = orders.filter(o => 
+        String(o.id).toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (o.productos && o.productos.length > 0 && 
+         o.productos[0].nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
-    const handleExport = () => {
+    const handleExport = async () => {
         if (exportStatus !== 'idle') return;
         setExportStatus('exporting');
-        setTimeout(() => { setExportStatus('success'); setTimeout(() => setExportStatus('idle'), 3000); }, 1500);
+        try {
+            const response = await api.get('/reportes/mis-compras/excel', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mis_compras.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            setExportStatus('success');
+            setTimeout(() => setExportStatus('idle'), 3000);
+        } catch {
+            setExportStatus('idle');
+        }
     };
 
     const handleCancelProduct = (orderId, productId) => {

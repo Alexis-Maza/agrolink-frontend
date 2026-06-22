@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { initialCrops } from '../../data/mockFarmerData';
+import api from '../../api/axiosConfig';
 
 function FarmerCatalog() {
     // 1. Datos simulados (Mock Data) de productos/cultivos importados
@@ -18,15 +19,22 @@ function FarmerCatalog() {
     );
 
     // 4. Función con feedback visual para exportar
-    const handleExport = () => {
+    const handleExport = async () => {
         if (exportStatus !== 'idle') return;
         setExportStatus('exporting');
-        
-        // Simulamos el tiempo de generación del archivo Excel
-        setTimeout(() => {
+        try {
+            const response = await api.get('/reportes/mis-cultivos/excel', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'catalogo_cultivos.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
             setExportStatus('success');
             setTimeout(() => setExportStatus('idle'), 3000);
-        }, 1500);
+        } catch {
+            setExportStatus('idle');
+        }
     };
 
     // 5. Función con feedback visual para descargar ficha

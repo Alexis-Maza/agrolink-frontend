@@ -1,42 +1,49 @@
-import React, { useState } from 'react';
-import { initialSales } from '../../data/mockFarmerData';
+import React, { useState, useEffect } from 'react';
+import api from '../../api/axiosConfig';
 
 function FarmerSales() {
-    // 1. Datos simulados (Mock Data) de ventas importados
-    const [salesData] = useState(initialSales);
+    const [salesData, setSalesData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // 2. Estados para el buscador y el modal
+    useEffect(() => {
+        api.get('/agricultor/ventas')
+            .then(res => setSalesData(res.data))
+            .catch(() => setSalesData([]))
+            .finally(() => setLoading(false));
+    }, []);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSale, setSelectedSale] = useState(null);
-    const [exportStatus, setExportStatus] = useState('idle'); // 'idle', 'exporting', 'success'
-    const [downloadStatus, setDownloadStatus] = useState('idle'); // 'idle', 'downloading', 'success'
+    const [exportStatus, setExportStatus] = useState('idle');
+    const [downloadStatus, setDownloadStatus] = useState('idle');
 
-    // 3. Filtrar datos según el buscador (por producto o por empresa)
-    const filteredSales = salesData.filter(sale => 
-        sale.producto.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        sale.empresa.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredSales = salesData.filter(sale =>
+        (sale.producto || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (sale.empresa || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // 4. Función con feedback visual para exportar
-    const handleExport = () => {
+    const handleExport = async () => {
         if (exportStatus !== 'idle') return;
         setExportStatus('exporting');
-        
-        // Simulamos el tiempo de generación del archivo Excel
-        setTimeout(() => {
+        try {
+            const response = await api.get('/reportes/mis-ventas/excel', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mis_ventas.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
             setExportStatus('success');
-            
-            // Volvemos al estado normal después de 3 segundos
             setTimeout(() => setExportStatus('idle'), 3000);
-        }, 1500);
+        } catch {
+            setExportStatus('idle');
+        }
     };
 
-    // 5. Función con feedback visual para descargar recibo
     const handleDownload = () => {
         if (downloadStatus !== 'idle') return;
         setDownloadStatus('downloading');
         
-        // Simulamos el proceso de descarga del PDF
         setTimeout(() => {
             setDownloadStatus('success');
             setTimeout(() => setDownloadStatus('idle'), 3000);
