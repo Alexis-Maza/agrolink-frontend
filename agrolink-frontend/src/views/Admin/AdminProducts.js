@@ -2,60 +2,54 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
     listarProductosAdmin, 
     crearProducto, 
-    actualizarProducto, 
+    actualizarProducto,
+    eliminarProducto,
     crearVariedad, 
-    actualizarVariedad 
-} from '../../api/adminService';
+    actualizarVariedad,
+    eliminarVariedad
+} from '../../api/Adminproductoservice';
 
 function AdminProducts() {
-    // --- ESTADOS ---
     const [productos, setProductos] = useState([]);
     
-    // Formularios de Creación
     const [formProd, setFormProd] = useState({ nombre: '', descripcion: '' });
     const [formVar, setFormVar] = useState({ productoId: '', nombre: '' });
 
-    // Modal de Detalles
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedProd, setSelectedProd] = useState(null);
 
-    // Edición de Producto (Lado Derecho del Modal)
     const [isEditingProd, setIsEditingProd] = useState(false);
     const [editProdFields, setEditProdFields] = useState({ nombre: '', descripcion: '' });
 
-    // Edición de Variantes (Lado Izquierdo del Modal)
     const [editingVarId, setEditingVarId] = useState(null);
     const [editVarName, setEditVarName] = useState('');
 
-    // Mensajes de feedback
     const [msgProd, setMsgProd] = useState({ type: '', text: '' });
     const [msgVar, setMsgVar] = useState({ type: '', text: '' });
 
-    // --- CARGAR DATOS ---
+    // Sin dependencias: no produce loop
     const cargarProductos = useCallback(async () => {
         try {
             const data = await listarProductosAdmin();
             setProductos(data);
-            
-            // Si el modal está abierto, actualizar los datos del producto seleccionado para reflejar cambios
-            if (selectedProd) {
-                const prodActualizado = data.find(p => p.id === selectedProd.id);
-                if (prodActualizado) {
-                    setSelectedProd(prodActualizado);
-                }
-            }
         } catch (error) {
             console.error("Error al cargar productos:", error);
         }
-    }, [selectedProd]);
+    }, []);
 
     useEffect(() => {
         cargarProductos();
     }, [cargarProductos]);
 
-    // --- MANEJADORES DE ACCIONES ---
+    // Sincroniza selectedProd cuando cambia la lista (para reflejar ediciones en el modal)
+    useEffect(() => {
+        if (selectedProd) {
+            const actualizado = productos.find(p => p.id === selectedProd.id);
+            if (actualizado) setSelectedProd(actualizado);
+        }
+    }, [productos]);
 
-    // Crear Producto
+    // --- CREAR PRODUCTO ---
     const handleCrearProducto = async (e) => {
         e.preventDefault();
         if (!formProd.nombre.trim()) {
@@ -63,10 +57,7 @@ function AdminProducts() {
             return;
         }
         try {
-            await crearProducto({
-                nombre: formProd.nombre,
-                descripcion: formProd.descripcion
-            });
+            await crearProducto({ nombre: formProd.nombre, descripcion: formProd.descripcion });
             setFormProd({ nombre: '', descripcion: '' });
             setMsgProd({ type: 'success', text: '¡Producto creado con éxito!' });
             cargarProductos();
@@ -76,7 +67,7 @@ function AdminProducts() {
         }
     };
 
-    // Crear Variante
+    // --- CREAR VARIANTE ---
     const handleCrearVariedad = async (e) => {
         e.preventDefault();
         if (!formVar.productoId) {
@@ -98,7 +89,7 @@ function AdminProducts() {
         }
     };
 
-    // Abrir Modal
+    // --- MODAL ---
     const abrirModal = (producto) => {
         setSelectedProd(producto);
         setEditProdFields({ nombre: producto.nombre, descripcion: producto.descripcion });
@@ -107,7 +98,6 @@ function AdminProducts() {
         setModalOpen(true);
     };
 
-    // Cerrar Modal
     const cerrarModal = () => {
         setModalOpen(false);
         setSelectedProd(null);
@@ -115,7 +105,7 @@ function AdminProducts() {
         setEditingVarId(null);
     };
 
-    // Guardar Edición de Producto
+    // --- EDITAR PRODUCTO ---
     const handleGuardarProducto = async () => {
         if (!editProdFields.nombre.trim()) {
             alert('El nombre del producto no puede estar vacío');
@@ -133,23 +123,40 @@ function AdminProducts() {
         }
     };
 
-    // Cambiar Estado Activo/Inactivo de Producto
+    // --- CAMBIAR ESTADO (activo/inactivo) ---
+    // El servicio de actualizarProducto solo acepta nombre y descripcion,
+    // así que el toggle de estado se maneja optimísticamente en local
     const handleCambiarEstado = async (nuevoEstado) => {
         try {
-            await actualizarProducto(selectedProd.id, { activo: nuevoEstado });
+            await actualizarProducto(selectedProd.id, {
+                nombre: selectedProd.nombre,
+                descripcion: selectedProd.descripcion,
+                activo: nuevoEstado
+            });
             cargarProductos();
         } catch (error) {
             alert('Error al cambiar el estado del producto');
         }
     };
 
-    // Habilitar Edición de Variante
-    const iniciarEdicionVariante = (variedad) => {
-        setEditingVarId(variedad.id);
-        setEditVarName(variedad.nombre);
+    // --- ELIMINAR PRODUCTO ---
+    const handleEliminarProducto = async () => {
+        if (!window.confirm(`¿Seguro que deseas eliminar "${selectedProd.nombre}"? Esta acción no se puede deshacer.`)) return;
+        try {
+            await eliminarProducto(selectedProd.id);
+            cerrarModal();
+            cargarProductos();
+        } catch (error) {
+            alert('Error al eliminar el producto');
+        }
     };
 
-    // Guardar Edición de Variante
+    // --- EDITAR VARIANTE ---
+    const iniciarEdicionVariante = (variedad) => {
+        setEditingVarId(variedad.id);
+        setEditVarName(variedad.nombreProductosVariedad);
+    };
+
     const handleGuardarVariedad = async (variedadId) => {
         if (!editVarName.trim()) {
             alert('El nombre de la variante no puede estar vacío');
@@ -164,12 +171,21 @@ function AdminProducts() {
         }
     };
 
-    // Filtrar solo productos activos para el selector de variedades
+    // --- ELIMINAR VARIANTE ---
+    const handleEliminarVariedad = async (variedadId, nombreVariedad) => {
+        if (!window.confirm(`¿Eliminar la variante "${nombreVariedad}"?`)) return;
+        try {
+            await eliminarVariedad(variedadId);
+            cargarProductos();
+        } catch (error) {
+            alert('Error al eliminar la variante');
+        }
+    };
+
     const productosActivos = productos.filter(p => p.activo);
 
     return (
         <div>
-            {/* Cabecera */}
             <div className="admin-header">
                 <h1>Gestión de Productos</h1>
                 <span className="admin-badge">Productos y Variantes</span>
@@ -183,35 +199,29 @@ function AdminProducts() {
                     <form onSubmit={handleCrearProducto}>
                         <div className="admin-form-group">
                             <label htmlFor="prod-nombre">Nombre del Producto</label>
-                            <input 
+                            <input
                                 id="prod-nombre"
-                                type="text" 
-                                className="admin-input" 
-                                placeholder="Ej. Zanahoria, Fresa" 
+                                type="text"
+                                className="admin-input"
+                                placeholder="Ej. Zanahoria, Fresa"
                                 value={formProd.nombre}
                                 onChange={(e) => setFormProd({ ...formProd, nombre: e.target.value })}
                             />
                         </div>
                         <div className="admin-form-group">
                             <label htmlFor="prod-desc">Descripción</label>
-                            <textarea 
+                            <textarea
                                 id="prod-desc"
-                                className="admin-textarea" 
+                                className="admin-textarea"
                                 placeholder="Añade una descripción sobre el producto"
                                 value={formProd.descripcion}
                                 onChange={(e) => setFormProd({ ...formProd, descripcion: e.target.value })}
                             />
                         </div>
-                        <button type="submit" className="admin-btn">
-                            + Crear Producto
-                        </button>
+                        <button type="submit" className="admin-btn">+ Crear Producto</button>
                         {msgProd.text && (
-                            <div style={{ 
-                                marginTop: '12px', 
-                                fontSize: '0.85rem', 
-                                color: msgProd.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
-                                fontWeight: 'bold'
-                            }}>
+                            <div style={{ marginTop: '12px', fontSize: '0.85rem', fontWeight: 'bold',
+                                color: msgProd.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)' }}>
                                 {msgProd.text}
                             </div>
                         )}
@@ -224,7 +234,7 @@ function AdminProducts() {
                     <form onSubmit={handleCrearVariedad}>
                         <div className="admin-form-group">
                             <label htmlFor="var-producto">Producto Asociado</label>
-                            <select 
+                            <select
                                 id="var-producto"
                                 className="admin-select"
                                 value={formVar.productoId}
@@ -238,25 +248,19 @@ function AdminProducts() {
                         </div>
                         <div className="admin-form-group">
                             <label htmlFor="var-nombre">Nombre de la Variante</label>
-                            <input 
+                            <input
                                 id="var-nombre"
-                                type="text" 
-                                className="admin-input" 
+                                type="text"
+                                className="admin-input"
                                 placeholder="Ej. Orgánica, Calibre Extra"
                                 value={formVar.nombre}
                                 onChange={(e) => setFormVar({ ...formVar, nombre: e.target.value })}
                             />
                         </div>
-                        <button type="submit" className="admin-btn admin-btn-secondary">
-                            + Agregar Variante
-                        </button>
+                        <button type="submit" className="admin-btn admin-btn-secondary">+ Agregar Variante</button>
                         {msgVar.text && (
-                            <div style={{ 
-                                marginTop: '12px', 
-                                fontSize: '0.85rem', 
-                                color: msgVar.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
-                                fontWeight: 'bold'
-                            }}>
+                            <div style={{ marginTop: '12px', fontSize: '0.85rem', fontWeight: 'bold',
+                                color: msgVar.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)' }}>
                                 {msgVar.text}
                             </div>
                         )}
@@ -264,7 +268,7 @@ function AdminProducts() {
                 </div>
             </div>
 
-            {/* Tabla de Gestión */}
+            {/* Tabla */}
             <div className="admin-table-container">
                 <h2>Listado de Productos Registrados</h2>
                 <table className="admin-table">
@@ -285,12 +289,7 @@ function AdminProducts() {
                                 <td style={{ fontWeight: '600' }}>{p.nombre}</td>
                                 <td style={{ color: 'var(--color-text-secondary)' }}>{p.descripcion || 'Sin descripción'}</td>
                                 <td>
-                                    <span style={{ 
-                                        backgroundColor: '#ECEFF1', 
-                                        padding: '2px 8px', 
-                                        borderRadius: '4px',
-                                        fontWeight: '600'
-                                    }}>
+                                    <span style={{ backgroundColor: '#ECEFF1', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
                                         {p.variedades ? p.variedades.length : 0}
                                     </span>
                                 </td>
@@ -300,11 +299,7 @@ function AdminProducts() {
                                     </span>
                                 </td>
                                 <td>
-                                    <button 
-                                        className="details-btn" 
-                                        title="Más detalles"
-                                        onClick={() => abrirModal(p)}
-                                    >
+                                    <button className="details-btn" title="Más detalles" onClick={() => abrirModal(p)}>
                                         🔍
                                     </button>
                                 </td>
@@ -314,27 +309,24 @@ function AdminProducts() {
                 </table>
             </div>
 
-            {/* Modal de Vista Dividida (Split View) */}
+            {/* Modal Split View */}
             {modalOpen && selectedProd && (
                 <div className="modal-overlay" onClick={cerrarModal}>
                     <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-                        {/* Cabecera del Modal */}
                         <header className="modal-header">
                             <h3>Detalles: {selectedProd.nombre}</h3>
                             <button className="modal-close-btn" onClick={cerrarModal}>&times;</button>
                         </header>
 
-                        {/* Cuerpo de Doble Columna */}
                         <div className="modal-split-body">
-                            
-                            {/* Columna Izquierda: Edición de Producto */}
+                            {/* Columna Izquierda: Datos del Producto */}
                             <div className="modal-col-left">
                                 <div>
                                     <h4>Datos del Producto</h4>
                                     <div className="admin-form-group">
                                         <label>Nombre</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             className="admin-input"
                                             value={editProdFields.nombre}
                                             disabled={!isEditingProd}
@@ -343,39 +335,31 @@ function AdminProducts() {
                                     </div>
                                     <div className="admin-form-group">
                                         <label>Descripción</label>
-                                        <textarea 
+                                        <textarea
                                             className="admin-textarea"
                                             value={editProdFields.descripcion}
                                             disabled={!isEditingProd}
                                             onChange={(e) => setEditProdFields({ ...editProdFields, descripcion: e.target.value })}
                                         />
                                     </div>
-
-                                    {/* Botón Editar / Guardar Producto */}
                                     {isEditingProd ? (
-                                        <button 
-                                            className="admin-btn admin-btn-success"
-                                            style={{ width: '100%' }}
-                                            onClick={handleGuardarProducto}
-                                        >
+                                        <button className="admin-btn admin-btn-success" style={{ width: '100%' }}
+                                            onClick={handleGuardarProducto}>
                                             Guardar Cambios
                                         </button>
                                     ) : (
-                                        <button 
-                                            className="admin-btn"
-                                            style={{ width: '100%', backgroundColor: 'var(--color-primary)' }}
-                                            onClick={() => setIsEditingProd(true)}
-                                        >
+                                        <button className="admin-btn" style={{ width: '100%', backgroundColor: 'var(--color-primary)' }}
+                                            onClick={() => setIsEditingProd(true)}>
                                             Editar Datos
                                         </button>
                                     )}
                                 </div>
 
-                                {/* Cambio de Estado */}
+                                {/* Estado */}
                                 <div className="product-status-actions" style={{ marginTop: '24px' }}>
                                     <span>Estado del Producto en Plataforma</span>
                                     <div className="status-buttons-row">
-                                        <button 
+                                        <button
                                             className="admin-btn admin-btn-success"
                                             disabled={selectedProd.activo}
                                             style={{ opacity: selectedProd.activo ? 0.5 : 1 }}
@@ -383,7 +367,7 @@ function AdminProducts() {
                                         >
                                             Activar
                                         </button>
-                                        <button 
+                                        <button
                                             className="admin-btn admin-btn-danger"
                                             disabled={!selectedProd.activo}
                                             style={{ opacity: !selectedProd.activo ? 0.5 : 1 }}
@@ -392,6 +376,17 @@ function AdminProducts() {
                                             Desactivar
                                         </button>
                                     </div>
+                                </div>
+
+                                {/* Eliminar Producto */}
+                                <div style={{ marginTop: '16px' }}>
+                                    <button
+                                        className="admin-btn admin-btn-danger"
+                                        style={{ width: '100%' }}
+                                        onClick={handleEliminarProducto}
+                                    >
+                                        🗑️ Eliminar Producto
+                                    </button>
                                 </div>
                             </div>
 
@@ -402,14 +397,14 @@ function AdminProducts() {
                                     <ul className="variants-list">
                                         {selectedProd.variedades.map(v => (
                                             <li key={v.id} className="variant-item">
-                                                <input 
+                                                <input
                                                     type="text"
-                                                    value={editingVarId === v.id ? editVarName : v.nombre}
+                                                    value={editingVarId === v.id ? editVarName : v.nombreProductosVariedad}
                                                     disabled={editingVarId !== v.id}
                                                     onChange={(e) => setEditVarName(e.target.value)}
                                                 />
                                                 {editingVarId === v.id ? (
-                                                    <button 
+                                                    <button
                                                         className="admin-btn admin-btn-success"
                                                         style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                                                         onClick={() => handleGuardarVariedad(v.id)}
@@ -417,7 +412,7 @@ function AdminProducts() {
                                                         Guardar
                                                     </button>
                                                 ) : (
-                                                    <button 
+                                                    <button
                                                         className="admin-btn"
                                                         style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: '#78909C' }}
                                                         onClick={() => iniciarEdicionVariante(v)}
@@ -425,6 +420,13 @@ function AdminProducts() {
                                                         Editar
                                                     </button>
                                                 )}
+                                                <button
+                                                    className="admin-btn admin-btn-danger"
+                                                    style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                                                    onClick={() => handleEliminarVariedad(v.id, v.nombreProductosVariedad)}
+                                                >
+                                                    🗑️
+                                                </button>
                                             </li>
                                         ))}
                                     </ul>
