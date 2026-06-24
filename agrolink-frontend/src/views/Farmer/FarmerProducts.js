@@ -76,7 +76,7 @@ const calcularAlerta20 = (fechaSiembra, diasTotalesEstimados) => {
 // Convertir CultivoResponse del backend al formato que usa el JSX
 const mapearResponseACrop = (c) => ({
   id: c.id,
-  nombre: c.nombreProductoVariedad || "Sin nombre",
+  nombre: c.nombreProductoVariedad || c.nombreVariedad || "Sin nombre",
   variedad: "",
   lote: c.lote || "---",
   hectareas: c.areaSembrada ? c.areaSembrada.toString() : "",

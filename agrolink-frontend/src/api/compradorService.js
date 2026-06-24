@@ -34,3 +34,8 @@ export const crearPedido = async (pedidoData) => {
     const response = await api.post('/comprador/pedidos/masivo', pedidoData);
     return response.data;
 };
+
+export const obtenerMisCompras = async () => {
+    const response = await api.get('/comprador/pedidos');
+    return response.data;
+};

@@ -59,3 +59,13 @@ export const registrarMerma = async (idCultivo, datos) => {
     const response = await api.post(`/cultivos/${idCultivo}/merma`, datos);
     return response.data;
 };
+
+export const obtenerVentas = async () => {
+    const response = await api.get('/agricultor/ventas');
+    return response.data;
+};
+
+export const obtenerCatalogo = async () => {
+    const response = await api.get('/productos/catalogo');
+    return response.data;
+};

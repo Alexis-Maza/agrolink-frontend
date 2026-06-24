@@ -48,3 +48,8 @@ export const actualizarVariedad = async (productoId, variedadId, nuevoNombre) =>
 export const eliminarVariedad = async (variedadId) => {
     await api.delete(`/api/admin/productos/variantes/${variedadId}`);
 };
+
+export const toggleEstadoVariedad = async (variedadId) => {
+    const response = await api.patch(`/api/admin/productos/variantes/${variedadId}/toggle-estado`);
+    return response.data;
+};
