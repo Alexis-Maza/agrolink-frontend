@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { obtenerCatalogo } from '../../api/agricultorService';
+import { listarCultivos, exportarCultivosExcel } from '../../api/agricultorService';
 
 const formatDate = (dateStr) => {
     if (!dateStr) return '---';
@@ -24,6 +24,7 @@ function FarmerCatalog() {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCultivo, setSelectedCultivo] = useState(null);
+    const [exportStatus, setExportStatus] = useState('idle');
 
     useEffect(() => {
         cargarCatalogo();
@@ -33,7 +34,7 @@ function FarmerCatalog() {
         setLoading(true);
         setError('');
         try {
-            const data = await obtenerCatalogo();
+            const data = await listarCultivos();
             setCatalogo(data);
         } catch {
             setError('No se pudo cargar el catálogo. Verifica tu conexión.');
@@ -42,21 +43,23 @@ function FarmerCatalog() {
         }
     };
 
-    // Aplanar productos > variedades > cultivos en una lista de filas para la tabla
-    const filas = catalogo.flatMap(producto =>
-        producto.variedades.flatMap(variedad =>
-            variedad.cultivos.map(cultivo => ({
-                ...cultivo,
-                nombreProducto: producto.nombreProducto,
-                nombreVariedad: variedad.nombreVariedad,
-            }))
-        )
-    );
+    const handleExport = async () => {
+        if (exportStatus !== 'idle') return;
+        setExportStatus('exporting');
+        try {
+            await exportarCultivosExcel();
+            setExportStatus('success');
+            setTimeout(() => setExportStatus('idle'), 3000);
+        } catch (err) {
+            alert('Error al exportar. Intenta de nuevo.');
+            setExportStatus('idle');
+        }
+    };
 
-    const filasFiltradas = filas.filter(f =>
-        f.nombreProducto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.nombreVariedad.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (f.lote || '').toLowerCase().includes(searchTerm.toLowerCase())
+    // Lista plana de cultivos filtrada
+    const filasFiltradas = catalogo.filter(c =>
+        (c.nombreProductoVariedad || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.lote || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     if (loading)
@@ -100,7 +103,7 @@ function FarmerCatalog() {
                     <div style={{ flex: '1', minWidth: '300px' }}>
                         <input
                             type="text"
-                            placeholder="Buscar por producto, variedad o lote..."
+                            placeholder="Buscar por producto o lote..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{
@@ -113,6 +116,18 @@ function FarmerCatalog() {
                     <span style={{ color: '#888', fontSize: '0.95rem', alignSelf: 'center' }}>
                         {filasFiltradas.length} cultivo(s) encontrado(s)
                     </span>
+                    <button onClick={handleExport} disabled={exportStatus !== 'idle'} style={{
+                        backgroundColor: exportStatus === 'success' ? '#D4EDDA' : '#E8F5E9',
+                        color: exportStatus === 'success' ? '#155724' : 'var(--color-primary)',
+                        border: `1px solid ${exportStatus === 'success' ? '#c3e6cb' : 'var(--color-primary)'}`,
+                        padding: '10px 20px', borderRadius: 'var(--radius-md)', fontWeight: 'bold',
+                        cursor: exportStatus !== 'idle' ? 'default' : 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '8px'
+                    }}>
+                        {exportStatus === 'idle' && '📊 Exportar historial'}
+                        {exportStatus === 'exporting' && '⏳ Generando Excel...'}
+                        {exportStatus === 'success' && '✅ Excel Descargado'}
+                    </button>
                 </div>
 
                 {/* TABLA */}
@@ -120,7 +135,7 @@ function FarmerCatalog() {
                     <table className="farmer-catalog-table">
                         <thead>
                             <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}>
-                                {['ID', 'Producto', 'Variedad', 'Lote', 'Estado', 'Cant. Estimada', 'Disponible', 'Acciones'].map(h => (
+                                {['ID', 'Producto / Variedad', 'Lote', 'Estado', 'Cant. Estimada', 'Disponible', 'Precio', 'Acciones'].map(h => (
                                     <th key={h} style={{ color: '#555', fontWeight: 'bold' }}>{h}</th>
                                 ))}
                             </tr>
@@ -145,9 +160,8 @@ function FarmerCatalog() {
                                                 #{fila.id}
                                             </td>
                                             <td style={{ color: '#333', fontWeight: '500' }}>
-                                                {fila.nombreProducto}
+                                                {`${fila.nombreProducto} ${fila.nombreProductoVariedad}`}
                                             </td>
-                                            <td style={{ color: '#555' }}>{fila.nombreVariedad}</td>
                                             <td style={{ color: '#555' }}>{fila.lote || '---'}</td>
                                             <td>
                                                 <span style={{
@@ -168,6 +182,9 @@ function FarmerCatalog() {
                                                 fontWeight: 'bold'
                                             }}>
                                                 {fila.cantidadDisponible} {fila.unidad}
+                                            </td>
+                                            <td style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>
+                                                S/ {parseFloat(fila.precio || 0).toFixed(2)}
                                             </td>
                                             <td style={{ textAlign: 'center' }}>
                                                 <button
@@ -222,10 +239,12 @@ function FarmerCatalog() {
                                     color: 'var(--color-primary)', margin: '0 0 4px 0',
                                     fontSize: '1.8rem'
                                 }}>
-                                    {selectedCultivo.nombreProducto}
+                                    {selectedCultivo.nombreProducto && selectedCultivo.nombreProductoVariedad
+                                        ? `${selectedCultivo.nombreProducto} ${selectedCultivo.nombreProductoVariedad}`
+                                        : selectedCultivo.nombreProductoVariedad || selectedCultivo.nombreProducto || "Sin nombre"}
                                 </h3>
                                 <span style={{ color: '#777', fontSize: '1rem' }}>
-                                    Variedad: <strong>{selectedCultivo.nombreVariedad}</strong>
+                                    Lote: <strong>{selectedCultivo.lote}</strong>
                                     &nbsp;·&nbsp; ID Cultivo: <strong>#{selectedCultivo.id}</strong>
                                 </span>
                             </div>
@@ -287,12 +306,6 @@ function FarmerCatalog() {
                                     <strong style={{ color: '#555' }}>Fecha de Siembra:</strong>{' '}
                                     <span style={{ color: '#333' }}>{formatDate(selectedCultivo.fechaSiembra)}</span>
                                 </p>
-                                <p style={{ margin: '0 0 10px 0' }}>
-                                    <strong style={{ color: '#555' }}>Cosecha Estimada:</strong>{' '}
-                                    <span style={{ color: '#2E7D32', fontWeight: 'bold' }}>
-                                        {formatDate(selectedCultivo.fechaCosechaEstimada)}
-                                    </span>
-                                </p>
                             </div>
 
                             {/* COLUMNA DERECHA */}
@@ -307,7 +320,13 @@ function FarmerCatalog() {
                                 <p style={{ margin: '0 0 10px 0' }}>
                                     <strong style={{ color: '#555' }}>Precio por Kg:</strong>{' '}
                                     <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>
-                                        S/ {selectedCultivo.precio?.toFixed(2)}
+                                        S/ {parseFloat(selectedCultivo.precio || 0).toFixed(2)}
+                                    </span>
+                                </p>
+                                <p style={{ margin: '0 0 10px 0' }}>
+                                    <strong style={{ color: '#555' }}>Mínimo de Venta:</strong>{' '}
+                                    <span style={{ color: '#333' }}>
+                                        {selectedCultivo.minimoVenta} {selectedCultivo.unidad}
                                     </span>
                                 </p>
                                 <p style={{ margin: '0 0 10px 0' }}>
@@ -340,8 +359,8 @@ function FarmerCatalog() {
                                             {formatDate(selectedCultivo.fechaSiembra)}
                                         </div>
                                         <div>
-                                            <strong style={{ color: '#666' }}>Cosecha est.:</strong>{' '}
-                                            {formatDate(selectedCultivo.fechaCosechaEstimada)}
+                                            <strong style={{ color: '#666' }}>Días estimados:</strong>{' '}
+                                            {selectedCultivo.diasTotalesEstimados} días
                                         </div>
                                     </div>
                                     <div style={{
@@ -350,6 +369,9 @@ function FarmerCatalog() {
                                         fontSize: '0.9rem', color: '#666'
                                     }}>
                                         Área: <strong>{selectedCultivo.areaSembrada} ha</strong>
+                                        &nbsp;·&nbsp; Alerta retraso: <strong style={{ color: selectedCultivo.alertaRetraso ? '#d32f2f' : '#2E7D32' }}>
+                                            {selectedCultivo.alertaRetraso ? '⚠️ Sí' : '✅ No'}
+                                        </strong>
                                     </div>
                                 </div>
                             </div>

@@ -39,3 +39,16 @@ export const obtenerMisCompras = async () => {
     const response = await api.get('/comprador/pedidos');
     return response.data;
 };
+
+export const exportarComprasExcel = async () => {
+    const response = await api.get('/reportes/mis-compras/excel', {
+        responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'mis_compras.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};

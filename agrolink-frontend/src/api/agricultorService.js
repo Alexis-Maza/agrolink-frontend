@@ -69,3 +69,29 @@ export const obtenerCatalogo = async () => {
     const response = await api.get('/productos/catalogo');
     return response.data;
 };
+
+export const exportarCultivosExcel = async () => {
+    const response = await api.get('/reportes/mis-cultivos/excel', {
+        responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'catalogo_cultivos.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+export const exportarVentasExcel = async () => {
+    const response = await api.get('/reportes/mis-ventas/excel', {
+        responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'mis_ventas.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
