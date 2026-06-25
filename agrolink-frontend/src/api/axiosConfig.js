@@ -7,7 +7,7 @@ const api = axios.create({
     }
 });
 
-// Interceptor: agrega el token automáticamente en cada request
+// Interceptor request: agrega el token automáticamente
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -16,23 +16,13 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Interceptor: si el token expira redirige al login
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 403) {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-        }
-        return Promise.reject(error);
-    }
-);
-
+// Interceptor response: solo redirige al login si es 401 (token inválido/expirado)
+// El 403 es "sin permiso" pero el token puede seguir siendo válido
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         console.error('❌ Error interceptado:', error.response?.status, error.response?.data);
-        if (error.response?.status === 403 || error.response?.status === 401) {
+        if (error.response?.status === 401) {
             localStorage.removeItem('token');
             window.location.href = '/login';
         }

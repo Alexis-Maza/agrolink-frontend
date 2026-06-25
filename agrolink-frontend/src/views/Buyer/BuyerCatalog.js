@@ -71,8 +71,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
     const filteredCrops = catalog.filter(crop => {
         const cleanSearch = normalizeText(searchTerm);
         return (
-            normalizeText(crop.nombreProductoVariedad || '').includes(cleanSearch) ||
-            normalizeText(crop.lote || '').includes(cleanSearch)
+            normalizeText(crop.productoVariedad?.nombreProductosVariedad || '').includes(cleanSearch)
         );
     });
 
@@ -101,7 +100,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
         const newItem = {
             id: `CART-${Date.now()}`,
             idCultivo: selectedCrop.id,
-            nombre: selectedCrop.nombreProductoVariedad,
+            nombre: selectedCrop.productoVariedad?.nombreProductosVariedad,
             lote: selectedCrop.lote,
             cantidad: purchaseData.cantidad,
             precio: precio,
@@ -116,7 +115,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
 
         setCartItems([...cartItems, newItem]);
         if (onAddToCart) onAddToCart(selectedCrop.id);
-        alert(`¡${selectedCrop.nombreProductoVariedad} añadido al carrito!`);
+        alert(`¡${selectedCrop.productoVariedad?.nombreProductosVariedad} añadido al carrito!`);
         handleCloseModal();
     };
 
@@ -155,7 +154,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                             <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                 <div>
                                     <div style={{ color: '#888', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '8px' }}>LOTE: {crop.lote}</div>
-                                    <h3 style={{ margin: '0 0 12px 0', color: 'var(--color-text)', fontSize: '1.25rem' }}>{crop.nombreProductoVariedad}</h3>
+                                    <h3 style={{ margin: '0 0 12px 0', color: 'var(--color-text)', fontSize: '1.25rem' }}>{crop.productoVariedad?.nombreProductosVariedad}</h3>
                                 </div>
                                 <div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem' }}>
@@ -205,7 +204,7 @@ function BuyerCatalog({ acquiredIds, onAddToCart }) {
                     <div className="buyer-modal-container" style={{ backgroundColor: 'white', padding: '40px', borderRadius: 'var(--radius-lg)' }}>
                         <button onClick={handleCloseModal} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#888', cursor: 'pointer' }}>&times;</button>
 
-                        <h3 style={{ color: 'var(--color-primary)', margin: '0 0 20px 0', fontSize: '1.6rem' }}>{selectedCrop.nombreProductoVariedad}</h3>
+                        <h3 style={{ color: 'var(--color-primary)', margin: '0 0 20px 0', fontSize: '1.6rem' }}>{selectedCrop.productoVariedad?.nombreProductosVariedad}</h3>
 
                         <div className="buyer-modal-details-grid" style={{ backgroundColor: '#F1F8F5', padding: '18px', borderRadius: 'var(--radius-md)' }}>
                             <div>

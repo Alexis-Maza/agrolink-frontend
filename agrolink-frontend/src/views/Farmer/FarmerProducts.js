@@ -40,7 +40,7 @@ const mapearEstadoVisual = (estadoCultivo, diasTotales, fechaSiembra) => {
   const progress = Math.min(100, Math.round((daysElapsed / totalDays) * 100));
   const daysLeft = Math.max(0, totalDays - daysElapsed);
 
-  if (estadoCultivo === "Listo para cosechar") {
+  if (estadoCultivo === "Listo para vender" || estadoCultivo === "Cosechado") {
     return {
       stage: "Cosechado / Disponible",
       progress: 100,
@@ -76,7 +76,9 @@ const calcularAlerta20 = (fechaSiembra, diasTotalesEstimados) => {
 // Convertir CultivoResponse del backend al formato que usa el JSX
 const mapearResponseACrop = (c) => ({
   id: c.id,
-  nombre: c.nombreProductoVariedad || "Sin nombre",
+  nombre: c.nombreProducto && c.nombreProductoVariedad 
+    ? `${c.nombreProducto} ${c.nombreProductoVariedad}`
+    : c.nombreProductoVariedad || "Sin nombre",
   variedad: "",
   lote: c.lote || "---",
   hectareas: c.areaSembrada ? c.areaSembrada.toString() : "",
