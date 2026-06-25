@@ -54,30 +54,37 @@ function PublicHome() {
       setLoading(true);
       try {
         const data = await obtenerCatalogo();
-        // Normalizar campos del backend al formato que usa el JSX
-        const normalizado = data.map((item) => ({
-          ...item,
-          nombre:
-            item.productoVariedad?.nombreProductosVariedad || "Sin nombre",
-          agricultor:
-            `${item.agricultor?.usuario?.nombres || ""} ${item.agricultor?.usuario?.apellidoPaterno || ""}`.trim(),
-          variedad:
-            item.productoVariedad?.nombreProductosVariedad || "Estándar",
-          cantidadDisponible: `${item.cantidadDisponible} ${item.unidad}`,
-          cantidadTotal: `${item.cantidadEstimada} ${item.unidad}`,
-          minimoVenta: `${item.minimoVenta} ${item.unidad}`,
-          precio: parseFloat(item.precio),
-          imagen:
-            item.imagenUrl ||
-            "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&q=80&w=600",
-          certificaciones: item.agricultor?.certificaciones
-            ? item.agricultor.certificaciones.split(", ")
-            : [],
-          incidencia: null,
-          etapas: null,
-          hectareas: item.areaSembrada || null,
-          fechaSiembra: item.fechaSiembra || null,
-        }));
+        console.log("PRIMER ITEM:", JSON.stringify(data[0], null, 2)); // ← agrega esto
+        const normalizado = data.map((item) => {
+          const variedad =
+            item.productoVariedad?.nombreProductosVariedad || "Estándar";
+          console.log("variedad:", variedad, "| raw:", item.productoVariedad);
+          return {
+            id: item.id,
+            lote: item.lote,
+            nombre: `${item.productoVariedad?.producto?.nombre || ""} ${item.productoVariedad?.nombreProductosVariedad || ""}`.trim() || "Sin nombre",
+            variedad: item.productoVariedad?.nombreProductosVariedad || "Estándar",
+            agricultor:
+              `${item.agricultor?.usuario?.nombres || ""} ${item.agricultor?.usuario?.apellidoPaterno || ""}`.trim(),
+            cantidadDisponible: `${item.cantidadDisponible} ${item.unidad}`,
+            cantidadTotal: `${item.cantidadEstimada} ${item.unidad}`,
+            minimoVenta: `${item.minimoVenta} ${item.unidad}`,
+            precio: parseFloat(item.precio),
+            imagen:
+              item.imagenUrl ||
+              "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&q=80&w=600",
+            certificaciones: item.agricultor?.certificaciones
+              ? item.agricultor.certificaciones.split(", ")
+              : [],
+            incidencia: null,
+            etapas: null,
+            hectareas: item.areaSembrada || null,
+            fechaSiembra: item.fechaSiembra || null,
+            estadoCultivo: item.estadoCultivo?.descripcionEstadoCultivo || null,
+            diasTotalesEstimados: item.diasTotalesEstimados || null,
+            productoVariedad: item.productoVariedad,
+          };
+        });
         setCatalog(normalizado);
       } catch (err) {
         console.error("Error cargando catálogo público:", err);

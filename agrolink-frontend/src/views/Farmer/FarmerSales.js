@@ -151,7 +151,7 @@ function FarmerSales() {
                                     return (
                                         <tr key={`${sale.id}-${sale.producto}`} style={{ borderBottom: "1px solid #eee" }}>
                                             <td style={{ fontWeight: "bold", color: "var(--color-primary)" }}>{sale.id}</td>
-                                            <td style={{ color: "#333" }}>{sale.nombreProducto} - {sale.producto}</td>
+                                            <td style={{ color: "#333" }}>{sale.nombreProducto} {sale.producto}</td>
                                             <td style={{ color: "#555" }}>{sale.comprador}</td>
                                             <td style={{ color: "#555" }}>{sale.empresa || "—"}</td>
                                             <td>
@@ -195,7 +195,7 @@ function FarmerSales() {
                                 <p style={{ margin: "0 0 15px 0" }}>
                                     <strong style={{ color: "#555" }}>Producto / Variedad:</strong><br />
                                     <span style={{ fontSize: "1.1rem", color: "#333" }}>
-                                        {selectedSale.nombreProducto} - {selectedSale.producto}
+                                        {selectedSale.nombreProducto} {selectedSale.producto}
                                     </span>
                                 </p>
                                 <p style={{ margin: "0 0 15px 0" }}>

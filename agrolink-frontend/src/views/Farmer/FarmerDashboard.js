@@ -136,7 +136,7 @@ function FarmerDashboard() {
                                 <tbody>
                                     {recentSales.map(sale => (
                                         <tr key={sale.id}>
-                                            <td style={{ padding: '12px 5px', borderBottom: '1px solid #eee', color: '#333', fontSize: '0.95rem' }}>{sale.producto}</td>
+                                            <td style={{ padding: '12px 5px', borderBottom: '1px solid #eee', color: '#333', fontSize: '0.95rem' }}>{sale.nombreProducto} {sale.producto}</td>
                                             <td style={{ padding: '12px 5px', borderBottom: '1px solid #eee', color: '#555', fontSize: '0.95rem' }}>{sale.comprador}</td>
                                             <td style={{ padding: '12px 5px', borderBottom: '1px solid #eee' }}>
                                                 <span style={{
