@@ -57,8 +57,8 @@ function EmailVerification() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '60px 20px' }}>
-            <div style={{ backgroundColor: 'white', padding: '45px', borderRadius: 'var(--radius-lg)', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '500px', textAlign: 'center', position: 'relative' }}>
+        <div className="auth-container">
+            <div className="auth-card auth-card-mini">
 
                 {!isSuccess && (
                     <button type="button" onClick={() => navigate('/register')} style={{ position: 'absolute', top: '20px', left: '20px', background: 'transparent', border: 'none', fontSize: '1.5rem', color: '#888', cursor: 'pointer' }}>⬅</button>
@@ -67,14 +67,14 @@ function EmailVerification() {
                 {isSuccess ? (
                     <div>
                         <div style={{ width: '90px', height: '90px', backgroundColor: '#E8F5E9', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 25px auto', fontSize: '3rem' }}>✔️</div>
-                        <h2 style={{ color: 'var(--color-primary)', marginBottom: '15px', fontFamily: 'var(--font-titles)', fontSize: '2.2rem' }}>¡Cuenta Activada!</h2>
+                        <h2 className="auth-title" style={{ color: 'var(--color-primary)', marginBottom: '15px' }}>¡Cuenta Activada!</h2>
                         <p style={{ color: '#555', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '15px' }}>Tu correo ha sido validado correctamente.</p>
                         <p style={{ color: '#888', fontSize: '0.95rem' }}>Redirigiéndote a iniciar sesión...</p>
                     </div>
                 ) : (
                     <>
                         <div style={{ width: '80px', height: '80px', backgroundColor: '#E8F5E9', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px auto', fontSize: '2.5rem' }}>✉️</div>
-                        <h2 style={{ color: 'var(--color-primary)', marginBottom: '15px', fontFamily: 'var(--font-titles)', fontSize: '2rem' }}>Verifica tu Correo</h2>
+                        <h2 className="auth-title" style={{ color: 'var(--color-primary)', marginBottom: '15px' }}>Verifica tu Correo</h2>
                         <p style={{ color: '#555', fontSize: '1.05rem', marginBottom: '30px', lineHeight: '1.6' }}>
                             Ingresa el código de 6 dígitos enviado a:<br />
                             <strong style={{ color: 'var(--color-secondary)' }}>{email}</strong>
@@ -88,7 +88,7 @@ function EmailVerification() {
 
                         <form onSubmit={handleTokenSubmit}>
                             <div style={{ marginBottom: '30px' }}>
-                                <input type="text" maxLength="6" value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/[^0-9]/g, ''))} placeholder="000000" style={{ width: '220px', padding: '15px', borderRadius: 'var(--radius-md)', border: '2px solid var(--color-primary)', fontSize: '2.2rem', textAlign: 'center', letterSpacing: '6px', fontWeight: 'bold' }} required disabled={isValidating} />
+                                <input type="text" maxLength="6" value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/[^0-9]/g, ''))} placeholder="000000" className="auth-input-token" required disabled={isValidating} />
                             </div>
 
                             <button type="submit" disabled={isValidating} style={{ width: '100%', padding: '16px', backgroundColor: isValidating ? '#ccc' : 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '1.1rem', fontWeight: 'bold', cursor: isValidating ? 'default' : 'pointer', marginBottom: '25px' }}>
