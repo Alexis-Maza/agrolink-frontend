@@ -253,22 +253,22 @@ function AdminProducts() {
           <tbody>
             {productos.map((p) => (
               <tr key={p.id}>
-                <td>{p.id}</td>
-                <td style={{ fontWeight: "600" }}>{p.nombre}</td>
-                <td style={{ color: "var(--color-text-secondary)" }}>{p.descripcion || "Sin descripción"}</td>
-                <td>
+                <td data-label="ID">{p.id}</td>
+                <td data-label="Nombre" style={{ fontWeight: "600" }}>{p.nombre}</td>
+                <td data-label="Descripción" style={{ color: "var(--color-text-secondary)" }}>{p.descripcion || "Sin descripción"}</td>
+                <td data-label="Cantidad Variantes">
                   <span style={{ backgroundColor: "#ECEFF1", padding: "2px 8px", borderRadius: "4px", fontWeight: "600" }}>
                     {p.variedades ? p.variedades.length : 0}
                   </span>
                 </td>
-                <td>
+                <td data-label="Estado">
                   <span className={`status-badge ${p.activo ? "active" : "inactive"}`}>
                     {p.activo ? "Activo" : "Inactivo"}
                   </span>
                 </td>
-                <td>
+                <td data-label="Acciones">
                   <button className="details-btn" title="Más detalles" onClick={() => abrirModal(p)}>
-                    🔍
+                    🔍 Ver Detalles
                   </button>
                 </td>
               </tr>

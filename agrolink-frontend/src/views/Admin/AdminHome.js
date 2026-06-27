@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import AdminProducts from './AdminProducts';
 import AdminFarmers from './AdminFarmers';
@@ -9,6 +9,7 @@ import { logout } from '../../api/authService';
 function AdminHome() {
     const location = useLocation();
     const userRole = localStorage.getItem('userRole');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Función auxiliar para determinar si un enlace está activo
     const isActive = (path) => {
@@ -30,36 +31,30 @@ function AdminHome() {
     });
 
     return (
-        <div
-            className="theme-admin"
-            style={{
-                display: "flex",
-                minHeight: "100vh",
-                backgroundColor: "var(--color-bg)",
-            }}
-        >
-            {/* BARRA LATERAL (Sidebar) */}
-            <nav
-                style={{
-                    width: "250px",
-                    backgroundColor: "white",
-                    boxShadow: "2px 0 5px rgba(0,0,0,0.05)",
-                    display: "flex",
-                    flexDirection: "column",
-                    position: "sticky",
-                    top: 0,
-                    height: "100vh",
-                    zIndex: 10,
-                }}
-            >
-                {/* Logo y cabecera del panel */}
-                <div
-                    style={{
-                        padding: "30px 20px",
-                        textAlign: "center",
-                        borderBottom: "1px solid #eee",
-                    }}
+        <div className="theme-admin admin-layout">
+            {/* BARRA SUPERIOR MÓVIL */}
+            <header className="admin-mobile-header">
+                <h2 style={{ margin: 0, fontSize: "1.3rem", color: "var(--color-primary)", fontWeight: "bold" }}>
+                    Agro<span style={{ color: "var(--color-secondary, #FF9800)" }}>Link</span>
+                </h2>
+                <button 
+                    className="admin-hamburger-btn" 
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    aria-label="Abrir menú"
                 >
+                    ☰
+                </button>
+            </header>
+
+            {/* OVERLAY PARA CERRAR MENÚ EN MÓVIL */}
+            {isSidebarOpen && (
+                <div className="admin-sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />
+            )}
+
+            {/* BARRA LATERAL (Sidebar) */}
+            <nav className={`admin-sidebar ${isSidebarOpen ? "open" : ""}`}>
+                {/* Logo y cabecera del panel */}
+                <div className="admin-logo-section" style={{ borderBottom: "1px solid #eee" }}>
                     <h2
                         style={{
                             color: "var(--color-primary)",
@@ -70,36 +65,42 @@ function AdminHome() {
                     >
                         Agro<span style={{ color: "var(--color-secondary)" }}>Link</span>
                     </h2>
-                    <p style={{ color: "#888", fontSize: "0.9rem", margin: "5px 0 0 0" }}>
+                    <p style={{ color: "#888", fontSize: "0.9rem", margin: "5px 0 0 0", fontWeight: "600" }}>
                         {userRole === 'SUBADMIN' ? 'Panel Subadministrador' : 'Panel Administrador'}
                     </p>
                 </div>
 
                 {/* Enlaces de Navegación */}
                 <div style={{ flex: 1, padding: "20px 0" }}>
-                    <Link to="/admin/productos" style={linkStyle("/admin/productos")}>
+                    <Link to="/admin/productos" style={linkStyle("/admin/productos")} onClick={() => setIsSidebarOpen(false)}>
                         📦 Productos
                     </Link>
-                    <Link to="/admin/agricultores" style={linkStyle("/admin/agricultores")}>
+                    <Link to="/admin/agricultores" style={linkStyle("/admin/agricultores")} onClick={() => setIsSidebarOpen(false)}>
                         👨‍🌾 Agricultores
                     </Link>
-                    <Link to="/admin/compradores" style={linkStyle("/admin/compradores")}>
+                    <Link to="/admin/compradores" style={linkStyle("/admin/compradores")} onClick={() => setIsSidebarOpen(false)}>
                         👥 Compradores
                     </Link>
-                    <Link to="/admin/perfil" style={linkStyle("/admin/perfil")}>
+                    <Link to="/admin/perfil" style={linkStyle("/admin/perfil")} onClick={() => setIsSidebarOpen(false)}>
                         👤 Mi Perfil
                     </Link>
                 </div>
 
                 {/* Footer del Sidebar con botón de cerrar sesión */}
-                <div style={{ padding: "20px", borderTop: "1px solid #eee" }}>
+                <div className="admin-sidebar-footer" style={{ borderTop: "1px solid #eee" }}>
                     <Link
                         to="/"
-                        onClick={logout}
+                        onClick={() => {
+                            logout();
+                            setIsSidebarOpen(false);
+                        }}
                         style={{
                             color: "#dc3545",
                             textDecoration: "none",
                             fontWeight: "bold",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px"
                         }}
                     >
                         🚪 Cerrar Sesión
@@ -108,7 +109,7 @@ function AdminHome() {
             </nav>
 
             {/* ÁREA PRINCIPAL (Contenido dinámico derecho) */}
-            <main style={{ flex: 1, padding: "40px", overflowY: "auto" }}>
+            <main className="admin-main">
                 <Routes>
                     {/* Redirección automática de /admin a /admin/productos */}
                     <Route path="/" element={<Navigate to="productos" replace />} />
