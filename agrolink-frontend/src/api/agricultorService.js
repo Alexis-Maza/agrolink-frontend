@@ -95,3 +95,8 @@ export const exportarVentasExcel = async () => {
     link.click();
     document.body.removeChild(link);
 };
+
+export const obtenerHistorialCultivo = async (idCultivo) => {
+    const response = await api.get(`/cultivos/${idCultivo}/etapas`);
+    return response.data;
+};

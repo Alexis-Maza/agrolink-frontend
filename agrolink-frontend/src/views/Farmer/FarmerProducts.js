@@ -9,6 +9,8 @@ import {
   registrarMerma,
 } from "../../api/agricultorService";
 
+import CultivoTimeline from "./Cultivotimeline"
+
 // --- Funciones Auxiliares ---
 const addDaysToDate = (dateStr, days) => {
   if (!dateStr) return "";
@@ -40,23 +42,24 @@ const mapearEstadoVisual = (estadoCultivo, diasTotales, fechaSiembra) => {
   const progress = Math.min(100, Math.round((daysElapsed / totalDays) * 100));
   const daysLeft = Math.max(0, totalDays - daysElapsed);
 
-  if (estadoCultivo === "Listo para vender" || estadoCultivo === "Cosechado") {
-    return {
-      stage: "Cosechado / Disponible",
-      progress: 100,
-      isCosechado: true,
-      daysLeft: 0,
-    };
-  } else if (estadoCultivo === "En crecimiento") {
-    return { stage: "En Crecimiento", progress, isCosechado: false, daysLeft };
-  } else {
-    return {
-      stage: "Recién Cultivado",
-      progress,
-      isCosechado: false,
-      daysLeft,
-    };
-  }
+      if (estadoCultivo === "Listo para cosechar") {
+        return {
+            stage: "Listo para vender",  // ← lo que muestra el front
+            progress: 100,
+            isCosechado: true,
+            daysLeft: 0,
+        };
+    } else if (estadoCultivo === "En crecimiento") {
+        return { stage: "En Crecimiento", progress, isCosechado: false, daysLeft };
+    } else {
+        // "Recién cultivado" o cualquier otro
+        return {
+            stage: "Recién Cultivado",
+            progress,
+            isCosechado: false,
+            daysLeft,
+        };
+    }
 };
 
 const calcularAlerta20 = (fechaSiembra, diasTotalesEstimados) => {
@@ -622,8 +625,10 @@ function FarmerProducts() {
                         }}
                       >
                         {stageData.isCosechado
-                          ? "📦 Listo"
-                          : "🌱 En Crecimiento"}
+                        ? "📦 Listo"
+                        : stageData.stage === "En Crecimiento"
+                            ? "🌿 En Crecimiento"
+                            : "🌱 Recién Cultivado"}
                       </div>
                     )}
                   </div>{" "}
@@ -1887,7 +1892,16 @@ function FarmerProducts() {
               </button>
             </div>
           </div>
-
+          {/* LÍNEA DE TIEMPO */}
+          <div style={{
+              borderTop: '2px solid #eee',
+              marginTop: '20px'
+          }}>
+              <CultivoTimeline
+                  cultivoId={editingCrop.id}
+                  cultivoNombre={editingCrop.nombre}
+              />
+          </div>
           <div className="farmer-modal-actions">
             <button
               onClick={() => setEditingCrop(null)}
