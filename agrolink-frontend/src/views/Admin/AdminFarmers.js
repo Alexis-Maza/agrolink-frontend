@@ -88,14 +88,7 @@ function AdminFarmers() {
         <span className="admin-badge">Control de Productores</span>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "24px",
-          marginBottom: "32px",
-        }}
-      >
+      <div className="admin-stats-grid">
         <div className="admin-card" style={{ padding: "24px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <h3 style={{ margin: "0 0 8px 0", fontSize: "0.9rem", color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
             Total de Agricultores
@@ -141,17 +134,17 @@ function AdminFarmers() {
           <tbody>
             {agricultores.map((a) => (
               <tr key={a.id}>
-                <td>{a.id}</td>
-                <td style={{ fontWeight: "600" }}>{a.nombre}</td>
-                <td>{a.apellidoPaterno}</td>
-                <td>{a.apellidoMaterno}</td>
-                <td style={{ color: "var(--color-text-secondary)" }}>{a.correo}</td>
-                <td>
+                <td data-label="ID">{a.id}</td>
+                <td data-label="Nombre" style={{ fontWeight: "600" }}>{a.nombre}</td>
+                <td data-label="Apellido Paterno">{a.apellidoPaterno}</td>
+                <td data-label="Apellido Materno">{a.apellidoMaterno}</td>
+                <td data-label="Correo Electrónico" style={{ color: "var(--color-text-secondary)" }}>{a.correo}</td>
+                <td data-label="Estado">
                   <span className={`status-badge ${a.estado === "Activo" ? "active" : "inactive"}`}>
                     {a.estado}
                   </span>
                 </td>
-                <td>
+                <td data-label="Acciones" className="admin-actions-cell">
                   <button
                     className="admin-btn admin-btn-secondary"
                     style={{ padding: "6px 12px", fontSize: "0.8rem" }}

@@ -113,7 +113,7 @@ function AdminBuyers() {
             </div>
 
             {/* Fichas Estadísticas */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+            <div className="admin-stats-grid">
                 <div className="admin-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <h3 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         Total de Compradores
@@ -160,17 +160,17 @@ function AdminBuyers() {
                     <tbody>
                         {compradores.map(b => (
                             <tr key={b.id}>
-                                <td>{b.id}</td>
-                                <td style={{ fontWeight: '600' }}>{b.nombre}</td>
-                                <td>{b.apellidoPaterno}</td>
-                                <td>{b.apellidoMaterno}</td>
-                                <td style={{ color: 'var(--color-text-secondary)' }}>{b.correo}</td>
-                                <td>
+                                <td data-label="ID">{b.id}</td>
+                                <td data-label="Nombre" style={{ fontWeight: '600' }}>{b.nombre}</td>
+                                <td data-label="Apellido Paterno">{b.apellidoPaterno}</td>
+                                <td data-label="Apellido Materno">{b.apellidoMaterno}</td>
+                                <td data-label="Correo Electrónico" style={{ color: 'var(--color-text-secondary)' }}>{b.correo}</td>
+                                <td data-label="Estado">
                                     <span className={`status-badge ${b.estado === 'Activo' ? 'active' : 'inactive'}`}>
                                         {b.estado}
                                     </span>
                                 </td>
-                                <td style={{ display: 'flex', gap: '8px' }}>
+                                <td className="admin-actions-cell" data-label="Acciones">
                                     <button
                                         className="admin-btn admin-btn-secondary"
                                         style={{ padding: '6px 12px', fontSize: '0.8rem' }}

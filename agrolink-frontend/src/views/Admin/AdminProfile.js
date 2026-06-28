@@ -349,7 +349,7 @@ function AdminProfile() {
 
             {/* Pestañas de Navegación (Tabs) - Solo para Superadmin */}
             {!superPerfil.isSubadmin && (
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '24px' }}>
+                <div className="admin-profile-tabs">
                     <button style={tabStyle('mis-datos')} onClick={() => setActiveTab('mis-datos')}>
                         👤 Mis Datos
                     </button>
@@ -365,7 +365,7 @@ function AdminProfile() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     
                     {/* Tarjeta de Detalles Fijos (Diseño Horizontal) */}
-                    <div className="admin-card" style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap', padding: '24px' }}>
+                    <div className="admin-profile-card">
                         <div style={{ 
                             width: '80px', 
                             height: '80px', 
@@ -376,7 +376,8 @@ function AdminProfile() {
                             fontWeight: 700,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            flexShrink: 0
                         }}>
                             {superPerfil.nombre.charAt(0)}
                         </div>
@@ -384,7 +385,7 @@ function AdminProfile() {
                             <h3 style={{ margin: '0 0 4px 0', fontSize: '1.4rem' }}>{superPerfil.nombre}</h3>
                             <p style={{ margin: '0 0 12px 0', color: 'var(--color-text-secondary)', fontSize: '0.95rem' }}>{superPerfil.correo}</p>
                             
-                            <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
+                            <div className="admin-profile-info-row">
                                 <div>
                                     <strong style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem', marginRight: '6px' }}>RANGO DEL SISTEMA:</strong>
                                     <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
@@ -430,7 +431,7 @@ function AdminProfile() {
                             </div>
                             
                             {isEditingEmail ? (
-                                <div style={{ display: 'flex', gap: '12px' }}>
+                                <div className="admin-form-buttons-row">
                                     <button type="submit" className="admin-btn admin-btn-success" style={{ flex: 1 }}>
                                         Guardar Cambios
                                     </button>
@@ -694,7 +695,7 @@ function AdminProfile() {
                             </div>
 
                             {isEditingPassword ? (
-                                <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <div className="admin-form-buttons-row" style={{ marginTop: '8px' }}>
                                     <button type="submit" className="admin-btn admin-btn-success" style={{ flex: 1 }}>
                                         Guardar Contraseña
                                     </button>
@@ -740,7 +741,7 @@ function AdminProfile() {
                 /* PESTAÑA: EQUIPO DE ADMINISTRADORES */
                 <div>
                     {/* Estadísticas de Soporte */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+                    <div className="admin-stats-grid" style={{ marginBottom: '24px' }}>
                         <div className="admin-card" style={{ padding: '20px' }}>
                             <h3 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>Administradores de Soporte</h3>
                             <p style={{ margin: 0, fontSize: '2rem', fontWeight: 800, color: 'var(--color-primary)' }}>{totalSubadmins}</p>
@@ -753,7 +754,7 @@ function AdminProfile() {
 
                     {/* Tabla de Administradores */}
                     <div className="admin-table-container">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                             <h2 style={{ margin: 0 }}>Listado del Equipo Técnico</h2>
                             <button 
                                 className="admin-btn"
@@ -777,16 +778,16 @@ function AdminProfile() {
                             <tbody>
                                 {subadmins.map(s => (
                                     <tr key={s.id}>
-                                        <td>{s.id}</td>
-                                        <td style={{ fontWeight: '600' }}>{s.nombre}</td>
-                                        <td style={{ color: 'var(--color-text-secondary)' }}>{s.correo}</td>
-                                        <td>
+                                        <td data-label="ID">{s.id}</td>
+                                        <td data-label="Nombre" style={{ fontWeight: '600' }}>{s.nombre}</td>
+                                        <td data-label="Correo Electrónico" style={{ color: 'var(--color-text-secondary)' }}>{s.correo}</td>
+                                        <td data-label="Estado">
                                             <span className={`status-badge ${s.estado === 'Activo' ? 'active' : 'inactive'}`}>
                                                 {s.estado}
                                             </span>
                                         </td>
-                                        <td>{s.fechaRegistro}</td>
-                                        <td style={{ display: 'flex', gap: '8px' }}>
+                                        <td data-label="Fecha Registro">{s.fechaRegistro}</td>
+                                        <td className="admin-actions-cell" data-label="Acciones">
                                             <button 
                                                 className="admin-btn admin-btn-secondary" 
                                                 style={{ padding: '6px 12px', fontSize: '0.8rem' }}
